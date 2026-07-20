@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "id": "tr-01",
+  "title": "Sepet toplamındaki kuruş hatasını düzelt",
+  "language": "tr",
+  "messageType": "initial",
+  "input": "Sepet toplamı indirimden sonra bazen bir kuruş fazla çıkıyor. Hesabı tam sayı kuruşlarla yap, mevcut vergi sırasını koru ve sınır değerleri için test ekle.",
+  "expected": {
+    "requiredGoalConcepts": ["fix cart rounding", "boundary tests"],
+    "requiredConstraints": [
+      "calculate with integer cents",
+      "preserve tax order"
+    ],
+    "forbiddenAdditions": ["floating point money"],
+    "responseLanguage": "tr"
+  },
+  "tags": ["bug-fix", "tests", "explicit-constraints"]
+}

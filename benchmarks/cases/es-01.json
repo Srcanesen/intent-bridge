@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "id": "es-01",
+  "title": "Corregir duplicados al importar contactos",
+  "language": "es",
+  "messageType": "initial",
+  "input": "La importación de contactos crea duplicados cuando el correo tiene mayúsculas. Normaliza solo para comparar, conserva el valor original y añade una prueba de regresión.",
+  "expected": {
+    "requiredGoalConcepts": ["prevent duplicate contacts", "regression test"],
+    "requiredConstraints": ["preserve original email value"],
+    "forbiddenAdditions": ["rewrite stored email"],
+    "responseLanguage": "es"
+  },
+  "tags": ["bug-fix", "tests", "explicit-constraints"]
+}

@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "id": "tr-09",
+  "title": "Boş CSV senaryosunu da kapsa",
+  "language": "tr",
+  "messageType": "follow_up",
+  "input": "Az önceki içe aktarma testine yalnızca başlık satırı olan CSV dosyasını da ekler misin? Beklenen sonuç sıfır kayıt olmalı.",
+  "expected": {
+    "requiredGoalConcepts": ["test header-only CSV"],
+    "requiredConstraints": ["expect zero records"],
+    "forbiddenAdditions": [],
+    "responseLanguage": "tr"
+  },
+  "tags": ["follow_up", "tests"]
+}

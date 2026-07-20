@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "id": "en-15",
+  "title": "Preserve image attachments in issue creation",
+  "language": "en",
+  "messageType": "normal",
+  "input": "When creating an issue from the composer, keep both attached screenshots and include their count in the request metadata. Do not analyze image contents.",
+  "attachments": {
+    "imageCount": 2
+  },
+  "expected": {
+    "requiredGoalConcepts": ["preserve screenshot attachments"],
+    "requiredConstraints": [
+      "include attachment count",
+      "do not analyze images"
+    ],
+    "forbiddenAdditions": ["image transcription"],
+    "responseLanguage": "en"
+  },
+  "tags": ["attachments", "explicit-constraints"]
+}

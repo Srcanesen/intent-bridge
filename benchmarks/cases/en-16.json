@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "id": "en-16",
+  "title": "Remove obsolete feature-flag adapter",
+  "language": "en",
+  "messageType": "initial",
+  "input": "Delete the legacy FlagAdapter now that every caller uses NativeFlags. Prove there are no remaining imports and keep the public flag names unchanged.",
+  "expected": {
+    "requiredGoalConcepts": ["remove legacy flag adapter"],
+    "requiredConstraints": ["no remaining imports", "keep public flag names"],
+    "forbiddenAdditions": [],
+    "responseLanguage": "en"
+  },
+  "tags": ["refactoring", "tests", "explicit-constraints"]
+}

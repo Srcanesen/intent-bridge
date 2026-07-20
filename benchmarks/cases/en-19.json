@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "id": "en-19",
+  "title": "Reduce bundle size without dependency churn",
+  "language": "en",
+  "messageType": "initial",
+  "input": "Find why the settings bundle grew by 80 KB and reduce it below the previous baseline. Do not add dependencies or change browser support.",
+  "expected": {
+    "requiredGoalConcepts": ["reduce settings bundle size"],
+    "requiredConstraints": [
+      "below previous baseline",
+      "do not add dependencies",
+      "do not change browser support"
+    ],
+    "forbiddenAdditions": [],
+    "responseLanguage": "en"
+  },
+  "tags": ["clear", "explicit-constraints"]
+}

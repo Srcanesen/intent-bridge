@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "id": "en-10",
+  "title": "Repair migration command documentation",
+  "language": "en",
+  "messageType": "normal",
+  "input": "In docs/migrations.md, correct the command to `corepack pnpm db:migrate --dry-run` and verify the example from the repository root. Do not execute a real migration.",
+  "expected": {
+    "requiredGoalConcepts": ["correct migration command documentation"],
+    "requiredConstraints": [
+      "verify from repository root",
+      "do not execute migration"
+    ],
+    "forbiddenAdditions": ["production database"],
+    "responseLanguage": "en"
+  },
+  "tags": ["paths-commands", "explicit-constraints"]
+}

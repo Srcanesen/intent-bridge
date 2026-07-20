@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "id": "en-17",
+  "title": "Fix calendar week at year boundary",
+  "language": "en",
+  "messageType": "normal",
+  "input": "The weekly calendar labels 30 December as week 1 in one view and week 53 in another. Make both use ISO week dates and add examples around New Year.",
+  "expected": {
+    "requiredGoalConcepts": ["consistent ISO week dates"],
+    "requiredConstraints": ["use ISO week dates", "add New Year examples"],
+    "forbiddenAdditions": ["locale-specific week rule"],
+    "responseLanguage": "en"
+  },
+  "tags": ["bug-fix", "tests", "explicit-constraints"]
+}

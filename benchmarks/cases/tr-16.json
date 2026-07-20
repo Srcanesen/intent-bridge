@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "id": "tr-16",
+  "title": "Eski tarih yardımcısını kaldır",
+  "language": "tr",
+  "messageType": "initial",
+  "input": "Tüm çağıranlar Intl.DateTimeFormat kullanıyorsa legacy formatDate yardımcısını sil. Önce kalan importları ara; çıktı biçimini değiştirme.",
+  "expected": {
+    "requiredGoalConcepts": ["remove legacy date helper"],
+    "requiredConstraints": [
+      "check remaining imports",
+      "preserve output format"
+    ],
+    "forbiddenAdditions": [],
+    "responseLanguage": "tr"
+  },
+  "tags": ["refactoring", "explicit-constraints"]
+}

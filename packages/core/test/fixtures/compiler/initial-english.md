@@ -1,0 +1,39 @@
+[INTENT BRIDGE TASK — v1]
+
+Message type: initial
+Required user-facing response language: English (en)
+
+## Intended outcome
+Fix the profile page layout.
+
+## Requested work
+1. `profile-layout`: Fix the profile page layout.
+
+## Scope
+### Task `profile-layout`
+- Profile page components.
+
+## User-stated constraints
+### Global
+- Do not add dependencies.
+
+### Task `profile-layout`
+- Preserve the existing API.
+
+## Success criteria
+### Task `profile-layout`
+- The profile page layout is correct.
+
+## Execution guidance
+- Inspect relevant repository context before implementation.
+- Do not treat assumptions as user requirements.
+- Do not expand scope beyond the requested work.
+- Resolve low-risk uncertainty from repository evidence.
+- Ask the user only when a material product decision cannot be safely resolved.
+- Use an appropriate verification method.
+- Explain the result in English (en).
+
+## Original user request
+```
+Fix the profile page layout.
+```

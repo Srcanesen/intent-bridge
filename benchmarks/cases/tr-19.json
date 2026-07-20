@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "id": "tr-19",
+  "title": "Ana sayfa LCP gerilemesini gider",
+  "language": "tr",
+  "messageType": "initial",
+  "input": "Ana sayfanın LCP değeri 1,8 saniyeden 3,1 saniyeye çıktı. Nedeni ölç, değeri tekrar 2 saniyenin altına indir ve analitik scriptini kaldırma.",
+  "expected": {
+    "requiredGoalConcepts": ["reduce homepage LCP"],
+    "requiredConstraints": [
+      "below two seconds",
+      "do not remove analytics script"
+    ],
+    "forbiddenAdditions": [],
+    "responseLanguage": "tr"
+  },
+  "tags": ["clear", "explicit-constraints"]
+}

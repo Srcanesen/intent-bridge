@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "id": "en-05",
+  "title": "Add pagination contract tests",
+  "language": "en",
+  "messageType": "normal",
+  "input": "Add API contract tests for cursor pagination: first page, next page, invalid cursor, and empty results. Use the existing test server; no network calls.",
+  "expected": {
+    "requiredGoalConcepts": ["pagination contract tests"],
+    "requiredConstraints": ["use existing test server", "no network calls"],
+    "forbiddenAdditions": ["new test framework"],
+    "responseLanguage": "en"
+  },
+  "tags": ["tests", "explicit-constraints"]
+}

@@ -1,0 +1,38 @@
+{
+  "orderedProfiles": [
+    {
+      "profileId": "pi:opencode-go:deepseek-v4-flash",
+      "invariantPassRate": null,
+      "structuralPassRate": 0.98,
+      "deterministicSafetyPassRate": 1,
+      "evaluatorMaterialIntentAlterationRate": 0.14285714285714285,
+      "evaluatorClearerOrEqualRate": 0.8979591836734694,
+      "failOpenRate": 0.02,
+      "latencyP50": 8954,
+      "totalCostUsd": 0.0127001
+    },
+    {
+      "profileId": "pi:opencode-go:mimo-v2.5",
+      "invariantPassRate": null,
+      "structuralPassRate": 0.92,
+      "deterministicSafetyPassRate": 1,
+      "evaluatorMaterialIntentAlterationRate": 0.06382978723404255,
+      "evaluatorClearerOrEqualRate": 0.9361702127659575,
+      "failOpenRate": 0.06,
+      "latencyP50": 17444,
+      "totalCostUsd": 0.016525599999999998
+    }
+  ],
+  "winner": null,
+  "tie": true,
+  "deltas": {
+    "invariantPassRate": null,
+    "structuralPassRate": 0.05999999999999994,
+    "deterministicSafetyPassRate": 0,
+    "evaluatorMaterialIntentAlterationRate": 0.0790273556231003,
+    "evaluatorClearerOrEqualRate": -0.03821102909248808,
+    "failOpenRate": -0.039999999999999994,
+    "latencyP50": -8490,
+    "totalCostUsd": -0.0038254999999999973
+  }
+}

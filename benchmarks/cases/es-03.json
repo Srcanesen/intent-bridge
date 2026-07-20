@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "id": "es-03",
+  "title": "Separar el cliente de métricas",
+  "language": "es",
+  "messageType": "initial",
+  "input": "Extrae el envío de métricas de AnalyticsService a un adaptador interno. Mantén los nombres de eventos y no añadas otra biblioteca.",
+  "expected": {
+    "requiredGoalConcepts": ["extract metrics adapter"],
+    "requiredConstraints": ["preserve event names", "do not add library"],
+    "forbiddenAdditions": [],
+    "responseLanguage": "es"
+  },
+  "tags": ["refactoring", "architecture", "explicit-constraints"]
+}

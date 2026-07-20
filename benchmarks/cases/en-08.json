@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "id": "en-08",
+  "title": "Redirect logging to stderr",
+  "language": "en",
+  "messageType": "steer",
+  "input": "Actually, keep the parser changes, but send diagnostics to stderr instead of creating a log file.",
+  "expected": {
+    "requiredGoalConcepts": ["send diagnostics to stderr"],
+    "requiredConstraints": ["keep parser changes"],
+    "forbiddenAdditions": ["persistent file logging"],
+    "responseLanguage": "en"
+  },
+  "tags": ["steer", "explicit-constraints"]
+}

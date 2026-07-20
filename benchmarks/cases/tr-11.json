@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "id": "tr-11",
+  "title": "Türkçe yanıtla ama kodu İngilizce tut",
+  "language": "tr",
+  "messageType": "initial",
+  "input": "Login timeout hatasını fix et, please keep variable names in English; kullanıcıya Türkçe cevap ver ve mevcut telemetry event adlarını değiştirme.",
+  "expected": {
+    "requiredGoalConcepts": ["fix login timeout"],
+    "requiredConstraints": [
+      "keep variable names in English",
+      "respond in Turkish",
+      "preserve telemetry event names"
+    ],
+    "forbiddenAdditions": [],
+    "responseLanguage": "tr"
+  },
+  "tags": ["mixed-language", "bug-fix", "explicit-constraints"]
+}

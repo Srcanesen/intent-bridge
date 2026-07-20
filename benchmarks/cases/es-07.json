@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "id": "es-07",
+  "title": "Responder en español con nombres en inglés",
+  "language": "es",
+  "messageType": "initial",
+  "input": "Please fix el estado vacío de la lista de facturas, pero mantén component names in English y responde en español.",
+  "expected": {
+    "requiredGoalConcepts": ["fix invoice empty state"],
+    "requiredConstraints": [
+      "keep component names in English",
+      "respond in Spanish"
+    ],
+    "forbiddenAdditions": [],
+    "responseLanguage": "es"
+  },
+  "tags": ["mixed-language", "ui", "explicit-constraints"]
+}

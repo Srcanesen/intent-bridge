@@ -1,0 +1,4031 @@
+{
+  "version": 2,
+  "profile": {
+    "id": "pi:opencode-go:mimo-v2.5",
+    "model": "mimo-v2.5"
+  },
+  "evaluator": {
+    "provider": "openai-codex",
+    "model": "gpt-5.6-sol",
+    "promptVersion": "pi-benchmark-evaluator-v3",
+    "reasoning": "medium"
+  },
+  "schemaVersion": "1",
+  "promptVersion": "pi-native-v1",
+  "compilerVersion": "pi-v1",
+  "runnerVersion": "benchmark-v2",
+  "startedAt": "2026-07-20T10:44:50.231Z",
+  "completedAt": "2026-07-20T11:05:09.763Z",
+  "concurrency": 1,
+  "results": [
+    {
+      "caseId": "en-01",
+      "title": "Prevent duplicate checkout submissions",
+      "tags": [
+        "clear",
+        "bug-fix",
+        "tests",
+        "explicit-constraints"
+      ],
+      "status": "transformed",
+      "latencyMs": 23954,
+      "tokenUsage": {
+        "input": 7,
+        "output": 1294,
+        "total": 2581
+      },
+      "estimatedCostUsd": 0.00036330000000000005,
+      "quality": {
+        "schemaValid": true,
+        "languagePresent": true,
+        "taskCount": 2,
+        "hasGoal": true,
+        "constraintsSeparated": true,
+        "assumptionsSeparated": true,
+        "ambiguitiesTyped": true,
+        "compilerValid": true,
+        "providerConfidence": 0.85
+      },
+      "invariant": {
+        "passed": false,
+        "checks": [
+          {
+            "name": "transformed",
+            "passed": true
+          },
+          {
+            "name": "schema_valid",
+            "passed": true
+          },
+          {
+            "name": "compiler_valid",
+            "passed": true
+          },
+          {
+            "name": "message_type",
+            "passed": true
+          },
+          {
+            "name": "response_language",
+            "passed": true
+          },
+          {
+            "name": "compiled_response_language",
+            "passed": true
+          },
+          {
+            "name": "literal_goal_concepts",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "literal_constraints",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "forbidden_additions",
+            "passed": true
+          },
+          {
+            "name": "original_request_fenced",
+            "passed": true
+          }
+        ]
+      },
+      "evaluation": {
+        "version": 1,
+        "intentAltered": false,
+        "clarity": "clearer"
+      }
+    },
+    {
+      "caseId": "en-02",
+      "title": "Accessible account menu keyboard flow",
+      "tags": [
+        "ui",
+        "explicit-constraints"
+      ],
+      "status": "transformed",
+      "latencyMs": 17410,
+      "tokenUsage": {
+        "input": 1282,
+        "output": 1291,
+        "total": 2573
+      },
+      "estimatedCostUsd": 0.00054096,
+      "quality": {
+        "schemaValid": true,
+        "languagePresent": true,
+        "taskCount": 5,
+        "hasGoal": true,
+        "constraintsSeparated": true,
+        "assumptionsSeparated": true,
+        "ambiguitiesTyped": true,
+        "compilerValid": true,
+        "providerConfidence": 0.85
+      },
+      "invariant": {
+        "passed": false,
+        "checks": [
+          {
+            "name": "transformed",
+            "passed": true
+          },
+          {
+            "name": "schema_valid",
+            "passed": true
+          },
+          {
+            "name": "compiler_valid",
+            "passed": true
+          },
+          {
+            "name": "message_type",
+            "passed": true
+          },
+          {
+            "name": "response_language",
+            "passed": true
+          },
+          {
+            "name": "compiled_response_language",
+            "passed": true
+          },
+          {
+            "name": "literal_goal_concepts",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "literal_constraints",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "forbidden_additions",
+            "passed": true
+          },
+          {
+            "name": "original_request_fenced",
+            "passed": true
+          }
+        ]
+      },
+      "evaluation": {
+        "version": 1,
+        "intentAltered": false,
+        "clarity": "clearer"
+      }
+    },
+    {
+      "caseId": "en-03",
+      "title": "Extract invoice tax calculation",
+      "tags": [
+        "refactoring",
+        "explicit-constraints"
+      ],
+      "status": "transformed",
+      "latencyMs": 16906,
+      "tokenUsage": {
+        "input": 254,
+        "output": 1151,
+        "total": 2429
+      },
+      "estimatedCostUsd": 0.00035784000000000006,
+      "quality": {
+        "schemaValid": true,
+        "languagePresent": true,
+        "taskCount": 5,
+        "hasGoal": true,
+        "constraintsSeparated": true,
+        "assumptionsSeparated": true,
+        "ambiguitiesTyped": true,
+        "compilerValid": true,
+        "providerConfidence": 0.88
+      },
+      "invariant": {
+        "passed": false,
+        "checks": [
+          {
+            "name": "transformed",
+            "passed": true
+          },
+          {
+            "name": "schema_valid",
+            "passed": true
+          },
+          {
+            "name": "compiler_valid",
+            "passed": true
+          },
+          {
+            "name": "message_type",
+            "passed": true
+          },
+          {
+            "name": "response_language",
+            "passed": true
+          },
+          {
+            "name": "compiled_response_language",
+            "passed": true
+          },
+          {
+            "name": "literal_goal_concepts",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "literal_constraints",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "forbidden_additions",
+            "passed": true
+          },
+          {
+            "name": "original_request_fenced",
+            "passed": true
+          }
+        ]
+      },
+      "evaluation": {
+        "version": 1,
+        "intentAltered": false,
+        "clarity": "clearer"
+      }
+    },
+    {
+      "caseId": "en-04",
+      "title": "Investigate intermittent websocket disconnects",
+      "tags": [
+        "vague",
+        "risky-assumptions"
+      ],
+      "status": "transformed",
+      "latencyMs": 23676,
+      "tokenUsage": {
+        "input": 256,
+        "output": 1281,
+        "total": 2561
+      },
+      "estimatedCostUsd": 0.00039452,
+      "quality": {
+        "schemaValid": true,
+        "languagePresent": true,
+        "taskCount": 2,
+        "hasGoal": true,
+        "constraintsSeparated": true,
+        "assumptionsSeparated": true,
+        "ambiguitiesTyped": true,
+        "compilerValid": true,
+        "providerConfidence": 0.85
+      },
+      "invariant": {
+        "passed": false,
+        "checks": [
+          {
+            "name": "transformed",
+            "passed": true
+          },
+          {
+            "name": "schema_valid",
+            "passed": true
+          },
+          {
+            "name": "compiler_valid",
+            "passed": true
+          },
+          {
+            "name": "message_type",
+            "passed": true
+          },
+          {
+            "name": "response_language",
+            "passed": true
+          },
+          {
+            "name": "compiled_response_language",
+            "passed": true
+          },
+          {
+            "name": "literal_goal_concepts",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "literal_constraints",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "forbidden_additions",
+            "passed": true
+          },
+          {
+            "name": "risk",
+            "passed": false
+          },
+          {
+            "name": "clarification",
+            "passed": true
+          },
+          {
+            "name": "original_request_fenced",
+            "passed": true
+          }
+        ]
+      },
+      "evaluation": {
+        "version": 1,
+        "intentAltered": false,
+        "clarity": "clearer"
+      }
+    },
+    {
+      "caseId": "en-05",
+      "title": "Add pagination contract tests",
+      "tags": [
+        "tests",
+        "explicit-constraints"
+      ],
+      "status": "transformed",
+      "latencyMs": 19235,
+      "tokenUsage": {
+        "input": 257,
+        "output": 1397,
+        "total": 2678
+      },
+      "estimatedCostUsd": 0.00042714000000000006,
+      "quality": {
+        "schemaValid": true,
+        "languagePresent": true,
+        "taskCount": 4,
+        "hasGoal": true,
+        "constraintsSeparated": true,
+        "assumptionsSeparated": true,
+        "ambiguitiesTyped": true,
+        "compilerValid": true,
+        "providerConfidence": 0.8
+      },
+      "invariant": {
+        "passed": false,
+        "checks": [
+          {
+            "name": "transformed",
+            "passed": true
+          },
+          {
+            "name": "schema_valid",
+            "passed": true
+          },
+          {
+            "name": "compiler_valid",
+            "passed": true
+          },
+          {
+            "name": "message_type",
+            "passed": true
+          },
+          {
+            "name": "response_language",
+            "passed": true
+          },
+          {
+            "name": "compiled_response_language",
+            "passed": true
+          },
+          {
+            "name": "literal_goal_concepts",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "literal_constraints",
+            "passed": true
+          },
+          {
+            "name": "forbidden_additions",
+            "passed": true
+          },
+          {
+            "name": "original_request_fenced",
+            "passed": true
+          }
+        ]
+      },
+      "evaluation": {
+        "version": 1,
+        "intentAltered": false,
+        "clarity": "clearer"
+      }
+    },
+    {
+      "caseId": "en-06",
+      "title": "Split notification delivery architecture",
+      "tags": [
+        "architecture",
+        "refactoring",
+        "explicit-constraints"
+      ],
+      "status": "transformed",
+      "latencyMs": 16476,
+      "tokenUsage": {
+        "input": 259,
+        "output": 1248,
+        "total": 2531
+      },
+      "estimatedCostUsd": 0.00038570000000000005,
+      "quality": {
+        "schemaValid": true,
+        "languagePresent": true,
+        "taskCount": 3,
+        "hasGoal": true,
+        "constraintsSeparated": true,
+        "assumptionsSeparated": true,
+        "ambiguitiesTyped": true,
+        "compilerValid": true,
+        "providerConfidence": 0.85
+      },
+      "invariant": {
+        "passed": false,
+        "checks": [
+          {
+            "name": "transformed",
+            "passed": true
+          },
+          {
+            "name": "schema_valid",
+            "passed": true
+          },
+          {
+            "name": "compiler_valid",
+            "passed": true
+          },
+          {
+            "name": "message_type",
+            "passed": true
+          },
+          {
+            "name": "response_language",
+            "passed": true
+          },
+          {
+            "name": "compiled_response_language",
+            "passed": true
+          },
+          {
+            "name": "literal_goal_concepts",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "literal_constraints",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "forbidden_additions",
+            "passed": true
+          },
+          {
+            "name": "original_request_fenced",
+            "passed": true
+          }
+        ]
+      },
+      "evaluation": {
+        "version": 1,
+        "intentAltered": false,
+        "clarity": "clearer"
+      }
+    },
+    {
+      "caseId": "en-07",
+      "title": "Ship search filter and loading state",
+      "tags": [
+        "ui",
+        "multi-task",
+        "tests",
+        "explicit-constraints"
+      ],
+      "status": "transformed",
+      "latencyMs": 22508,
+      "tokenUsage": {
+        "input": 261,
+        "output": 1630,
+        "total": 2915
+      },
+      "estimatedCostUsd": 0.0004929400000000001,
+      "quality": {
+        "schemaValid": true,
+        "languagePresent": true,
+        "taskCount": 5,
+        "hasGoal": true,
+        "constraintsSeparated": true,
+        "assumptionsSeparated": true,
+        "ambiguitiesTyped": true,
+        "compilerValid": true,
+        "providerConfidence": 0.82
+      },
+      "invariant": {
+        "passed": false,
+        "checks": [
+          {
+            "name": "transformed",
+            "passed": true
+          },
+          {
+            "name": "schema_valid",
+            "passed": true
+          },
+          {
+            "name": "compiler_valid",
+            "passed": true
+          },
+          {
+            "name": "message_type",
+            "passed": true
+          },
+          {
+            "name": "response_language",
+            "passed": true
+          },
+          {
+            "name": "compiled_response_language",
+            "passed": true
+          },
+          {
+            "name": "literal_goal_concepts",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "literal_constraints",
+            "passed": true
+          },
+          {
+            "name": "forbidden_additions",
+            "passed": true
+          },
+          {
+            "name": "original_request_fenced",
+            "passed": true
+          }
+        ]
+      },
+      "evaluation": {
+        "version": 1,
+        "intentAltered": false,
+        "clarity": "clearer"
+      }
+    },
+    {
+      "caseId": "en-08",
+      "title": "Redirect logging to stderr",
+      "tags": [
+        "steer",
+        "explicit-constraints"
+      ],
+      "status": "transformed",
+      "latencyMs": 14959,
+      "tokenUsage": {
+        "input": 246,
+        "output": 872,
+        "total": 2142
+      },
+      "estimatedCostUsd": 0.00027860000000000005,
+      "quality": {
+        "schemaValid": true,
+        "languagePresent": true,
+        "taskCount": 2,
+        "hasGoal": true,
+        "constraintsSeparated": true,
+        "assumptionsSeparated": true,
+        "ambiguitiesTyped": true,
+        "compilerValid": true,
+        "providerConfidence": 0.95
+      },
+      "invariant": {
+        "passed": false,
+        "checks": [
+          {
+            "name": "transformed",
+            "passed": true
+          },
+          {
+            "name": "schema_valid",
+            "passed": true
+          },
+          {
+            "name": "compiler_valid",
+            "passed": true
+          },
+          {
+            "name": "message_type",
+            "passed": true
+          },
+          {
+            "name": "response_language",
+            "passed": true
+          },
+          {
+            "name": "compiled_response_language",
+            "passed": true
+          },
+          {
+            "name": "literal_goal_concepts",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "literal_constraints",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "forbidden_additions",
+            "passed": true
+          },
+          {
+            "name": "original_request_fenced",
+            "passed": true
+          }
+        ]
+      },
+      "evaluation": {
+        "version": 1,
+        "intentAltered": false,
+        "clarity": "clearer"
+      }
+    },
+    {
+      "caseId": "en-09",
+      "title": "Cover the timeout branch too",
+      "tags": [
+        "follow_up",
+        "tests",
+        "explicit-constraints"
+      ],
+      "status": "transformed",
+      "latencyMs": 16161,
+      "tokenUsage": {
+        "input": 245,
+        "output": 914,
+        "total": 2183
+      },
+      "estimatedCostUsd": 0.00029022000000000005,
+      "quality": {
+        "schemaValid": true,
+        "languagePresent": true,
+        "taskCount": 1,
+        "hasGoal": true,
+        "constraintsSeparated": true,
+        "assumptionsSeparated": true,
+        "ambiguitiesTyped": true,
+        "compilerValid": true,
+        "providerConfidence": 0.65
+      },
+      "invariant": {
+        "passed": false,
+        "checks": [
+          {
+            "name": "transformed",
+            "passed": true
+          },
+          {
+            "name": "schema_valid",
+            "passed": true
+          },
+          {
+            "name": "compiler_valid",
+            "passed": true
+          },
+          {
+            "name": "message_type",
+            "passed": true
+          },
+          {
+            "name": "response_language",
+            "passed": true
+          },
+          {
+            "name": "compiled_response_language",
+            "passed": true
+          },
+          {
+            "name": "literal_goal_concepts",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "literal_constraints",
+            "passed": true
+          },
+          {
+            "name": "forbidden_additions",
+            "passed": false,
+            "detail": "forbidden literal found"
+          },
+          {
+            "name": "original_request_fenced",
+            "passed": true
+          }
+        ]
+      },
+      "evaluation": {
+        "version": 1,
+        "intentAltered": false,
+        "clarity": "clearer"
+      }
+    },
+    {
+      "caseId": "en-10",
+      "title": "Repair migration command documentation",
+      "tags": [
+        "paths-commands",
+        "explicit-constraints"
+      ],
+      "status": "transformed",
+      "latencyMs": 20965,
+      "tokenUsage": {
+        "input": 264,
+        "output": 1312,
+        "total": 2600
+      },
+      "estimatedCostUsd": 0.00040432,
+      "quality": {
+        "schemaValid": true,
+        "languagePresent": true,
+        "taskCount": 2,
+        "hasGoal": true,
+        "constraintsSeparated": true,
+        "assumptionsSeparated": true,
+        "ambiguitiesTyped": true,
+        "compilerValid": true,
+        "providerConfidence": 0.9
+      },
+      "invariant": {
+        "passed": false,
+        "checks": [
+          {
+            "name": "transformed",
+            "passed": true
+          },
+          {
+            "name": "schema_valid",
+            "passed": true
+          },
+          {
+            "name": "compiler_valid",
+            "passed": true
+          },
+          {
+            "name": "message_type",
+            "passed": true
+          },
+          {
+            "name": "response_language",
+            "passed": true
+          },
+          {
+            "name": "compiled_response_language",
+            "passed": true
+          },
+          {
+            "name": "literal_goal_concepts",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "literal_constraints",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "forbidden_additions",
+            "passed": true
+          },
+          {
+            "name": "original_request_fenced",
+            "passed": true
+          }
+        ]
+      },
+      "evaluation": {
+        "version": 1,
+        "intentAltered": false,
+        "clarity": "clearer"
+      }
+    },
+    {
+      "caseId": "en-11",
+      "title": "Translate only user-facing validation copy",
+      "tags": [
+        "mixed-language",
+        "bug-fix",
+        "explicit-constraints"
+      ],
+      "status": "transformed",
+      "latencyMs": 20386,
+      "tokenUsage": {
+        "input": 248,
+        "output": 1153,
+        "total": 2425
+      },
+      "estimatedCostUsd": 0.00035756000000000004,
+      "quality": {
+        "schemaValid": true,
+        "languagePresent": true,
+        "taskCount": 1,
+        "hasGoal": true,
+        "constraintsSeparated": true,
+        "assumptionsSeparated": true,
+        "ambiguitiesTyped": true,
+        "compilerValid": true,
+        "providerConfidence": 0.6
+      },
+      "invariant": {
+        "passed": false,
+        "checks": [
+          {
+            "name": "transformed",
+            "passed": true
+          },
+          {
+            "name": "schema_valid",
+            "passed": true
+          },
+          {
+            "name": "compiler_valid",
+            "passed": true
+          },
+          {
+            "name": "message_type",
+            "passed": true
+          },
+          {
+            "name": "response_language",
+            "passed": true
+          },
+          {
+            "name": "compiled_response_language",
+            "passed": true
+          },
+          {
+            "name": "literal_goal_concepts",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "literal_constraints",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "forbidden_additions",
+            "passed": true
+          },
+          {
+            "name": "original_request_fenced",
+            "passed": true
+          }
+        ]
+      },
+      "evaluation": {
+        "version": 1,
+        "intentAltered": true,
+        "clarity": "less_clear"
+      }
+    },
+    {
+      "caseId": "en-12",
+      "title": "Treat imported note as untrusted data",
+      "tags": [
+        "prompt-injection-like",
+        "explicit-constraints"
+      ],
+      "status": "transformed",
+      "latencyMs": 22744,
+      "tokenUsage": {
+        "input": 265,
+        "output": 1395,
+        "total": 2684
+      },
+      "estimatedCostUsd": 0.0004277,
+      "quality": {
+        "schemaValid": true,
+        "languagePresent": true,
+        "taskCount": 1,
+        "hasGoal": true,
+        "constraintsSeparated": true,
+        "assumptionsSeparated": true,
+        "ambiguitiesTyped": true,
+        "compilerValid": true,
+        "providerConfidence": 0.9
+      },
+      "invariant": {
+        "passed": false,
+        "checks": [
+          {
+            "name": "transformed",
+            "passed": true
+          },
+          {
+            "name": "schema_valid",
+            "passed": true
+          },
+          {
+            "name": "compiler_valid",
+            "passed": true
+          },
+          {
+            "name": "message_type",
+            "passed": true
+          },
+          {
+            "name": "response_language",
+            "passed": true
+          },
+          {
+            "name": "compiled_response_language",
+            "passed": true
+          },
+          {
+            "name": "literal_goal_concepts",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "literal_constraints",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "forbidden_additions",
+            "passed": true
+          },
+          {
+            "name": "original_request_fenced",
+            "passed": true
+          }
+        ]
+      },
+      "evaluation": {
+        "version": 1,
+        "intentAltered": true,
+        "clarity": "less_clear"
+      }
+    },
+    {
+      "caseId": "en-13",
+      "title": "Mask synthetic webhook token in diagnostics",
+      "tags": [
+        "secret-like",
+        "bug-fix",
+        "explicit-constraints"
+      ],
+      "status": "transformed",
+      "latencyMs": 17444,
+      "tokenUsage": {
+        "input": 7,
+        "output": 1212,
+        "total": 2499
+      },
+      "estimatedCostUsd": 0.00034034,
+      "quality": {
+        "schemaValid": true,
+        "languagePresent": true,
+        "taskCount": 2,
+        "hasGoal": true,
+        "constraintsSeparated": true,
+        "assumptionsSeparated": true,
+        "ambiguitiesTyped": true,
+        "compilerValid": true,
+        "providerConfidence": 0.85
+      },
+      "invariant": {
+        "passed": false,
+        "checks": [
+          {
+            "name": "transformed",
+            "passed": true
+          },
+          {
+            "name": "schema_valid",
+            "passed": true
+          },
+          {
+            "name": "compiler_valid",
+            "passed": true
+          },
+          {
+            "name": "message_type",
+            "passed": true
+          },
+          {
+            "name": "response_language",
+            "passed": true
+          },
+          {
+            "name": "compiled_response_language",
+            "passed": true
+          },
+          {
+            "name": "literal_goal_concepts",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "literal_constraints",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "forbidden_additions",
+            "passed": true
+          },
+          {
+            "name": "original_request_fenced",
+            "passed": true
+          }
+        ]
+      },
+      "evaluation": {
+        "version": 1,
+        "intentAltered": false,
+        "clarity": "clearer"
+      }
+    },
+    {
+      "caseId": "en-14",
+      "title": "Choose a cache invalidation approach",
+      "tags": [
+        "vague",
+        "architecture",
+        "risky-assumptions"
+      ],
+      "status": "transformed",
+      "latencyMs": 23735,
+      "tokenUsage": {
+        "input": 247,
+        "output": 1409,
+        "total": 2680
+      },
+      "estimatedCostUsd": 0.0004291,
+      "quality": {
+        "schemaValid": true,
+        "languagePresent": true,
+        "taskCount": 3,
+        "hasGoal": true,
+        "constraintsSeparated": true,
+        "assumptionsSeparated": true,
+        "ambiguitiesTyped": true,
+        "compilerValid": true,
+        "providerConfidence": 0.35
+      },
+      "invariant": {
+        "passed": false,
+        "checks": [
+          {
+            "name": "transformed",
+            "passed": true
+          },
+          {
+            "name": "schema_valid",
+            "passed": true
+          },
+          {
+            "name": "compiler_valid",
+            "passed": true
+          },
+          {
+            "name": "message_type",
+            "passed": true
+          },
+          {
+            "name": "response_language",
+            "passed": true
+          },
+          {
+            "name": "compiled_response_language",
+            "passed": true
+          },
+          {
+            "name": "literal_goal_concepts",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "literal_constraints",
+            "passed": true
+          },
+          {
+            "name": "forbidden_additions",
+            "passed": true
+          },
+          {
+            "name": "risk",
+            "passed": true
+          },
+          {
+            "name": "clarification",
+            "passed": false
+          },
+          {
+            "name": "original_request_fenced",
+            "passed": true
+          }
+        ]
+      },
+      "evaluation": {
+        "version": 1,
+        "intentAltered": false,
+        "clarity": "clearer"
+      }
+    },
+    {
+      "caseId": "en-15",
+      "title": "Preserve image attachments in issue creation",
+      "tags": [
+        "attachments",
+        "explicit-constraints"
+      ],
+      "status": "transformed",
+      "latencyMs": 13178,
+      "tokenUsage": {
+        "input": 253,
+        "output": 933,
+        "total": 2210
+      },
+      "estimatedCostUsd": 0.00029665999999999997,
+      "quality": {
+        "schemaValid": true,
+        "languagePresent": true,
+        "taskCount": 2,
+        "hasGoal": true,
+        "constraintsSeparated": true,
+        "assumptionsSeparated": true,
+        "ambiguitiesTyped": true,
+        "compilerValid": true,
+        "providerConfidence": 0.85
+      },
+      "invariant": {
+        "passed": false,
+        "checks": [
+          {
+            "name": "transformed",
+            "passed": true
+          },
+          {
+            "name": "schema_valid",
+            "passed": true
+          },
+          {
+            "name": "compiler_valid",
+            "passed": true
+          },
+          {
+            "name": "message_type",
+            "passed": true
+          },
+          {
+            "name": "response_language",
+            "passed": true
+          },
+          {
+            "name": "compiled_response_language",
+            "passed": true
+          },
+          {
+            "name": "literal_goal_concepts",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "literal_constraints",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "forbidden_additions",
+            "passed": true
+          },
+          {
+            "name": "original_request_fenced",
+            "passed": true
+          }
+        ]
+      },
+      "evaluation": {
+        "version": 1,
+        "intentAltered": true,
+        "clarity": "less_clear"
+      }
+    },
+    {
+      "caseId": "en-16",
+      "title": "Remove obsolete feature-flag adapter",
+      "tags": [
+        "refactoring",
+        "tests",
+        "explicit-constraints"
+      ],
+      "status": "transformed",
+      "latencyMs": 21035,
+      "tokenUsage": {
+        "input": 254,
+        "output": 926,
+        "total": 2204
+      },
+      "estimatedCostUsd": 0.00029484000000000004,
+      "quality": {
+        "schemaValid": true,
+        "languagePresent": true,
+        "taskCount": 3,
+        "hasGoal": true,
+        "constraintsSeparated": true,
+        "assumptionsSeparated": true,
+        "ambiguitiesTyped": true,
+        "compilerValid": true,
+        "providerConfidence": 0.88
+      },
+      "invariant": {
+        "passed": false,
+        "checks": [
+          {
+            "name": "transformed",
+            "passed": true
+          },
+          {
+            "name": "schema_valid",
+            "passed": true
+          },
+          {
+            "name": "compiler_valid",
+            "passed": true
+          },
+          {
+            "name": "message_type",
+            "passed": true
+          },
+          {
+            "name": "response_language",
+            "passed": true
+          },
+          {
+            "name": "compiled_response_language",
+            "passed": true
+          },
+          {
+            "name": "literal_goal_concepts",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "literal_constraints",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "forbidden_additions",
+            "passed": true
+          },
+          {
+            "name": "original_request_fenced",
+            "passed": true
+          }
+        ]
+      },
+      "evaluation": {
+        "version": 1,
+        "intentAltered": false,
+        "clarity": "clearer"
+      }
+    },
+    {
+      "caseId": "en-17",
+      "title": "Fix calendar week at year boundary",
+      "tags": [
+        "bug-fix",
+        "tests",
+        "explicit-constraints"
+      ],
+      "status": "fail_open",
+      "errorCode": "PROVIDER_UNREACHABLE",
+      "invariant": {
+        "passed": false,
+        "checks": [
+          {
+            "name": "transformed",
+            "passed": false
+          }
+        ]
+      }
+    },
+    {
+      "caseId": "en-18",
+      "title": "Clarify destructive archive behavior",
+      "tags": [
+        "vague",
+        "risky-assumptions"
+      ],
+      "status": "transformed",
+      "latencyMs": 11787,
+      "tokenUsage": {
+        "input": 252,
+        "output": 777,
+        "total": 2053
+      },
+      "estimatedCostUsd": 0.00025284000000000005,
+      "quality": {
+        "schemaValid": true,
+        "languagePresent": true,
+        "taskCount": 1,
+        "hasGoal": true,
+        "constraintsSeparated": true,
+        "assumptionsSeparated": true,
+        "ambiguitiesTyped": true,
+        "compilerValid": true,
+        "providerConfidence": 0.65
+      },
+      "invariant": {
+        "passed": false,
+        "checks": [
+          {
+            "name": "transformed",
+            "passed": true
+          },
+          {
+            "name": "schema_valid",
+            "passed": true
+          },
+          {
+            "name": "compiler_valid",
+            "passed": true
+          },
+          {
+            "name": "message_type",
+            "passed": true
+          },
+          {
+            "name": "response_language",
+            "passed": true
+          },
+          {
+            "name": "compiled_response_language",
+            "passed": true
+          },
+          {
+            "name": "literal_goal_concepts",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "literal_constraints",
+            "passed": true
+          },
+          {
+            "name": "forbidden_additions",
+            "passed": true
+          },
+          {
+            "name": "risk",
+            "passed": false
+          },
+          {
+            "name": "clarification",
+            "passed": true
+          },
+          {
+            "name": "original_request_fenced",
+            "passed": true
+          }
+        ]
+      },
+      "evaluation": {
+        "version": 1,
+        "intentAltered": false,
+        "clarity": "clearer"
+      }
+    },
+    {
+      "caseId": "en-19",
+      "title": "Reduce bundle size without dependency churn",
+      "tags": [
+        "clear",
+        "explicit-constraints"
+      ],
+      "status": "transformed",
+      "latencyMs": 17357,
+      "tokenUsage": {
+        "input": 254,
+        "output": 915,
+        "total": 2193
+      },
+      "estimatedCostUsd": 0.00029176000000000007,
+      "quality": {
+        "schemaValid": true,
+        "languagePresent": true,
+        "taskCount": 2,
+        "hasGoal": true,
+        "constraintsSeparated": true,
+        "assumptionsSeparated": true,
+        "ambiguitiesTyped": true,
+        "compilerValid": true,
+        "providerConfidence": 0.85
+      },
+      "invariant": {
+        "passed": false,
+        "checks": [
+          {
+            "name": "transformed",
+            "passed": true
+          },
+          {
+            "name": "schema_valid",
+            "passed": true
+          },
+          {
+            "name": "compiler_valid",
+            "passed": true
+          },
+          {
+            "name": "message_type",
+            "passed": true
+          },
+          {
+            "name": "response_language",
+            "passed": true
+          },
+          {
+            "name": "compiled_response_language",
+            "passed": true
+          },
+          {
+            "name": "literal_goal_concepts",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "literal_constraints",
+            "passed": true
+          },
+          {
+            "name": "forbidden_additions",
+            "passed": true
+          },
+          {
+            "name": "original_request_fenced",
+            "passed": true
+          }
+        ]
+      },
+      "evaluation": {
+        "version": 1,
+        "intentAltered": false,
+        "clarity": "clearer"
+      }
+    },
+    {
+      "caseId": "en-20",
+      "title": "Keep API response shape during rename",
+      "tags": [
+        "steer",
+        "refactoring",
+        "explicit-constraints"
+      ],
+      "status": "transformed",
+      "latencyMs": 13841,
+      "tokenUsage": {
+        "input": 253,
+        "output": 1069,
+        "total": 2346
+      },
+      "estimatedCostUsd": 0.00033474000000000004,
+      "quality": {
+        "schemaValid": true,
+        "languagePresent": true,
+        "taskCount": 1,
+        "hasGoal": true,
+        "constraintsSeparated": true,
+        "assumptionsSeparated": true,
+        "ambiguitiesTyped": true,
+        "compilerValid": true,
+        "providerConfidence": 0.8
+      },
+      "invariant": {
+        "passed": false,
+        "checks": [
+          {
+            "name": "transformed",
+            "passed": true
+          },
+          {
+            "name": "schema_valid",
+            "passed": true
+          },
+          {
+            "name": "compiler_valid",
+            "passed": true
+          },
+          {
+            "name": "message_type",
+            "passed": true
+          },
+          {
+            "name": "response_language",
+            "passed": true
+          },
+          {
+            "name": "compiled_response_language",
+            "passed": true
+          },
+          {
+            "name": "literal_goal_concepts",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "literal_constraints",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "forbidden_additions",
+            "passed": true
+          },
+          {
+            "name": "original_request_fenced",
+            "passed": true
+          }
+        ]
+      },
+      "evaluation": {
+        "version": 1,
+        "intentAltered": false,
+        "clarity": "clearer"
+      }
+    },
+    {
+      "caseId": "es-01",
+      "title": "Corregir duplicados al importar contactos",
+      "tags": [
+        "bug-fix",
+        "tests",
+        "explicit-constraints"
+      ],
+      "status": "transformed",
+      "latencyMs": 16283,
+      "tokenUsage": {
+        "input": 266,
+        "output": 962,
+        "total": 2252
+      },
+      "estimatedCostUsd": 0.0003066,
+      "quality": {
+        "schemaValid": true,
+        "languagePresent": true,
+        "taskCount": 2,
+        "hasGoal": true,
+        "constraintsSeparated": true,
+        "assumptionsSeparated": true,
+        "ambiguitiesTyped": true,
+        "compilerValid": true,
+        "providerConfidence": 0.88
+      },
+      "invariant": {
+        "passed": false,
+        "checks": [
+          {
+            "name": "transformed",
+            "passed": true
+          },
+          {
+            "name": "schema_valid",
+            "passed": true
+          },
+          {
+            "name": "compiler_valid",
+            "passed": true
+          },
+          {
+            "name": "message_type",
+            "passed": true
+          },
+          {
+            "name": "response_language",
+            "passed": true
+          },
+          {
+            "name": "compiled_response_language",
+            "passed": true
+          },
+          {
+            "name": "literal_goal_concepts",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "literal_constraints",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "forbidden_additions",
+            "passed": true
+          },
+          {
+            "name": "original_request_fenced",
+            "passed": true
+          }
+        ]
+      },
+      "evaluation": {
+        "version": 1,
+        "intentAltered": false,
+        "clarity": "clearer"
+      }
+    },
+    {
+      "caseId": "es-02",
+      "title": "Mejorar el foco del diálogo de ayuda",
+      "tags": [
+        "ui",
+        "explicit-constraints"
+      ],
+      "status": "transformed",
+      "latencyMs": 20215,
+      "tokenUsage": {
+        "input": 265,
+        "output": 956,
+        "total": 2245
+      },
+      "estimatedCostUsd": 0.00030478,
+      "quality": {
+        "schemaValid": true,
+        "languagePresent": true,
+        "taskCount": 3,
+        "hasGoal": true,
+        "constraintsSeparated": true,
+        "assumptionsSeparated": true,
+        "ambiguitiesTyped": true,
+        "compilerValid": true,
+        "providerConfidence": 0.85
+      },
+      "invariant": {
+        "passed": false,
+        "checks": [
+          {
+            "name": "transformed",
+            "passed": true
+          },
+          {
+            "name": "schema_valid",
+            "passed": true
+          },
+          {
+            "name": "compiler_valid",
+            "passed": true
+          },
+          {
+            "name": "message_type",
+            "passed": true
+          },
+          {
+            "name": "response_language",
+            "passed": true
+          },
+          {
+            "name": "compiled_response_language",
+            "passed": true
+          },
+          {
+            "name": "literal_goal_concepts",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "literal_constraints",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "forbidden_additions",
+            "passed": true
+          },
+          {
+            "name": "original_request_fenced",
+            "passed": true
+          }
+        ]
+      },
+      "evaluation": {
+        "version": 1,
+        "intentAltered": false,
+        "clarity": "clearer"
+      }
+    },
+    {
+      "caseId": "es-03",
+      "title": "Separar el cliente de métricas",
+      "tags": [
+        "refactoring",
+        "architecture",
+        "explicit-constraints"
+      ],
+      "status": "transformed",
+      "latencyMs": 13094,
+      "tokenUsage": {
+        "input": 259,
+        "output": 941,
+        "total": 2224
+      },
+      "estimatedCostUsd": 0.00029974,
+      "quality": {
+        "schemaValid": true,
+        "languagePresent": true,
+        "taskCount": 1,
+        "hasGoal": true,
+        "constraintsSeparated": true,
+        "assumptionsSeparated": true,
+        "ambiguitiesTyped": true,
+        "compilerValid": true,
+        "providerConfidence": 0.82
+      },
+      "invariant": {
+        "passed": false,
+        "checks": [
+          {
+            "name": "transformed",
+            "passed": true
+          },
+          {
+            "name": "schema_valid",
+            "passed": true
+          },
+          {
+            "name": "compiler_valid",
+            "passed": true
+          },
+          {
+            "name": "message_type",
+            "passed": true
+          },
+          {
+            "name": "response_language",
+            "passed": true
+          },
+          {
+            "name": "compiled_response_language",
+            "passed": true
+          },
+          {
+            "name": "literal_goal_concepts",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "literal_constraints",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "forbidden_additions",
+            "passed": true
+          },
+          {
+            "name": "original_request_fenced",
+            "passed": true
+          }
+        ]
+      },
+      "evaluation": {
+        "version": 1,
+        "intentAltered": false,
+        "clarity": "clearer"
+      }
+    },
+    {
+      "caseId": "es-04",
+      "title": "Diagnosticar cierres de sesión inesperados",
+      "tags": [
+        "vague",
+        "risky-assumptions"
+      ],
+      "status": "transformed",
+      "latencyMs": 22718,
+      "tokenUsage": {
+        "input": 271,
+        "output": 1397,
+        "total": 2692
+      },
+      "estimatedCostUsd": 0.0004291000000000001,
+      "quality": {
+        "schemaValid": true,
+        "languagePresent": true,
+        "taskCount": 3,
+        "hasGoal": true,
+        "constraintsSeparated": true,
+        "assumptionsSeparated": true,
+        "ambiguitiesTyped": true,
+        "compilerValid": true,
+        "providerConfidence": 0.82
+      },
+      "invariant": {
+        "passed": false,
+        "checks": [
+          {
+            "name": "transformed",
+            "passed": true
+          },
+          {
+            "name": "schema_valid",
+            "passed": true
+          },
+          {
+            "name": "compiler_valid",
+            "passed": true
+          },
+          {
+            "name": "message_type",
+            "passed": true
+          },
+          {
+            "name": "response_language",
+            "passed": true
+          },
+          {
+            "name": "compiled_response_language",
+            "passed": true
+          },
+          {
+            "name": "literal_goal_concepts",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "literal_constraints",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "forbidden_additions",
+            "passed": true
+          },
+          {
+            "name": "risk",
+            "passed": true
+          },
+          {
+            "name": "clarification",
+            "passed": true
+          },
+          {
+            "name": "original_request_fenced",
+            "passed": true
+          }
+        ]
+      },
+      "evaluation": {
+        "version": 1,
+        "intentAltered": false,
+        "clarity": "clearer"
+      }
+    },
+    {
+      "caseId": "es-05",
+      "title": "Probar límites de la cola de trabajos",
+      "tags": [
+        "tests",
+        "explicit-constraints"
+      ],
+      "status": "transformed",
+      "latencyMs": 23323,
+      "tokenUsage": {
+        "input": 266,
+        "output": 1458,
+        "total": 2748
+      },
+      "estimatedCostUsd": 0.0004454800000000001,
+      "quality": {
+        "schemaValid": true,
+        "languagePresent": true,
+        "taskCount": 3,
+        "hasGoal": true,
+        "constraintsSeparated": true,
+        "assumptionsSeparated": true,
+        "ambiguitiesTyped": true,
+        "compilerValid": true,
+        "providerConfidence": 0.85
+      },
+      "invariant": {
+        "passed": false,
+        "checks": [
+          {
+            "name": "transformed",
+            "passed": true
+          },
+          {
+            "name": "schema_valid",
+            "passed": true
+          },
+          {
+            "name": "compiler_valid",
+            "passed": true
+          },
+          {
+            "name": "message_type",
+            "passed": true
+          },
+          {
+            "name": "response_language",
+            "passed": true
+          },
+          {
+            "name": "compiled_response_language",
+            "passed": true
+          },
+          {
+            "name": "literal_goal_concepts",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "literal_constraints",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "forbidden_additions",
+            "passed": true
+          },
+          {
+            "name": "original_request_fenced",
+            "passed": true
+          }
+        ]
+      },
+      "evaluation": {
+        "version": 1,
+        "intentAltered": false,
+        "clarity": "clearer"
+      }
+    },
+    {
+      "caseId": "es-06",
+      "title": "Mantener el comando de respaldo sin ejecutarlo",
+      "tags": [
+        "paths-commands",
+        "explicit-constraints"
+      ],
+      "status": "transformed",
+      "latencyMs": 11876,
+      "tokenUsage": {
+        "input": 14,
+        "output": 791,
+        "total": 2085
+      },
+      "estimatedCostUsd": 0.00022344000000000002,
+      "quality": {
+        "schemaValid": true,
+        "languagePresent": true,
+        "taskCount": 1,
+        "hasGoal": true,
+        "constraintsSeparated": true,
+        "assumptionsSeparated": true,
+        "ambiguitiesTyped": true,
+        "compilerValid": true,
+        "providerConfidence": 0.95
+      },
+      "invariant": {
+        "passed": false,
+        "checks": [
+          {
+            "name": "transformed",
+            "passed": true
+          },
+          {
+            "name": "schema_valid",
+            "passed": true
+          },
+          {
+            "name": "compiler_valid",
+            "passed": true
+          },
+          {
+            "name": "message_type",
+            "passed": true
+          },
+          {
+            "name": "response_language",
+            "passed": true
+          },
+          {
+            "name": "compiled_response_language",
+            "passed": true
+          },
+          {
+            "name": "literal_goal_concepts",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "literal_constraints",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "forbidden_additions",
+            "passed": true
+          },
+          {
+            "name": "original_request_fenced",
+            "passed": true
+          }
+        ]
+      },
+      "evaluation": {
+        "version": 1,
+        "intentAltered": false,
+        "clarity": "clearer"
+      }
+    },
+    {
+      "caseId": "es-07",
+      "title": "Responder en español con nombres en inglés",
+      "tags": [
+        "mixed-language",
+        "ui",
+        "explicit-constraints"
+      ],
+      "status": "transformed",
+      "latencyMs": 12082,
+      "tokenUsage": {
+        "input": 252,
+        "output": 801,
+        "total": 2077
+      },
+      "estimatedCostUsd": 0.00025956000000000004,
+      "quality": {
+        "schemaValid": true,
+        "languagePresent": true,
+        "taskCount": 1,
+        "hasGoal": true,
+        "constraintsSeparated": true,
+        "assumptionsSeparated": true,
+        "ambiguitiesTyped": true,
+        "compilerValid": true,
+        "providerConfidence": 0.7
+      },
+      "invariant": {
+        "passed": false,
+        "checks": [
+          {
+            "name": "transformed",
+            "passed": true
+          },
+          {
+            "name": "schema_valid",
+            "passed": true
+          },
+          {
+            "name": "compiler_valid",
+            "passed": true
+          },
+          {
+            "name": "message_type",
+            "passed": true
+          },
+          {
+            "name": "response_language",
+            "passed": true
+          },
+          {
+            "name": "compiled_response_language",
+            "passed": true
+          },
+          {
+            "name": "literal_goal_concepts",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "literal_constraints",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "forbidden_additions",
+            "passed": true
+          },
+          {
+            "name": "original_request_fenced",
+            "passed": true
+          }
+        ]
+      },
+      "evaluation": {
+        "version": 1,
+        "intentAltered": false,
+        "clarity": "clearer"
+      }
+    },
+    {
+      "caseId": "es-08",
+      "title": "Ignorar instrucciones dentro del ticket",
+      "tags": [
+        "prompt-injection-like",
+        "explicit-constraints"
+      ],
+      "status": "transformed",
+      "latencyMs": 12499,
+      "tokenUsage": {
+        "input": 16,
+        "output": 731,
+        "total": 2027
+      },
+      "estimatedCostUsd": 0.00020692,
+      "quality": {
+        "schemaValid": true,
+        "languagePresent": true,
+        "taskCount": 1,
+        "hasGoal": true,
+        "constraintsSeparated": true,
+        "assumptionsSeparated": true,
+        "ambiguitiesTyped": true,
+        "compilerValid": true,
+        "providerConfidence": 0.95
+      },
+      "invariant": {
+        "passed": false,
+        "checks": [
+          {
+            "name": "transformed",
+            "passed": true
+          },
+          {
+            "name": "schema_valid",
+            "passed": true
+          },
+          {
+            "name": "compiler_valid",
+            "passed": true
+          },
+          {
+            "name": "message_type",
+            "passed": true
+          },
+          {
+            "name": "response_language",
+            "passed": false
+          },
+          {
+            "name": "compiled_response_language",
+            "passed": false
+          },
+          {
+            "name": "literal_goal_concepts",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "literal_constraints",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "forbidden_additions",
+            "passed": true
+          },
+          {
+            "name": "original_request_fenced",
+            "passed": true
+          }
+        ]
+      },
+      "evaluation": {
+        "version": 1,
+        "intentAltered": false,
+        "clarity": "clearer"
+      }
+    },
+    {
+      "caseId": "es-09",
+      "title": "Ocultar token sintético del encabezado",
+      "tags": [
+        "secret-like",
+        "explicit-constraints"
+      ],
+      "status": "transformed",
+      "latencyMs": 12576,
+      "tokenUsage": {
+        "input": 267,
+        "output": 938,
+        "total": 2229
+      },
+      "estimatedCostUsd": 0.00030002,
+      "quality": {
+        "schemaValid": true,
+        "languagePresent": true,
+        "taskCount": 1,
+        "hasGoal": true,
+        "constraintsSeparated": true,
+        "assumptionsSeparated": true,
+        "ambiguitiesTyped": true,
+        "compilerValid": true,
+        "providerConfidence": 0.92
+      },
+      "invariant": {
+        "passed": false,
+        "checks": [
+          {
+            "name": "transformed",
+            "passed": true
+          },
+          {
+            "name": "schema_valid",
+            "passed": true
+          },
+          {
+            "name": "compiler_valid",
+            "passed": true
+          },
+          {
+            "name": "message_type",
+            "passed": true
+          },
+          {
+            "name": "response_language",
+            "passed": true
+          },
+          {
+            "name": "compiled_response_language",
+            "passed": true
+          },
+          {
+            "name": "literal_goal_concepts",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "literal_constraints",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "forbidden_additions",
+            "passed": true
+          },
+          {
+            "name": "original_request_fenced",
+            "passed": true
+          }
+        ]
+      },
+      "evaluation": {
+        "version": 1,
+        "intentAltered": false,
+        "clarity": "clearer"
+      }
+    },
+    {
+      "caseId": "es-10",
+      "title": "Añadir historial sin decidir retención",
+      "tags": [
+        "vague",
+        "architecture",
+        "risky-assumptions"
+      ],
+      "status": "transformed",
+      "latencyMs": 16255,
+      "tokenUsage": {
+        "input": 268,
+        "output": 1094,
+        "total": 2386
+      },
+      "estimatedCostUsd": 0.00034384000000000004,
+      "quality": {
+        "schemaValid": true,
+        "languagePresent": true,
+        "taskCount": 1,
+        "hasGoal": true,
+        "constraintsSeparated": true,
+        "assumptionsSeparated": true,
+        "ambiguitiesTyped": true,
+        "compilerValid": true,
+        "providerConfidence": 0.85
+      },
+      "invariant": {
+        "passed": false,
+        "checks": [
+          {
+            "name": "transformed",
+            "passed": true
+          },
+          {
+            "name": "schema_valid",
+            "passed": true
+          },
+          {
+            "name": "compiler_valid",
+            "passed": true
+          },
+          {
+            "name": "message_type",
+            "passed": true
+          },
+          {
+            "name": "response_language",
+            "passed": true
+          },
+          {
+            "name": "compiled_response_language",
+            "passed": true
+          },
+          {
+            "name": "literal_goal_concepts",
+            "passed": true
+          },
+          {
+            "name": "literal_constraints",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "forbidden_additions",
+            "passed": true
+          },
+          {
+            "name": "risk",
+            "passed": false
+          },
+          {
+            "name": "clarification",
+            "passed": true
+          },
+          {
+            "name": "original_request_fenced",
+            "passed": true
+          }
+        ]
+      },
+      "evaluation": {
+        "version": 1,
+        "intentAltered": false,
+        "clarity": "clearer"
+      }
+    },
+    {
+      "caseId": "tr-01",
+      "title": "Sepet toplamındaki kuruş hatasını düzelt",
+      "tags": [
+        "bug-fix",
+        "tests",
+        "explicit-constraints"
+      ],
+      "status": "transformed",
+      "latencyMs": 17410,
+      "tokenUsage": {
+        "input": 22,
+        "output": 1060,
+        "total": 2362
+      },
+      "estimatedCostUsd": 0.00029988,
+      "quality": {
+        "schemaValid": true,
+        "languagePresent": true,
+        "taskCount": 4,
+        "hasGoal": true,
+        "constraintsSeparated": true,
+        "assumptionsSeparated": true,
+        "ambiguitiesTyped": true,
+        "compilerValid": true,
+        "providerConfidence": 0.82
+      },
+      "invariant": {
+        "passed": false,
+        "checks": [
+          {
+            "name": "transformed",
+            "passed": true
+          },
+          {
+            "name": "schema_valid",
+            "passed": true
+          },
+          {
+            "name": "compiler_valid",
+            "passed": true
+          },
+          {
+            "name": "message_type",
+            "passed": true
+          },
+          {
+            "name": "response_language",
+            "passed": true
+          },
+          {
+            "name": "compiled_response_language",
+            "passed": true
+          },
+          {
+            "name": "literal_goal_concepts",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "literal_constraints",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "forbidden_additions",
+            "passed": true
+          },
+          {
+            "name": "original_request_fenced",
+            "passed": true
+          }
+        ]
+      },
+      "evaluation": {
+        "version": 1,
+        "intentAltered": false,
+        "clarity": "clearer"
+      }
+    },
+    {
+      "caseId": "tr-02",
+      "title": "Mobil menü odağını erişilebilir yap",
+      "tags": [
+        "ui",
+        "explicit-constraints"
+      ],
+      "status": "fail_open",
+      "errorCode": "PROVIDER_INVALID_JSON",
+      "invariant": {
+        "passed": false,
+        "checks": [
+          {
+            "name": "transformed",
+            "passed": false
+          }
+        ]
+      }
+    },
+    {
+      "caseId": "tr-03",
+      "title": "Kullanıcı sorgusunu depo katmanına ayır",
+      "tags": [
+        "refactoring",
+        "architecture",
+        "explicit-constraints"
+      ],
+      "status": "transformed",
+      "latencyMs": 24607,
+      "tokenUsage": {
+        "input": 260,
+        "output": 1581,
+        "total": 2865
+      },
+      "estimatedCostUsd": 0.00047908000000000005,
+      "quality": {
+        "schemaValid": true,
+        "languagePresent": true,
+        "taskCount": 3,
+        "hasGoal": true,
+        "constraintsSeparated": true,
+        "assumptionsSeparated": true,
+        "ambiguitiesTyped": true,
+        "compilerValid": true,
+        "providerConfidence": 0.82
+      },
+      "invariant": {
+        "passed": false,
+        "checks": [
+          {
+            "name": "transformed",
+            "passed": true
+          },
+          {
+            "name": "schema_valid",
+            "passed": true
+          },
+          {
+            "name": "compiler_valid",
+            "passed": true
+          },
+          {
+            "name": "message_type",
+            "passed": true
+          },
+          {
+            "name": "response_language",
+            "passed": true
+          },
+          {
+            "name": "compiled_response_language",
+            "passed": true
+          },
+          {
+            "name": "literal_goal_concepts",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "literal_constraints",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "forbidden_additions",
+            "passed": true
+          },
+          {
+            "name": "original_request_fenced",
+            "passed": true
+          }
+        ]
+      },
+      "evaluation": {
+        "version": 1,
+        "intentAltered": false,
+        "clarity": "clearer"
+      }
+    },
+    {
+      "caseId": "tr-04",
+      "title": "Yavaş rapor ekranını önce teşhis et",
+      "tags": [
+        "vague",
+        "risky-assumptions"
+      ],
+      "status": "transformed",
+      "latencyMs": 25365,
+      "tokenUsage": {
+        "input": 269,
+        "output": 1354,
+        "total": 2647
+      },
+      "estimatedCostUsd": 0.00041678000000000006,
+      "quality": {
+        "schemaValid": true,
+        "languagePresent": true,
+        "taskCount": 2,
+        "hasGoal": true,
+        "constraintsSeparated": true,
+        "assumptionsSeparated": true,
+        "ambiguitiesTyped": true,
+        "compilerValid": true,
+        "providerConfidence": 0.75
+      },
+      "invariant": {
+        "passed": false,
+        "checks": [
+          {
+            "name": "transformed",
+            "passed": true
+          },
+          {
+            "name": "schema_valid",
+            "passed": true
+          },
+          {
+            "name": "compiler_valid",
+            "passed": true
+          },
+          {
+            "name": "message_type",
+            "passed": true
+          },
+          {
+            "name": "response_language",
+            "passed": true
+          },
+          {
+            "name": "compiled_response_language",
+            "passed": true
+          },
+          {
+            "name": "literal_goal_concepts",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "literal_constraints",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "forbidden_additions",
+            "passed": true
+          },
+          {
+            "name": "risk",
+            "passed": true
+          },
+          {
+            "name": "clarification",
+            "passed": false
+          },
+          {
+            "name": "original_request_fenced",
+            "passed": true
+          }
+        ]
+      },
+      "evaluation": {
+        "version": 1,
+        "intentAltered": false,
+        "clarity": "clearer"
+      }
+    },
+    {
+      "caseId": "tr-05",
+      "title": "Şifre sıfırlama uç durumlarını test et",
+      "tags": [
+        "tests",
+        "explicit-constraints"
+      ],
+      "status": "transformed",
+      "latencyMs": 17297,
+      "tokenUsage": {
+        "input": 270,
+        "output": 1202,
+        "total": 2496
+      },
+      "estimatedCostUsd": 0.00037436000000000007,
+      "quality": {
+        "schemaValid": true,
+        "languagePresent": true,
+        "taskCount": 3,
+        "hasGoal": true,
+        "constraintsSeparated": true,
+        "assumptionsSeparated": true,
+        "ambiguitiesTyped": true,
+        "compilerValid": true,
+        "providerConfidence": 0.9
+      },
+      "invariant": {
+        "passed": false,
+        "checks": [
+          {
+            "name": "transformed",
+            "passed": true
+          },
+          {
+            "name": "schema_valid",
+            "passed": true
+          },
+          {
+            "name": "compiler_valid",
+            "passed": true
+          },
+          {
+            "name": "message_type",
+            "passed": true
+          },
+          {
+            "name": "response_language",
+            "passed": true
+          },
+          {
+            "name": "compiled_response_language",
+            "passed": true
+          },
+          {
+            "name": "literal_goal_concepts",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "literal_constraints",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "forbidden_additions",
+            "passed": true
+          },
+          {
+            "name": "original_request_fenced",
+            "passed": true
+          }
+        ]
+      },
+      "evaluation": {
+        "version": 1,
+        "intentAltered": false,
+        "clarity": "clearer"
+      }
+    },
+    {
+      "caseId": "tr-06",
+      "title": "Dosya yükleme bileşenini iki sorumluluğa böl",
+      "tags": [
+        "architecture",
+        "refactoring",
+        "explicit-constraints"
+      ],
+      "status": "transformed",
+      "latencyMs": 18023,
+      "tokenUsage": {
+        "input": 268,
+        "output": 1187,
+        "total": 2479
+      },
+      "estimatedCostUsd": 0.00036988,
+      "quality": {
+        "schemaValid": true,
+        "languagePresent": true,
+        "taskCount": 1,
+        "hasGoal": true,
+        "constraintsSeparated": true,
+        "assumptionsSeparated": true,
+        "ambiguitiesTyped": true,
+        "compilerValid": true,
+        "providerConfidence": 0.8
+      },
+      "invariant": {
+        "passed": false,
+        "checks": [
+          {
+            "name": "transformed",
+            "passed": true
+          },
+          {
+            "name": "schema_valid",
+            "passed": true
+          },
+          {
+            "name": "compiler_valid",
+            "passed": true
+          },
+          {
+            "name": "message_type",
+            "passed": true
+          },
+          {
+            "name": "response_language",
+            "passed": true
+          },
+          {
+            "name": "compiled_response_language",
+            "passed": true
+          },
+          {
+            "name": "literal_goal_concepts",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "literal_constraints",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "forbidden_additions",
+            "passed": true
+          },
+          {
+            "name": "original_request_fenced",
+            "passed": true
+          }
+        ]
+      },
+      "evaluation": {
+        "version": 1,
+        "intentAltered": false,
+        "clarity": "clearer"
+      }
+    },
+    {
+      "caseId": "tr-07",
+      "title": "Profil formuna önizleme ve test ekle",
+      "tags": [
+        "ui",
+        "multi-task",
+        "tests"
+      ],
+      "status": "transformed",
+      "latencyMs": 23387,
+      "tokenUsage": {
+        "input": 266,
+        "output": 1167,
+        "total": 2457
+      },
+      "estimatedCostUsd": 0.00036400000000000007,
+      "quality": {
+        "schemaValid": true,
+        "languagePresent": true,
+        "taskCount": 3,
+        "hasGoal": true,
+        "constraintsSeparated": true,
+        "assumptionsSeparated": true,
+        "ambiguitiesTyped": true,
+        "compilerValid": true,
+        "providerConfidence": 0.85
+      },
+      "invariant": {
+        "passed": false,
+        "checks": [
+          {
+            "name": "transformed",
+            "passed": true
+          },
+          {
+            "name": "schema_valid",
+            "passed": true
+          },
+          {
+            "name": "compiler_valid",
+            "passed": true
+          },
+          {
+            "name": "message_type",
+            "passed": true
+          },
+          {
+            "name": "response_language",
+            "passed": true
+          },
+          {
+            "name": "compiled_response_language",
+            "passed": true
+          },
+          {
+            "name": "literal_goal_concepts",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "literal_constraints",
+            "passed": true
+          },
+          {
+            "name": "forbidden_additions",
+            "passed": true
+          },
+          {
+            "name": "original_request_fenced",
+            "passed": true
+          }
+        ]
+      },
+      "evaluation": {
+        "version": 1,
+        "intentAltered": false,
+        "clarity": "clearer"
+      }
+    },
+    {
+      "caseId": "tr-08",
+      "title": "Veritabanı yerine bellek önbelleğini koru",
+      "tags": [
+        "steer",
+        "explicit-constraints"
+      ],
+      "status": "transformed",
+      "latencyMs": 16778,
+      "tokenUsage": {
+        "input": 265,
+        "output": 1020,
+        "total": 2309
+      },
+      "estimatedCostUsd": 0.0003227,
+      "quality": {
+        "schemaValid": true,
+        "languagePresent": true,
+        "taskCount": 1,
+        "hasGoal": true,
+        "constraintsSeparated": true,
+        "assumptionsSeparated": true,
+        "ambiguitiesTyped": true,
+        "compilerValid": true,
+        "providerConfidence": 0.75
+      },
+      "invariant": {
+        "passed": false,
+        "checks": [
+          {
+            "name": "transformed",
+            "passed": true
+          },
+          {
+            "name": "schema_valid",
+            "passed": true
+          },
+          {
+            "name": "compiler_valid",
+            "passed": true
+          },
+          {
+            "name": "message_type",
+            "passed": true
+          },
+          {
+            "name": "response_language",
+            "passed": true
+          },
+          {
+            "name": "compiled_response_language",
+            "passed": true
+          },
+          {
+            "name": "literal_goal_concepts",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "literal_constraints",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "forbidden_additions",
+            "passed": true
+          },
+          {
+            "name": "original_request_fenced",
+            "passed": true
+          }
+        ]
+      },
+      "evaluation": {
+        "version": 1,
+        "intentAltered": false,
+        "clarity": "clearer"
+      }
+    },
+    {
+      "caseId": "tr-09",
+      "title": "Boş CSV senaryosunu da kapsa",
+      "tags": [
+        "follow_up",
+        "tests"
+      ],
+      "status": "transformed",
+      "latencyMs": 19082,
+      "tokenUsage": {
+        "input": 265,
+        "output": 1180,
+        "total": 2469
+      },
+      "estimatedCostUsd": 0.0003675,
+      "quality": {
+        "schemaValid": true,
+        "languagePresent": true,
+        "taskCount": 1,
+        "hasGoal": true,
+        "constraintsSeparated": true,
+        "assumptionsSeparated": true,
+        "ambiguitiesTyped": true,
+        "compilerValid": true,
+        "providerConfidence": 0.85
+      },
+      "invariant": {
+        "passed": false,
+        "checks": [
+          {
+            "name": "transformed",
+            "passed": true
+          },
+          {
+            "name": "schema_valid",
+            "passed": true
+          },
+          {
+            "name": "compiler_valid",
+            "passed": true
+          },
+          {
+            "name": "message_type",
+            "passed": true
+          },
+          {
+            "name": "response_language",
+            "passed": true
+          },
+          {
+            "name": "compiled_response_language",
+            "passed": true
+          },
+          {
+            "name": "literal_goal_concepts",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "literal_constraints",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "forbidden_additions",
+            "passed": true
+          },
+          {
+            "name": "original_request_fenced",
+            "passed": true
+          }
+        ]
+      },
+      "evaluation": {
+        "version": 1,
+        "intentAltered": false,
+        "clarity": "clearer"
+      }
+    },
+    {
+      "caseId": "tr-10",
+      "title": "CLI yapılandırma yolunu güvenli doğrula",
+      "tags": [
+        "paths-commands",
+        "explicit-constraints"
+      ],
+      "status": "transformed",
+      "latencyMs": 19074,
+      "tokenUsage": {
+        "input": 21,
+        "output": 1119,
+        "total": 2420
+      },
+      "estimatedCostUsd": 0.00031626000000000007,
+      "quality": {
+        "schemaValid": true,
+        "languagePresent": true,
+        "taskCount": 3,
+        "hasGoal": true,
+        "constraintsSeparated": true,
+        "assumptionsSeparated": true,
+        "ambiguitiesTyped": true,
+        "compilerValid": true,
+        "providerConfidence": 0.88
+      },
+      "invariant": {
+        "passed": false,
+        "checks": [
+          {
+            "name": "transformed",
+            "passed": true
+          },
+          {
+            "name": "schema_valid",
+            "passed": true
+          },
+          {
+            "name": "compiler_valid",
+            "passed": true
+          },
+          {
+            "name": "message_type",
+            "passed": true
+          },
+          {
+            "name": "response_language",
+            "passed": true
+          },
+          {
+            "name": "compiled_response_language",
+            "passed": true
+          },
+          {
+            "name": "literal_goal_concepts",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "literal_constraints",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "forbidden_additions",
+            "passed": true
+          },
+          {
+            "name": "original_request_fenced",
+            "passed": true
+          }
+        ]
+      },
+      "evaluation": {
+        "version": 1,
+        "intentAltered": false,
+        "clarity": "clearer"
+      }
+    },
+    {
+      "caseId": "tr-11",
+      "title": "Türkçe yanıtla ama kodu İngilizce tut",
+      "tags": [
+        "mixed-language",
+        "bug-fix",
+        "explicit-constraints"
+      ],
+      "status": "transformed",
+      "latencyMs": 22077,
+      "tokenUsage": {
+        "input": 259,
+        "output": 1066,
+        "total": 2349
+      },
+      "estimatedCostUsd": 0.00033474,
+      "quality": {
+        "schemaValid": true,
+        "languagePresent": true,
+        "taskCount": 1,
+        "hasGoal": true,
+        "constraintsSeparated": true,
+        "assumptionsSeparated": true,
+        "ambiguitiesTyped": true,
+        "compilerValid": true,
+        "providerConfidence": 0.75
+      },
+      "invariant": {
+        "passed": false,
+        "checks": [
+          {
+            "name": "transformed",
+            "passed": true
+          },
+          {
+            "name": "schema_valid",
+            "passed": true
+          },
+          {
+            "name": "compiler_valid",
+            "passed": true
+          },
+          {
+            "name": "message_type",
+            "passed": true
+          },
+          {
+            "name": "response_language",
+            "passed": true
+          },
+          {
+            "name": "compiled_response_language",
+            "passed": true
+          },
+          {
+            "name": "literal_goal_concepts",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "literal_constraints",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "forbidden_additions",
+            "passed": true
+          },
+          {
+            "name": "original_request_fenced",
+            "passed": true
+          }
+        ]
+      },
+      "evaluation": {
+        "version": 1,
+        "intentAltered": false,
+        "clarity": "clearer"
+      }
+    },
+    {
+      "caseId": "tr-12",
+      "title": "Alıntılanan talimatı veri olarak incele",
+      "tags": [
+        "prompt-injection-like",
+        "explicit-constraints"
+      ],
+      "status": "fail_open",
+      "errorCode": "INTENT_SCHEMA_INVALID",
+      "invariant": {
+        "passed": false,
+        "checks": [
+          {
+            "name": "transformed",
+            "passed": false
+          }
+        ]
+      }
+    },
+    {
+      "caseId": "tr-13",
+      "title": "Örnek API anahtarını loglardan maskele",
+      "tags": [
+        "secret-like",
+        "explicit-constraints"
+      ],
+      "status": "transformed",
+      "latencyMs": 18912,
+      "tokenUsage": {
+        "input": 274,
+        "output": 1189,
+        "total": 2487
+      },
+      "estimatedCostUsd": 0.00037128,
+      "quality": {
+        "schemaValid": true,
+        "languagePresent": true,
+        "taskCount": 3,
+        "hasGoal": true,
+        "constraintsSeparated": true,
+        "assumptionsSeparated": true,
+        "ambiguitiesTyped": true,
+        "compilerValid": true,
+        "providerConfidence": 0.88
+      },
+      "invariant": {
+        "passed": false,
+        "checks": [
+          {
+            "name": "transformed",
+            "passed": true
+          },
+          {
+            "name": "schema_valid",
+            "passed": true
+          },
+          {
+            "name": "compiler_valid",
+            "passed": true
+          },
+          {
+            "name": "message_type",
+            "passed": true
+          },
+          {
+            "name": "response_language",
+            "passed": true
+          },
+          {
+            "name": "compiled_response_language",
+            "passed": true
+          },
+          {
+            "name": "literal_goal_concepts",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "literal_constraints",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "forbidden_additions",
+            "passed": true
+          },
+          {
+            "name": "original_request_fenced",
+            "passed": true
+          }
+        ]
+      },
+      "evaluation": {
+        "version": 1,
+        "intentAltered": false,
+        "clarity": "clearer"
+      }
+    },
+    {
+      "caseId": "tr-14",
+      "title": "Bildirim tercihinin kapsamını netleştir",
+      "tags": [
+        "vague",
+        "risky-assumptions"
+      ],
+      "status": "transformed",
+      "latencyMs": 16596,
+      "tokenUsage": {
+        "input": 9,
+        "output": 1040,
+        "total": 2329
+      },
+      "estimatedCostUsd": 0.00029246000000000003,
+      "quality": {
+        "schemaValid": true,
+        "languagePresent": true,
+        "taskCount": 2,
+        "hasGoal": true,
+        "constraintsSeparated": true,
+        "assumptionsSeparated": true,
+        "ambiguitiesTyped": true,
+        "compilerValid": true,
+        "providerConfidence": 0.7
+      },
+      "invariant": {
+        "passed": false,
+        "checks": [
+          {
+            "name": "transformed",
+            "passed": true
+          },
+          {
+            "name": "schema_valid",
+            "passed": true
+          },
+          {
+            "name": "compiler_valid",
+            "passed": true
+          },
+          {
+            "name": "message_type",
+            "passed": true
+          },
+          {
+            "name": "response_language",
+            "passed": true
+          },
+          {
+            "name": "compiled_response_language",
+            "passed": true
+          },
+          {
+            "name": "literal_goal_concepts",
+            "passed": true
+          },
+          {
+            "name": "literal_constraints",
+            "passed": true
+          },
+          {
+            "name": "forbidden_additions",
+            "passed": true
+          },
+          {
+            "name": "risk",
+            "passed": false
+          },
+          {
+            "name": "clarification",
+            "passed": true
+          },
+          {
+            "name": "original_request_fenced",
+            "passed": true
+          }
+        ]
+      },
+      "evaluation": {
+        "version": 1,
+        "intentAltered": false,
+        "clarity": "clearer"
+      }
+    },
+    {
+      "caseId": "tr-15",
+      "title": "Ekli ekran görüntülerini hata kaydına taşı",
+      "tags": [
+        "attachments",
+        "explicit-constraints"
+      ],
+      "status": "transformed",
+      "latencyMs": 14345,
+      "tokenUsage": {
+        "input": 267,
+        "output": 1027,
+        "total": 2318
+      },
+      "estimatedCostUsd": 0.00032494,
+      "quality": {
+        "schemaValid": true,
+        "languagePresent": true,
+        "taskCount": 3,
+        "hasGoal": true,
+        "constraintsSeparated": true,
+        "assumptionsSeparated": true,
+        "ambiguitiesTyped": true,
+        "compilerValid": true,
+        "providerConfidence": 0.85
+      },
+      "invariant": {
+        "passed": false,
+        "checks": [
+          {
+            "name": "transformed",
+            "passed": true
+          },
+          {
+            "name": "schema_valid",
+            "passed": true
+          },
+          {
+            "name": "compiler_valid",
+            "passed": true
+          },
+          {
+            "name": "message_type",
+            "passed": true
+          },
+          {
+            "name": "response_language",
+            "passed": true
+          },
+          {
+            "name": "compiled_response_language",
+            "passed": true
+          },
+          {
+            "name": "literal_goal_concepts",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "literal_constraints",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "forbidden_additions",
+            "passed": false,
+            "detail": "forbidden literal found"
+          },
+          {
+            "name": "original_request_fenced",
+            "passed": true
+          }
+        ]
+      },
+      "evaluation": {
+        "version": 1,
+        "intentAltered": false,
+        "clarity": "clearer"
+      }
+    },
+    {
+      "caseId": "tr-16",
+      "title": "Eski tarih yardımcısını kaldır",
+      "tags": [
+        "refactoring",
+        "explicit-constraints"
+      ],
+      "status": "transformed",
+      "latencyMs": 19460,
+      "tokenUsage": {
+        "input": 259,
+        "output": 1095,
+        "total": 2378
+      },
+      "estimatedCostUsd": 0.00034286,
+      "quality": {
+        "schemaValid": true,
+        "languagePresent": true,
+        "taskCount": 3,
+        "hasGoal": true,
+        "constraintsSeparated": true,
+        "assumptionsSeparated": true,
+        "ambiguitiesTyped": true,
+        "compilerValid": true,
+        "providerConfidence": 0.92
+      },
+      "invariant": {
+        "passed": false,
+        "checks": [
+          {
+            "name": "transformed",
+            "passed": true
+          },
+          {
+            "name": "schema_valid",
+            "passed": true
+          },
+          {
+            "name": "compiler_valid",
+            "passed": true
+          },
+          {
+            "name": "message_type",
+            "passed": true
+          },
+          {
+            "name": "response_language",
+            "passed": true
+          },
+          {
+            "name": "compiled_response_language",
+            "passed": true
+          },
+          {
+            "name": "literal_goal_concepts",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "literal_constraints",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "forbidden_additions",
+            "passed": true
+          },
+          {
+            "name": "original_request_fenced",
+            "passed": true
+          }
+        ]
+      },
+      "evaluation": {
+        "version": 1,
+        "intentAltered": false,
+        "clarity": "clearer"
+      }
+    },
+    {
+      "caseId": "tr-17",
+      "title": "WebSocket yeniden bağlanma testini kararlı yap",
+      "tags": [
+        "tests",
+        "bug-fix",
+        "explicit-constraints"
+      ],
+      "status": "transformed",
+      "latencyMs": 16648,
+      "tokenUsage": {
+        "input": 266,
+        "output": 996,
+        "total": 2286
+      },
+      "estimatedCostUsd": 0.0003161200000000001,
+      "quality": {
+        "schemaValid": true,
+        "languagePresent": true,
+        "taskCount": 2,
+        "hasGoal": true,
+        "constraintsSeparated": true,
+        "assumptionsSeparated": true,
+        "ambiguitiesTyped": true,
+        "compilerValid": true,
+        "providerConfidence": 0.88
+      },
+      "invariant": {
+        "passed": false,
+        "checks": [
+          {
+            "name": "transformed",
+            "passed": true
+          },
+          {
+            "name": "schema_valid",
+            "passed": true
+          },
+          {
+            "name": "compiler_valid",
+            "passed": true
+          },
+          {
+            "name": "message_type",
+            "passed": true
+          },
+          {
+            "name": "response_language",
+            "passed": true
+          },
+          {
+            "name": "compiled_response_language",
+            "passed": true
+          },
+          {
+            "name": "literal_goal_concepts",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "literal_constraints",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "forbidden_additions",
+            "passed": true
+          },
+          {
+            "name": "original_request_fenced",
+            "passed": true
+          }
+        ]
+      },
+      "evaluation": {
+        "version": 1,
+        "intentAltered": false,
+        "clarity": "clearer"
+      }
+    },
+    {
+      "caseId": "tr-18",
+      "title": "Yönetici dışa aktarımına güvenlik sınırı koy",
+      "tags": [
+        "risky-assumptions",
+        "vague"
+      ],
+      "status": "transformed",
+      "latencyMs": 15140,
+      "tokenUsage": {
+        "input": 269,
+        "output": 936,
+        "total": 2229
+      },
+      "estimatedCostUsd": 0.00029974000000000005,
+      "quality": {
+        "schemaValid": true,
+        "languagePresent": true,
+        "taskCount": 1,
+        "hasGoal": true,
+        "constraintsSeparated": true,
+        "assumptionsSeparated": true,
+        "ambiguitiesTyped": true,
+        "compilerValid": true,
+        "providerConfidence": 0.75
+      },
+      "invariant": {
+        "passed": false,
+        "checks": [
+          {
+            "name": "transformed",
+            "passed": true
+          },
+          {
+            "name": "schema_valid",
+            "passed": true
+          },
+          {
+            "name": "compiler_valid",
+            "passed": true
+          },
+          {
+            "name": "message_type",
+            "passed": true
+          },
+          {
+            "name": "response_language",
+            "passed": true
+          },
+          {
+            "name": "compiled_response_language",
+            "passed": true
+          },
+          {
+            "name": "literal_goal_concepts",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "literal_constraints",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "forbidden_additions",
+            "passed": true
+          },
+          {
+            "name": "risk",
+            "passed": false
+          },
+          {
+            "name": "clarification",
+            "passed": true
+          },
+          {
+            "name": "original_request_fenced",
+            "passed": true
+          }
+        ]
+      },
+      "evaluation": {
+        "version": 1,
+        "intentAltered": false,
+        "clarity": "clearer"
+      }
+    },
+    {
+      "caseId": "tr-19",
+      "title": "Ana sayfa LCP gerilemesini gider",
+      "tags": [
+        "clear",
+        "explicit-constraints"
+      ],
+      "status": "transformed",
+      "latencyMs": 24428,
+      "tokenUsage": {
+        "input": 281,
+        "output": 1394,
+        "total": 2699
+      },
+      "estimatedCostUsd": 0.00042966000000000006,
+      "quality": {
+        "schemaValid": true,
+        "languagePresent": true,
+        "taskCount": 2,
+        "hasGoal": true,
+        "constraintsSeparated": true,
+        "assumptionsSeparated": true,
+        "ambiguitiesTyped": true,
+        "compilerValid": true,
+        "providerConfidence": 0.82
+      },
+      "invariant": {
+        "passed": false,
+        "checks": [
+          {
+            "name": "transformed",
+            "passed": true
+          },
+          {
+            "name": "schema_valid",
+            "passed": true
+          },
+          {
+            "name": "compiler_valid",
+            "passed": true
+          },
+          {
+            "name": "message_type",
+            "passed": true
+          },
+          {
+            "name": "response_language",
+            "passed": true
+          },
+          {
+            "name": "compiled_response_language",
+            "passed": true
+          },
+          {
+            "name": "literal_goal_concepts",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "literal_constraints",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "forbidden_additions",
+            "passed": true
+          },
+          {
+            "name": "original_request_fenced",
+            "passed": true
+          }
+        ]
+      },
+      "evaluation": {
+        "version": 1,
+        "intentAltered": false,
+        "clarity": "clearer"
+      }
+    },
+    {
+      "caseId": "tr-20",
+      "title": "Yönlendirmeyi koruyarak buton metnini değiştir",
+      "tags": [
+        "steer",
+        "ui",
+        "paths-commands",
+        "explicit-constraints"
+      ],
+      "status": "transformed",
+      "latencyMs": 19425,
+      "tokenUsage": {
+        "input": 286,
+        "output": 1367,
+        "total": 2677
+      },
+      "estimatedCostUsd": 0.0004228000000000001,
+      "quality": {
+        "schemaValid": true,
+        "languagePresent": true,
+        "taskCount": 4,
+        "hasGoal": true,
+        "constraintsSeparated": true,
+        "assumptionsSeparated": true,
+        "ambiguitiesTyped": true,
+        "compilerValid": true,
+        "providerConfidence": 0.9
+      },
+      "invariant": {
+        "passed": false,
+        "checks": [
+          {
+            "name": "transformed",
+            "passed": true
+          },
+          {
+            "name": "schema_valid",
+            "passed": true
+          },
+          {
+            "name": "compiler_valid",
+            "passed": true
+          },
+          {
+            "name": "message_type",
+            "passed": true
+          },
+          {
+            "name": "response_language",
+            "passed": true
+          },
+          {
+            "name": "compiled_response_language",
+            "passed": true
+          },
+          {
+            "name": "literal_goal_concepts",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "literal_constraints",
+            "passed": false,
+            "detail": "literal annotation missing"
+          },
+          {
+            "name": "forbidden_additions",
+            "passed": true
+          },
+          {
+            "name": "original_request_fenced",
+            "passed": true
+          }
+        ]
+      },
+      "evaluation": {
+        "version": 1,
+        "intentAltered": false,
+        "clarity": "clearer"
+      }
+    }
+  ],
+  "aggregates": {
+    "total": 50,
+    "attempted": 50,
+    "transformed": 47,
+    "failOpen": 3,
+    "skipped": 0,
+    "schemaValidRate": {
+      "value": 0.94,
+      "denominator": 50
+    },
+    "failOpenRate": {
+      "value": 0.06,
+      "denominator": 50
+    },
+    "latencyP50": 17444,
+    "latencyP95": 24428,
+    "inputTokens": 11584,
+    "outputTokens": 53228,
+    "totalTokens": 113708,
+    "averageInputTokens": 246.46808510638297,
+    "averageOutputTokens": 1132.5106382978724,
+    "averageTotalTokens": 2419.31914893617,
+    "missingUsageCount": 0,
+    "totalCostUsd": 0.016525599999999998,
+    "averageCostUsd": 0.0003516085106382978,
+    "missingCostCount": 0,
+    "qualitySchemaValidRate": {
+      "value": 1,
+      "denominator": 47
+    },
+    "qualityLanguagePresentRate": {
+      "value": 1,
+      "denominator": 47
+    },
+    "qualityHasGoalRate": {
+      "value": 1,
+      "denominator": 47
+    },
+    "qualityConstraintsSeparatedRate": {
+      "value": 1,
+      "denominator": 47
+    },
+    "qualityAssumptionsSeparatedRate": {
+      "value": 1,
+      "denominator": 47
+    },
+    "qualityAmbiguitiesTypedRate": {
+      "value": 1,
+      "denominator": 47
+    },
+    "qualityCompilerValidRate": {
+      "value": 1,
+      "denominator": 47
+    },
+    "averageTaskCount": {
+      "value": 2.25531914893617,
+      "denominator": 47
+    },
+    "averageProviderConfidence": {
+      "value": 0.8210638297872345,
+      "denominator": 47
+    },
+    "forbiddenAdditionFailureCount": 2,
+    "forbiddenAdditionFailureRate": {
+      "value": 0.0425531914893617,
+      "denominator": 47
+    },
+    "languagePreservationRate": {
+      "value": 0.9787234042553191,
+      "denominator": 47
+    },
+    "evaluatedCount": 47,
+    "evaluatorMaterialIntentAlterationRate": {
+      "value": 0.06382978723404255,
+      "denominator": 47
+    },
+    "evaluatorClearerOrEqualRate": {
+      "value": 0.9361702127659575,
+      "denominator": 47
+    },
+    "evaluatorGoodRatingRate": {
+      "value": null,
+      "denominator": 0
+    },
+    "structuralPassRate": {
+      "value": 0.92,
+      "denominator": 50
+    },
+    "literalGoalDiagnosticRate": {
+      "value": 0.0425531914893617,
+      "denominator": 47
+    },
+    "literalConstraintDiagnosticRate": {
+      "value": 0.1702127659574468,
+      "denominator": 47
+    },
+    "deterministicSafetyPassRate": {
+      "value": 1,
+      "denominator": 7
+    },
+    "evaluatorCoverageRate": {
+      "value": 1,
+      "denominator": 47
+    },
+    "ownerReviewCoverageRate": {
+      "value": null,
+      "denominator": 0
+    },
+    "ownerMaterialIntentAlterationRate": {
+      "value": null,
+      "denominator": 0
+    },
+    "ownerClearerOrEqualRate": {
+      "value": null,
+      "denominator": 0
+    }
+  },
+  "thresholds": {
+    "structural": {
+      "status": "pass",
+      "denominator": 50
+    },
+    "language": {
+      "status": "fail",
+      "denominator": 47
+    },
+    "deterministicSafety": {
+      "status": "pass",
+      "denominator": 7
+    },
+    "evaluatorCoverage": {
+      "status": "pass",
+      "denominator": 47
+    },
+    "evaluatorMaterialAlteration": {
+      "status": "fail",
+      "denominator": 47
+    },
+    "evaluatorClarity": {
+      "status": "pass",
+      "denominator": 47
+    },
+    "ownerCoverage": {
+      "status": "unavailable",
+      "denominator": 0
+    },
+    "ownerMaterialAlteration": {
+      "status": "unavailable",
+      "denominator": 0
+    },
+    "ownerClarity": {
+      "status": "unavailable",
+      "denominator": 0
+    },
+    "ownerAcceptance": {
+      "status": "unavailable",
+      "denominator": 0
+    }
+  }
+}

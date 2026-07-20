@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "id": "tr-10",
+  "title": "CLI yapılandırma yolunu güvenli doğrula",
+  "language": "tr",
+  "messageType": "normal",
+  "input": "`packages/cli/src/config.ts` içinde `corepack pnpm cli --config ./fixtures/demo.json` yolunu doğrula. `../` ile dizin dışına çıkılmasını reddet; komutu çalıştırırken ağ kullanma.",
+  "expected": {
+    "requiredGoalConcepts": ["validate CLI config path"],
+    "requiredConstraints": ["reject path traversal", "no network"],
+    "forbiddenAdditions": ["absolute path fallback"],
+    "responseLanguage": "tr"
+  },
+  "tags": ["paths-commands", "explicit-constraints"]
+}

@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "id": "es-06",
+  "title": "Mantener el comando de respaldo sin ejecutarlo",
+  "language": "es",
+  "messageType": "normal",
+  "input": "Corrige en `docs/backup.md` el ejemplo a `docker compose run --rm backup --verify`. Comprueba la sintaxis, pero no ejecutes el respaldo ni accedas a producción.",
+  "expected": {
+    "requiredGoalConcepts": ["correct backup command documentation"],
+    "requiredConstraints": [
+      "do not execute backup",
+      "do not access production"
+    ],
+    "forbiddenAdditions": ["production credentials"],
+    "responseLanguage": "es"
+  },
+  "tags": ["paths-commands", "explicit-constraints"]
+}

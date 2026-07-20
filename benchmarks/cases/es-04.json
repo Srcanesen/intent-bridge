@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "id": "es-04",
+  "title": "Diagnosticar cierres de sesión inesperados",
+  "language": "es",
+  "messageType": "initial",
+  "input": "Algunos usuarios dicen que la sesión se cierra sola, pero no tenemos pasos para reproducirlo. Revisa primero expiración, reloj y renovación sin asumir la causa.",
+  "expected": {
+    "requiredGoalConcepts": ["diagnose unexpected logout"],
+    "requiredConstraints": ["do not assume cause"],
+    "forbiddenAdditions": [],
+    "responseLanguage": "es",
+    "risk": "medium",
+    "clarificationRecommended": false
+  },
+  "tags": ["vague", "risky-assumptions"]
+}

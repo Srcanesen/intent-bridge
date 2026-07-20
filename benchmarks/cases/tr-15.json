@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "id": "tr-15",
+  "title": "Ekli ekran görüntülerini hata kaydına taşı",
+  "language": "tr",
+  "messageType": "normal",
+  "input": "Hata bildirimi gönderilirken ekli üç ekran görüntüsünü aynen koru ve sayısını metadata alanına yaz. Görsellerden metin çıkarmaya çalışma.",
+  "attachments": {
+    "imageCount": 3
+  },
+  "expected": {
+    "requiredGoalConcepts": ["preserve bug report screenshots"],
+    "requiredConstraints": ["record image count", "do not extract image text"],
+    "forbiddenAdditions": ["OCR"],
+    "responseLanguage": "tr"
+  },
+  "tags": ["attachments", "explicit-constraints"]
+}

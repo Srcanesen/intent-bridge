@@ -1,0 +1,12 @@
+name: Bug report
+description: Report a reproducible non-sensitive issue
+body:
+  - type: textarea
+    attributes:
+      label: Reproduction
+      description: Remove credentials, provider bodies, and private project data.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Expected behavior

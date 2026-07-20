@@ -1,0 +1,47 @@
+{
+  "name": "@intent-bridge/pi-extension",
+  "private": false,
+  "version": "1.0.0",
+  "license": "Apache-2.0",
+  "description": "Fail-open multilingual intent transformation for Pi.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Srcanesen/intent-bridge.git",
+    "directory": "packages/pi-extension"
+  },
+  "homepage": "https://github.com/Srcanesen/intent-bridge#readme",
+  "bugs": {
+    "url": "https://github.com/Srcanesen/intent-bridge/issues"
+  },
+  "type": "module",
+  "main": "./dist/index.js",
+  "exports": "./dist/index.js",
+  "files": [
+    "dist/index.js",
+    "README.md",
+    "LICENSE",
+    "THIRD_PARTY_NOTICES.md",
+    "package.json"
+  ],
+  "engines": {
+    "node": ">=22.23.1"
+  },
+  "keywords": [
+    "pi-package",
+    "pi",
+    "intent-bridge"
+  ],
+  "pi": {
+    "extensions": [
+      "./dist/index.js"
+    ]
+  },
+  "peerDependencies": {
+    "@earendil-works/pi-coding-agent": "*"
+  },
+  "devDependencies": {
+    "@earendil-works/pi-coding-agent": "0.80.10",
+    "@intent-bridge/core": "workspace:*",
+    "@intent-bridge/provider-openai-compatible": "workspace:*"
+  }
+}

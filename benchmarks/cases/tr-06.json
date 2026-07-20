@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "id": "tr-06",
+  "title": "Dosya yükleme bileşenini iki sorumluluğa böl",
+  "language": "tr",
+  "messageType": "initial",
+  "input": "Dosya seçimi ile yükleme isteğini ayrı modüllere ayır. Mevcut onProgress callback sözleşmesini bozma ve yeni bağımlılık ekleme.",
+  "expected": {
+    "requiredGoalConcepts": ["separate file selection and upload"],
+    "requiredConstraints": [
+      "preserve onProgress contract",
+      "do not add dependency"
+    ],
+    "forbiddenAdditions": [],
+    "responseLanguage": "tr"
+  },
+  "tags": ["architecture", "refactoring", "explicit-constraints"]
+}

@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "id": "en-14",
+  "title": "Choose a cache invalidation approach",
+  "language": "en",
+  "messageType": "initial",
+  "input": "Our profile page feels stale after edits. Figure out a sensible cache invalidation approach for this codebase.",
+  "expected": {
+    "requiredGoalConcepts": ["profile cache invalidation"],
+    "requiredConstraints": [],
+    "forbiddenAdditions": [],
+    "responseLanguage": "en",
+    "risk": "medium",
+    "clarificationRecommended": false
+  },
+  "tags": ["vague", "architecture", "risky-assumptions"]
+}

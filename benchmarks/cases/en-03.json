@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "id": "en-03",
+  "title": "Extract invoice tax calculation",
+  "language": "en",
+  "messageType": "initial",
+  "input": "Refactor the tax calculation out of InvoiceService into a pure function. Preserve rounding behavior exactly and do not alter the public InvoiceService API.",
+  "expected": {
+    "requiredGoalConcepts": ["extract tax calculation"],
+    "requiredConstraints": [
+      "preserve rounding behavior",
+      "do not alter public API"
+    ],
+    "forbiddenAdditions": ["new tax rules"],
+    "responseLanguage": "en"
+  },
+  "tags": ["refactoring", "explicit-constraints"]
+}

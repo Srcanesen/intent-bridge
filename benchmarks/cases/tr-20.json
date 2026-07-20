@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "id": "tr-20",
+  "title": "Yönlendirmeyi koruyarak buton metnini değiştir",
+  "language": "tr",
+  "messageType": "steer",
+  "input": "Buton metnini \"Devam et\" yapalım; fakat konuştuğumuz `/checkout/review` yönlendirmesi ve analytics olayı aynen kalsın. Sonunda `corepack pnpm test -- checkout` komutunu çalıştır.",
+  "expected": {
+    "requiredGoalConcepts": ["change button label"],
+    "requiredConstraints": [
+      "preserve checkout review route",
+      "preserve analytics event",
+      "run checkout test command"
+    ],
+    "forbiddenAdditions": ["new checkout step"],
+    "responseLanguage": "tr"
+  },
+  "tags": ["steer", "ui", "paths-commands", "explicit-constraints"]
+}

@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "id": "tr-17",
+  "title": "WebSocket yeniden bağlanma testini kararlı yap",
+  "language": "tr",
+  "messageType": "normal",
+  "input": "Yeniden bağlanma testindeki rastgele beklemeyi sahte zamanlayıcıyla değiştir. Üç denemeden sonra vazgeçme davranışı aynı kalsın.",
+  "expected": {
+    "requiredGoalConcepts": ["stabilize reconnect test"],
+    "requiredConstraints": ["use fake timer", "preserve three-attempt limit"],
+    "forbiddenAdditions": ["unbounded retries"],
+    "responseLanguage": "tr"
+  },
+  "tags": ["tests", "bug-fix", "explicit-constraints"]
+}

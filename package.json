@@ -1,0 +1,51 @@
+{
+  "name": "intent-bridge",
+  "private": true,
+  "version": "1.0.0",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Srcanesen/intent-bridge.git"
+  },
+  "homepage": "https://github.com/Srcanesen/intent-bridge#readme",
+  "bugs": {
+    "url": "https://github.com/Srcanesen/intent-bridge/issues"
+  },
+  "packageManager": "pnpm@11.15.0",
+  "engines": {
+    "node": ">=22.23.1"
+  },
+  "scripts": {
+    "format": "biome format --write .",
+    "format:check": "biome format .",
+    "lint": "biome lint .",
+    "typecheck": "tsc --build tsconfig.json",
+    "test": "vitest run",
+    "test:unit": "vitest run",
+    "test:contract": "vitest run",
+    "test:integration": "vitest run",
+    "test:live": "vitest run",
+    "benchmark": "corepack pnpm build && node packages/benchmark/dist/cli.js",
+    "benchmark:pi-thinking": "corepack pnpm build && node packages/pi-extension/scripts/benchmark-thinking.mjs",
+    "benchmark:pi-local": "corepack pnpm build && node packages/pi-extension/scripts/benchmark-local-latency.mjs",
+    "benchmark:pi-corpus": "corepack pnpm build && node packages/pi-extension/scripts/benchmark-native-corpus.mjs",
+    "build:extension": "tsc --build --force tsconfig.json && node scripts/bundle-extension.mjs",
+    "build": "corepack pnpm build:extension",
+    "release:pack": "corepack pnpm build && node scripts/release-smoke.mjs --pack",
+    "release:smoke": "corepack pnpm build && node scripts/release-smoke.mjs",
+    "scan:secrets": "node scripts/scan-secrets.mjs",
+    "check": "corepack pnpm format:check && corepack pnpm lint && corepack pnpm typecheck && corepack pnpm test && corepack pnpm build"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.3.15",
+    "@types/node": "^26.1.1",
+    "esbuild": "0.27.4",
+    "typescript": "5.9.3",
+    "vitest": "4.1.0"
+  },
+  "pi": {
+    "extensions": [
+      "./packages/pi-extension/dist/index.js"
+    ]
+  }
+}

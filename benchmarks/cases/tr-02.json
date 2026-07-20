@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "id": "tr-02",
+  "title": "Mobil menü odağını erişilebilir yap",
+  "language": "tr",
+  "messageType": "normal",
+  "input": "Mobil menü açıldığında odağı ilk bağlantıya taşı, Escape ile kapat ve odağı menü düğmesine geri ver. Görsel yerleşimi değiştirme.",
+  "expected": {
+    "requiredGoalConcepts": ["accessible mobile menu focus"],
+    "requiredConstraints": [
+      "close with Escape",
+      "return focus to menu button",
+      "do not change visual layout"
+    ],
+    "forbiddenAdditions": ["new menu design"],
+    "responseLanguage": "tr"
+  },
+  "tags": ["ui", "explicit-constraints"]
+}

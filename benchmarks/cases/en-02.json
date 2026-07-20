@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "id": "en-02",
+  "title": "Accessible account menu keyboard flow",
+  "language": "en",
+  "messageType": "normal",
+  "input": "Update the account dropdown to open with Enter or Space, trap no focus, close on Escape, and return focus to the trigger. Keep the existing visual design.",
+  "expected": {
+    "requiredGoalConcepts": ["accessible account menu"],
+    "requiredConstraints": [
+      "close on Escape",
+      "return focus to trigger",
+      "keep existing visual design"
+    ],
+    "forbiddenAdditions": ["new navigation layout"],
+    "responseLanguage": "en"
+  },
+  "tags": ["ui", "explicit-constraints"]
+}

@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "id": "en-07",
+  "title": "Ship search filter and loading state",
+  "language": "en",
+  "messageType": "initial",
+  "input": "On the products page, add a category filter and show a skeleton while results load. Also add tests for changing categories and for an empty result set. Keep URLs shareable.",
+  "expected": {
+    "requiredGoalConcepts": [
+      "category filter",
+      "loading skeleton",
+      "filter tests"
+    ],
+    "requiredConstraints": ["shareable URLs"],
+    "forbiddenAdditions": ["infinite scroll"],
+    "responseLanguage": "en"
+  },
+  "tags": ["ui", "multi-task", "tests", "explicit-constraints"]
+}

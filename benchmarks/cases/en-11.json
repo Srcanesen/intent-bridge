@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "id": "en-11",
+  "title": "Translate only user-facing validation copy",
+  "language": "en",
+  "messageType": "initial",
+  "input": "Please fix the signup validation, pero responde al usuario en español. Keep identifiers and error codes in English.",
+  "expected": {
+    "requiredGoalConcepts": ["fix signup validation"],
+    "requiredConstraints": [
+      "respond in Spanish",
+      "keep identifiers and error codes in English"
+    ],
+    "forbiddenAdditions": ["translate identifiers"],
+    "responseLanguage": "en"
+  },
+  "tags": ["mixed-language", "bug-fix", "explicit-constraints"]
+}

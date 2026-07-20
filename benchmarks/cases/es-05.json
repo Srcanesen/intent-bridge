@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "id": "es-05",
+  "title": "Probar límites de la cola de trabajos",
+  "language": "es",
+  "messageType": "normal",
+  "input": "Añade pruebas para cola vacía, capacidad máxima y rechazo al superar el límite. Usa el reloj falso existente y no inicies workers reales.",
+  "expected": {
+    "requiredGoalConcepts": ["job queue boundary tests"],
+    "requiredConstraints": [
+      "use existing fake clock",
+      "do not start real workers"
+    ],
+    "forbiddenAdditions": ["new worker process"],
+    "responseLanguage": "es"
+  },
+  "tags": ["tests", "explicit-constraints"]
+}

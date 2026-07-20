@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "id": "tr-08",
+  "title": "Veritabanı yerine bellek önbelleğini koru",
+  "language": "tr",
+  "messageType": "steer",
+  "input": "Önceki planı daraltalım: kalıcı tablo ekleme, yalnızca süreç içi önbelleği düzelt ve mevcut TTL ayarını kullan.",
+  "expected": {
+    "requiredGoalConcepts": ["fix in-process cache"],
+    "requiredConstraints": ["do not add persistent table", "use existing TTL"],
+    "forbiddenAdditions": ["database migration"],
+    "responseLanguage": "tr"
+  },
+  "tags": ["steer", "explicit-constraints"]
+}

@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "id": "tr-18",
+  "title": "Yönetici dışa aktarımına güvenlik sınırı koy",
+  "language": "tr",
+  "messageType": "initial",
+  "input": "Yönetici paneline kullanıcı dışa aktarma ekle. Hangi rollerin indireceği henüz kararlaştırılmadı; yetki modeli netleşmeden varsayım yapma.",
+  "expected": {
+    "requiredGoalConcepts": ["admin user export"],
+    "requiredConstraints": ["do not assume authorization model"],
+    "forbiddenAdditions": ["public download link"],
+    "responseLanguage": "tr",
+    "risk": "high",
+    "clarificationRecommended": true
+  },
+  "tags": ["risky-assumptions", "vague"]
+}

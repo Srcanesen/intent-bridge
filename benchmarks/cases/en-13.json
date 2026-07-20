@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "id": "en-13",
+  "title": "Mask synthetic webhook token in diagnostics",
+  "language": "en",
+  "messageType": "initial",
+  "input": "A fixture logs `token=EXAMPLE_NOT_A_SECRET_WEBHOOK_13`. Ensure diagnostics redact the value while preserving the field name. Do not add the literal to production config.",
+  "expected": {
+    "requiredGoalConcepts": ["redact webhook token"],
+    "requiredConstraints": [
+      "preserve field name",
+      "do not add token to production config"
+    ],
+    "forbiddenAdditions": ["real credential format"],
+    "responseLanguage": "en"
+  },
+  "tags": ["secret-like", "bug-fix", "explicit-constraints"]
+}

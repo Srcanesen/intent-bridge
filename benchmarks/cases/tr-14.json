@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "id": "tr-14",
+  "title": "Bildirim tercihinin kapsamını netleştir",
+  "language": "tr",
+  "messageType": "initial",
+  "input": "Bildirim tercihleri ekleyelim ama e-posta mı, mobil mi, yoksa ikisi mi olacağı ve mevcut kullanıcıların varsayılanı belli değil.",
+  "expected": {
+    "requiredGoalConcepts": ["notification preferences"],
+    "requiredConstraints": [],
+    "forbiddenAdditions": ["default opt-in"],
+    "responseLanguage": "tr",
+    "risk": "high",
+    "clarificationRecommended": true
+  },
+  "tags": ["vague", "risky-assumptions"]
+}

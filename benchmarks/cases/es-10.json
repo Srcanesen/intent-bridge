@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "id": "es-10",
+  "title": "Añadir historial sin decidir retención",
+  "language": "es",
+  "messageType": "initial",
+  "input": "Queremos un historial de cambios de perfil, pero aún no sabemos cuánto tiempo conservarlo ni quién puede verlo. Diseña solo cuando esas decisiones estén claras.",
+  "expected": {
+    "requiredGoalConcepts": ["profile change history"],
+    "requiredConstraints": ["wait for retention and authorization decisions"],
+    "forbiddenAdditions": ["unlimited retention"],
+    "responseLanguage": "es",
+    "risk": "high",
+    "clarificationRecommended": true
+  },
+  "tags": ["vague", "architecture", "risky-assumptions"]
+}

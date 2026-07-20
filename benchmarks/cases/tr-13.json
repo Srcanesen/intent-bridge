@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "id": "tr-13",
+  "title": "Örnek API anahtarını loglardan maskele",
+  "language": "tr",
+  "messageType": "initial",
+  "input": "Test girdisinde `token=EXAMPLE_NOT_A_SECRET_TR_13` var. Loglarda değeri maskele, test fixture içindeki sentetik değeri koru ve gerçek anahtar biçimi üretme.",
+  "expected": {
+    "requiredGoalConcepts": ["redact example token in logs"],
+    "requiredConstraints": [
+      "preserve synthetic fixture",
+      "do not generate real key format"
+    ],
+    "forbiddenAdditions": ["production credential"],
+    "responseLanguage": "tr"
+  },
+  "tags": ["secret-like", "explicit-constraints"]
+}

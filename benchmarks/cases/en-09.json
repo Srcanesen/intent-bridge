@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "id": "en-09",
+  "title": "Cover the timeout branch too",
+  "language": "en",
+  "messageType": "follow_up",
+  "input": "Please also cover the timeout branch we discussed, using fake timers so the test stays deterministic.",
+  "expected": {
+    "requiredGoalConcepts": ["test timeout branch"],
+    "requiredConstraints": ["use fake timers", "deterministic test"],
+    "forbiddenAdditions": ["real delay"],
+    "responseLanguage": "en"
+  },
+  "tags": ["follow_up", "tests", "explicit-constraints"]
+}

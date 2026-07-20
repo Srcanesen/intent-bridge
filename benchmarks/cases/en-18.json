@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "id": "en-18",
+  "title": "Clarify destructive archive behavior",
+  "language": "en",
+  "messageType": "initial",
+  "input": "Add an archive action for workspaces. I have not decided whether archived workspaces can be restored or whether members should be notified.",
+  "expected": {
+    "requiredGoalConcepts": ["workspace archive action"],
+    "requiredConstraints": [],
+    "forbiddenAdditions": ["permanent deletion"],
+    "responseLanguage": "en",
+    "risk": "high",
+    "clarificationRecommended": true
+  },
+  "tags": ["vague", "risky-assumptions"]
+}

@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "id": "en-01",
+  "title": "Prevent duplicate checkout submissions",
+  "language": "en",
+  "messageType": "initial",
+  "input": "Customers can double-click Pay and create two orders. Fix the checkout submission so one click produces at most one order, and add a regression test. Do not change the payment provider integration.",
+  "expected": {
+    "requiredGoalConcepts": ["prevent duplicate orders", "regression test"],
+    "requiredConstraints": [
+      "at most one order",
+      "do not change payment provider integration"
+    ],
+    "forbiddenAdditions": ["replace payment provider"],
+    "responseLanguage": "en"
+  },
+  "tags": ["clear", "bug-fix", "tests", "explicit-constraints"]
+}

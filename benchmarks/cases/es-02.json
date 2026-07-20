@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "id": "es-02",
+  "title": "Mejorar el foco del diálogo de ayuda",
+  "language": "es",
+  "messageType": "normal",
+  "input": "Al abrir el diálogo de ayuda, mueve el foco al título, ciérralo con Escape y devuelve el foco al enlace de ayuda. No cambies los estilos.",
+  "expected": {
+    "requiredGoalConcepts": ["accessible help dialog focus"],
+    "requiredConstraints": [
+      "close with Escape",
+      "return focus to help link",
+      "do not change styles"
+    ],
+    "forbiddenAdditions": ["dialog redesign"],
+    "responseLanguage": "es"
+  },
+  "tags": ["ui", "explicit-constraints"]
+}

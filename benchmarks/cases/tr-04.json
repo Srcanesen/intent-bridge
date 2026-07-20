@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "id": "tr-04",
+  "title": "Yavaş rapor ekranını önce teşhis et",
+  "language": "tr",
+  "messageType": "initial",
+  "input": "Rapor ekranı bazı müşterilerde çok yavaşmış. Hangi sorgunun sorunlu olduğunu bilmiyorum; ölçüm yapıp kanıt bulmadan indeks ekleme.",
+  "expected": {
+    "requiredGoalConcepts": ["diagnose slow report"],
+    "requiredConstraints": ["measure before adding index"],
+    "forbiddenAdditions": [],
+    "responseLanguage": "tr",
+    "risk": "medium",
+    "clarificationRecommended": false
+  },
+  "tags": ["vague", "risky-assumptions"]
+}

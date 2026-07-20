@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "id": "tr-07",
+  "title": "Profil formuna önizleme ve test ekle",
+  "language": "tr",
+  "messageType": "initial",
+  "input": "Profil formuna kaydetmeden önce değişiklik özeti ekle; iptal edilince alanları eski haline getir ve iki akış için de test yaz.",
+  "expected": {
+    "requiredGoalConcepts": [
+      "profile change preview",
+      "restore cancelled fields",
+      "flow tests"
+    ],
+    "requiredConstraints": [],
+    "forbiddenAdditions": [],
+    "responseLanguage": "tr"
+  },
+  "tags": ["ui", "multi-task", "tests"]
+}

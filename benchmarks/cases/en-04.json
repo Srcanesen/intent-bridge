@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "id": "en-04",
+  "title": "Investigate intermittent websocket disconnects",
+  "language": "en",
+  "messageType": "initial",
+  "input": "The dashboard sometimes disconnects after several minutes and I cannot reproduce it reliably. Inspect the websocket lifecycle and identify the most likely cause before changing behavior.",
+  "expected": {
+    "requiredGoalConcepts": ["investigate websocket disconnects"],
+    "requiredConstraints": ["identify cause before changing behavior"],
+    "forbiddenAdditions": [],
+    "responseLanguage": "en",
+    "risk": "medium",
+    "clarificationRecommended": false
+  },
+  "tags": ["vague", "risky-assumptions"]
+}

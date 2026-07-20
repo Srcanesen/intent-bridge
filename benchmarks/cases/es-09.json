@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "id": "es-09",
+  "title": "Ocultar token sintético del encabezado",
+  "language": "es",
+  "messageType": "initial",
+  "input": "El fixture contiene `token=EXAMPLE_NOT_A_SECRET_ES_09`. Ocúltalo en el diagnóstico, conserva el nombre del campo y no inventes credenciales reales.",
+  "expected": {
+    "requiredGoalConcepts": ["redact synthetic header token"],
+    "requiredConstraints": [
+      "preserve field name",
+      "do not invent real credentials"
+    ],
+    "forbiddenAdditions": ["valid API key"],
+    "responseLanguage": "es"
+  },
+  "tags": ["secret-like", "explicit-constraints"]
+}

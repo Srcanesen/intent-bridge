@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "id": "en-06",
+  "title": "Split notification delivery architecture",
+  "language": "en",
+  "messageType": "initial",
+  "input": "Design a boundary between notification composition and delivery so email and SMS adapters share no vendor-specific types. Keep this as an internal refactor; do not add a message queue.",
+  "expected": {
+    "requiredGoalConcepts": ["separate notification composition and delivery"],
+    "requiredConstraints": [
+      "no vendor-specific shared types",
+      "internal refactor"
+    ],
+    "forbiddenAdditions": ["Kafka broker"],
+    "responseLanguage": "en"
+  },
+  "tags": ["architecture", "refactoring", "explicit-constraints"]
+}

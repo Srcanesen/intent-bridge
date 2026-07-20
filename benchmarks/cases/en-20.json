@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "id": "en-20",
+  "title": "Keep API response shape during rename",
+  "language": "en",
+  "messageType": "steer",
+  "input": "Rename the internal `ownerId` variable as planned, but leave the JSON response field named `owner_id` for backward compatibility.",
+  "expected": {
+    "requiredGoalConcepts": ["rename internal owner variable"],
+    "requiredConstraints": [
+      "keep owner_id response field",
+      "backward compatibility"
+    ],
+    "forbiddenAdditions": ["breaking API rename"],
+    "responseLanguage": "en"
+  },
+  "tags": ["steer", "refactoring", "explicit-constraints"]
+}

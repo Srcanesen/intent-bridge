@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "id": "tr-03",
+  "title": "Kullanıcı sorgusunu depo katmanına ayır",
+  "language": "tr",
+  "messageType": "initial",
+  "input": "UserService içindeki kullanıcı arama sorgusunu repository katmanına taşı. Dış API imzası ve hata kodları aynen kalsın.",
+  "expected": {
+    "requiredGoalConcepts": ["move user query to repository"],
+    "requiredConstraints": ["preserve public API", "preserve error codes"],
+    "forbiddenAdditions": ["new ORM"],
+    "responseLanguage": "tr"
+  },
+  "tags": ["refactoring", "architecture", "explicit-constraints"]
+}

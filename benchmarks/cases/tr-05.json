@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "id": "tr-05",
+  "title": "Şifre sıfırlama uç durumlarını test et",
+  "language": "tr",
+  "messageType": "normal",
+  "input": "Şifre sıfırlama için süresi dolmuş bağlantı, kullanılmış bağlantı ve bilinmeyen e-posta senaryolarını test et. Testlerde gerçek e-posta gönderme.",
+  "expected": {
+    "requiredGoalConcepts": ["password reset edge case tests"],
+    "requiredConstraints": ["do not send real email"],
+    "forbiddenAdditions": ["external mail service"],
+    "responseLanguage": "tr"
+  },
+  "tags": ["tests", "explicit-constraints"]
+}
