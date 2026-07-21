@@ -101,6 +101,29 @@ describe("PiNativeProvider", () => {
       }),
     );
     expect(completeSimple.mock.calls[0]?.[2]).not.toHaveProperty("temperature");
+    const outbound = completeSimple.mock.calls[0]?.[1];
+    const system = outbound?.systemPrompt ?? "";
+    const user = outbound?.messages[0]?.content ?? "{}";
+    expect(JSON.parse(user)).toEqual({
+      messageType: request.messageType,
+      originalText: request.originalText,
+      attachmentSummary: request.attachmentSummary,
+      projectContext: request.projectContext,
+    });
+    for (const metadata of [
+      "outputRequirements",
+      "implementationCodeForbidden",
+      "interpreterPromptVersion",
+      "intentSchemaVersion",
+    ]) {
+      expect(user).not.toContain(metadata);
+    }
+    expect(system).toContain("interpreterPromptVersion: pi-native-v3");
+    expect(system).not.toContain("outputRequirements");
+    expect(system).not.toContain("implementationCodeForbidden");
+    expect(`${system}\n${user}`).not.toContain(
+      "Do not write implementation code",
+    );
     expect(result).toMatchObject({
       requestId: "response-1",
       usage: { inputTokens: 2, outputTokens: 3, totalTokens: 5 },
@@ -223,7 +246,7 @@ describe("PiNativeProvider", () => {
     expect(completeSimple).toHaveBeenCalledTimes(1);
   });
 
-  it("marks interpreter instructions as not user constraints in the prompt", async () => {
+  it("keeps response-envelope controls out of user intent", async () => {
     const completeSimple = vi.fn().mockResolvedValue({
       stopReason: "toolUse",
       content: [
@@ -237,10 +260,12 @@ describe("PiNativeProvider", () => {
     await createPiProvider({ completeSimple }, model).interpret(request, {});
     const systemPrompt = completeSimple.mock.calls[0]?.[1]?.systemPrompt;
     expect(systemPrompt).toMatch(
-      /interpreter.*instruction[\s\S]*?never user (goal|scope|constraint)/i,
+      /response-envelope controls must not appear as a user goal, scope, constraint, assumption, or ambiguity/i,
     );
-    expect(systemPrompt).toContain("outputRequirements");
-    expect(systemPrompt).toContain("Do not write implementation code");
+    expect(systemPrompt).toContain(
+      "Never perform the requested work inside the response",
+    );
+    expect(systemPrompt).not.toContain("Do not write implementation code");
   });
 
   it("keeps completeSimpleFor as an adapter-backed benchmark compatibility export", async () => {

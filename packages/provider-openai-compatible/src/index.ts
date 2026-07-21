@@ -13,7 +13,7 @@ import {
   type ProviderProfileV1,
 } from "@intent-bridge/core";
 
-export const OPENAI_COMPATIBLE_PROMPT_VERSION = "openai-compatible-v2";
+export const OPENAI_COMPATIBLE_PROMPT_VERSION = "openai-compatible-v3";
 export const MAX_RESPONSE_BYTES = 1024 * 1024;
 
 type JsonSchema = Record<string, unknown>;
@@ -59,10 +59,9 @@ const SYSTEM_INSTRUCTION = `You are an intent interpreter for an AI coding harne
 
 Understand the user's software-development request.
 Preserve its meaning and boundaries.
-Return only the required structured intent.
-outputRequirements.contentLanguage controls intent-field language only.
+Return/emit only the required IntentDocument JSON or tool call. Intent-field text is English. Never perform the requested work inside the response.
+These response-envelope controls must not appear as a user goal, scope, constraint, assumption, or ambiguity.
 Set responseLanguage.source to user_explicit only when the user explicitly changes the assistant's final response or explanation language. A requested artifact, code, file, README, or UI-copy language is source_language_default. If uncertain, use source_language_default and record an ambiguity when useful.
-Do not write implementation code.
 Do not invent requirements.
 Do not silently expand scope.
 Separate user constraints, assumptions and ambiguities.
@@ -315,15 +314,10 @@ export class OpenAICompatibleProvider implements IntentProvider {
           {
             role: "user",
             content: JSON.stringify({
-              interpreterPromptVersion: OPENAI_COMPATIBLE_PROMPT_VERSION,
-              intentSchemaVersion: "2",
-              request: {
-                messageType: request.messageType,
-                originalText: request.originalText,
-                imageCount: request.attachmentSummary.imageCount,
-              },
-              project: request.projectContext,
-              outputRequirements: request.outputRequirements,
+              messageType: request.messageType,
+              originalText: request.originalText,
+              attachmentSummary: request.attachmentSummary,
+              projectContext: request.projectContext,
             }),
           },
         ],
