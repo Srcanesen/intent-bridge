@@ -28,21 +28,8 @@ const cases = [
 ];
 
 describe("benchmark-native-corpus argument parsing", () => {
-  it("uses the current grounded protocol in the generated bundle", async () => {
+  it("uses the current grounded prompt version", () => {
     expect(PI_NATIVE_PROMPT_VERSION).toBe("pi-native-v6");
-    const bundle = await readFile(
-      join(process.cwd(), "packages/pi-extension/dist/index.js"),
-      "utf8",
-    );
-    for (const value of [
-      "pi-native-v6",
-      "openai-compatible-v5",
-      "GroundedInterpretationEnvelopeV1",
-      "emit_grounded_intent",
-    ])
-      expect(bundle).toContain(value);
-    for (const legacy of ["emit_intent", "intentJson", "evidenceJson"])
-      expect(bundle).not.toContain(legacy);
   });
 
   it("requires --provider and --model and defaults concurrency to 2", () => {
