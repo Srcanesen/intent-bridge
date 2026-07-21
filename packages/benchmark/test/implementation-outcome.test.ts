@@ -53,7 +53,6 @@ function arm(
     outputTokens: null,
     costUsd: null,
     blockedSafety: { boundary: 0, network: 0, destructive: 0 },
-    responseLanguageSafety: "unavailable",
     fixtureRevision: "1".repeat(40),
     fixtureTree: "2".repeat(40),
   };
@@ -131,6 +130,23 @@ describe("implementation outcome contracts", () => {
       parseImplementationOutcomeReportV1({
         ...valid,
         runConfigHash: "9".repeat(64),
+      }),
+    ).toThrow();
+    expect(() =>
+      parseImplementationOutcomeReportV1({
+        ...valid,
+        pairs: [
+          {
+            ...valid.pairs[0],
+            arms: [
+              {
+                ...valid.pairs[0]!.arms[0],
+                responseLanguageSafety: "unavailable",
+              },
+              valid.pairs[0]!.arms[1],
+            ],
+          },
+        ],
       }),
     ).toThrow();
     expect(() =>

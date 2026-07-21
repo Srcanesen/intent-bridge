@@ -71,7 +71,6 @@ export type ImplementationArmResultV1 = {
     network: number;
     destructive: number;
   };
-  responseLanguageSafety: "unavailable";
   fixtureRevision: string;
   fixtureTree: string;
 };
@@ -365,7 +364,6 @@ function parseArm(value: unknown): ImplementationArmResultV1 {
     "outputTokens",
     "costUsd",
     "blockedSafety",
-    "responseLanguageSafety",
     "fixtureRevision",
     "fixtureTree",
   ]);
@@ -435,9 +433,6 @@ function parseArm(value: unknown): ImplementationArmResultV1 {
       network: integer(blocked.network, 0, 500),
       destructive: integer(blocked.destructive, 0, 500),
     },
-    responseLanguageSafety: enumValue(o.responseLanguageSafety, [
-      "unavailable",
-    ] as const),
     fixtureRevision: gitHash(o.fixtureRevision),
     fixtureTree: gitHash(o.fixtureTree),
   };

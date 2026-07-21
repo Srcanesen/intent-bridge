@@ -281,7 +281,6 @@ export async function inspectImplementationOutcome(input: {
     outputTokens: input.outputTokens,
     costUsd: input.costUsd,
     blockedSafety: input.blockedSafety,
-    responseLanguageSafety: "unavailable",
     fixtureRevision: input.fixtureRevision,
     fixtureTree: input.fixtureTree,
   };
