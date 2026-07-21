@@ -1,0 +1,79 @@
+{
+  "schemaVersion": 1,
+  "benchmarkId": "source-grounded-evidence-v3",
+  "subjectRelease": "v1.2.0-rc",
+  "subjectCommit": "16e82444333286e913d048856b9283b329b9872f",
+  "confirmatory": {
+    "count": 80,
+    "contentSha256": "d25bb4bf705923dcfc698279ade9ebf0fac07dc9783f87467940f5c0502c3d55",
+    "source": "prompt-transformation-v1"
+  },
+  "smoke": {
+    "count": 8,
+    "casesSha256": "f0ef68b6fb49eb7641af1d088ecc79e68905ed70589aef671804b5772ce8eba6",
+    "annotationsSha256": "ae6466edeec01c65b638f4d1379b9449a867b703c94b7132d384dde0273126f9"
+  },
+  "prompts": {
+    "pi": "pi-native-v6",
+    "openaiCompatible": "openai-compatible-v5"
+  },
+  "candidate": {
+    "provider": "opencode-go",
+    "runtimeProviderAlias": "opencode-go-gateway",
+    "model": "deepseek-v4-flash"
+  },
+  "evaluator": {
+    "provider": "openai-codex",
+    "model": "gpt-5.6-sol",
+    "reasoning": "medium",
+    "promptVersion": "pi-benchmark-evaluator-v4"
+  },
+  "sandbox": {
+    "type": "externally-enforced",
+    "sourceReadOnly": true,
+    "homeCredentialMount": false,
+    "network": "deny-except-bounded-loopback-gateways",
+    "concurrency": 1,
+    "retries": 0
+  },
+  "inferenceCap": { "totalCalls": 176, "providerMeteredCostUsd": 1 },
+  "gates": {
+    "languagePreservation": 1,
+    "deterministicSafety": 1,
+    "materialIntentAlterationMaxRate": 0.05,
+    "informalClearerMinRate": 0.8,
+    "informalLessClearMaxRate": 0.05,
+    "ambiguityHandlingMinRate": 0.9,
+    "evidenceCoverage": 1,
+    "smokeAmbiguityExact": 1
+  },
+  "reviewPolicy": {
+    "language": "tr",
+    "smokeReviewAll": true,
+    "englishEvidenceTurkishExplanation": true,
+    "confirmatoryReviewFlagged": true,
+    "confirmatoryStratifiedUnflaggedSampleSize": 16,
+    "escalateToAllOnReclassifiedUnflagged": true,
+    "rawBundleMode": "0600",
+    "rawBundleLocalOnly": true,
+    "rawBundleNeverCommitted": true,
+    "rawBundleDeleteAfterReview": true,
+    "commitAggregateOnly": true,
+    "forbiddenRawContentKeys": [
+      "prompt",
+      "input",
+      "originalText",
+      "intent",
+      "compiledTask",
+      "evidence",
+      "quotes",
+      "items",
+      "caseIds",
+      "caseTitles",
+      "credentials",
+      "providerErrorBodies"
+    ],
+    "requireApprovalBeforeRelease": true,
+    "separateProviderModelCostApprovalRequired": true
+  }
+}
