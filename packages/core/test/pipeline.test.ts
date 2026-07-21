@@ -604,6 +604,95 @@ describe("InterpretationPipeline", () => {
     expect(testProvider.interpret).toHaveBeenCalledTimes(1);
   });
 
+  it("rejects leaked no-code constraint when source does not request it", async () => {
+    const leakedIntent: IntentDocumentV1 = {
+      ...validIntent(),
+      globalConstraints: [
+        "No implementation code to be written in this response",
+      ],
+    };
+    const testCompiler = compiler();
+    const pipeline = new InterpretationPipeline(
+      provider(leakedIntent),
+      testCompiler,
+    );
+
+    await expect(pipeline.run(input(), options)).resolves.toEqual({
+      status: "fail_open",
+      originalText: "Fix the profile layout.",
+      errorCode: "INTENT_SCHEMA_INVALID",
+      traceId: "trace-1",
+    });
+    expect(testCompiler.compile).not.toHaveBeenCalled();
+  });
+
+  it("allows leaked no-code constraint when user explicitly requests no code in English", async () => {
+    const leakedIntent: IntentDocumentV1 = {
+      ...validIntent(),
+      globalConstraints: ["Do not write implementation code"],
+    };
+    const testCompiler = compiler();
+    const pipeline = new InterpretationPipeline(
+      provider(leakedIntent),
+      testCompiler,
+    );
+
+    const enInput: BridgeInput = {
+      ...input(),
+      originalText: "Explain how this works, no code needed.",
+    };
+    await expect(pipeline.run(enInput, options)).resolves.toMatchObject({
+      status: "transformed",
+    });
+    expect(testCompiler.compile).toHaveBeenCalledTimes(1);
+  });
+
+  it("allows leaked no-code constraint when user explicitly requests no code in Turkish", async () => {
+    const leakedIntent: IntentDocumentV1 = {
+      ...validIntent(),
+      globalConstraints: ["Do not write implementation code"],
+    };
+    const testCompiler = compiler();
+    const pipeline = new InterpretationPipeline(
+      provider(leakedIntent),
+      testCompiler,
+    );
+
+    const trInput: BridgeInput = {
+      ...input(),
+      originalText: "Sadece açıklama yap, kod yazma.",
+    };
+    await expect(pipeline.run(trInput, options)).resolves.toMatchObject({
+      status: "transformed",
+    });
+    expect(testCompiler.compile).toHaveBeenCalledTimes(1);
+  });
+
+  it("checks task constraints for leaked no-code too", async () => {
+    const leakedIntent: IntentDocumentV1 = {
+      ...validIntent(),
+      tasks: [
+        {
+          ...(validIntent().tasks[0] as IntentDocumentV1["tasks"][number]),
+          constraints: ["Do not write implementation code"],
+        },
+      ],
+    };
+    const testCompiler = compiler();
+    const pipeline = new InterpretationPipeline(
+      provider(leakedIntent),
+      testCompiler,
+    );
+
+    await expect(pipeline.run(input(), options)).resolves.toEqual({
+      status: "fail_open",
+      originalText: "Fix the profile layout.",
+      errorCode: "INTENT_SCHEMA_INVALID",
+      traceId: "trace-1",
+    });
+    expect(testCompiler.compile).not.toHaveBeenCalled();
+  });
+
   it("defensively rejects an invalid provider intent without compiling or retrying", async () => {
     const testProvider = provider({
       invalid: true,

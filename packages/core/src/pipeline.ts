@@ -100,6 +100,46 @@ export function estimateCostUsd(
   return Number.isFinite(cost) ? cost : undefined;
 }
 
+// Guard: reject intent with leaked interpreter-only no-code constraints
+// when the source does not explicitly request no code.
+const LEAKED_NO_CODE_RE =
+  /\b(?:no\s+implementation\s+code|do\s+not\s+write\s+implementation\s+code)\b/i;
+
+const USER_EN_NO_CODE_RE =
+  /\b(?:no\s+code|do\s+not\s+(?:write|implement|generate)\s+(?:code|implementation)|don['’]t\s+(?:write|implement|generate)\s+(?:code|implementation))\b/i;
+
+const USER_TR_NO_CODE_RE =
+  /\b(?:kod\s+yazma|uygulama\s+kodu\s+yazma|kod\s+istemiyorum|kod\s+yazmadan)\b/i;
+
+function sourceRequestsNoCode(sourceTexts: string[]): boolean {
+  return sourceTexts.some(
+    (t) => USER_EN_NO_CODE_RE.test(t) || USER_TR_NO_CODE_RE.test(t),
+  );
+}
+
+function hasLeakedNoCodeConstraint(intent: IntentDocument): boolean {
+  return [
+    ...intent.globalConstraints,
+    ...intent.tasks.flatMap((t) => t.constraints),
+  ].some((c) => LEAKED_NO_CODE_RE.test(c));
+}
+
+function guardNoCodeLeak(intent: IntentDocument, input: BridgeInput): void {
+  if (!hasLeakedNoCodeConstraint(intent)) return;
+  const sourceTexts: string[] = [
+    input.originalText,
+    ...(input.project.summary ? [input.project.summary] : []),
+    ...input.project.instructionExcerpts,
+  ];
+  if (sourceRequestsNoCode(sourceTexts)) return;
+  throw new BridgeError({
+    code: "INTENT_SCHEMA_INVALID",
+    safeMessage:
+      "Intent contains interpreter-only instructions as user constraints.",
+    retryable: false,
+  });
+}
+
 function requestFrom(input: BridgeInput): InterpretationRequest {
   return {
     schemaVersion: "2",
@@ -229,6 +269,7 @@ export class InterpretationPipeline {
           expectedMessageType: input.messageType,
         }).intent,
       );
+      guardNoCodeLeak(intent, input);
       const qualityConfig = options.quality ?? DEFAULT_QUALITY_CONFIG;
       const assessment = assessQuality(intent, qualityConfig);
       let compiledTask: CompiledTask;
