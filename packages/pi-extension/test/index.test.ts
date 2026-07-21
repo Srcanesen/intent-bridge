@@ -108,15 +108,18 @@ function setup(
   } = {},
 ) {
   const handlers: Record<string, (event: any, ctx: any) => Promise<any>> = {};
+  const registrationOrder: string[] = [];
   let command: ((args: string, ctx: any) => Promise<void>) | undefined;
   let commandOptions:
     | Parameters<ExtensionAPI["registerCommand"]>[1]
     | undefined;
   const pi = {
     on: vi.fn((name, handler) => {
+      registrationOrder.push(name);
       handlers[name] = handler;
     }),
-    registerCommand: vi.fn((_name, value) => {
+    registerCommand: vi.fn((name, value) => {
+      registrationOrder.push(name);
       command = value.handler;
       commandOptions = value;
     }),
@@ -190,6 +193,7 @@ function setup(
   });
   return {
     handlers,
+    registrationOrder,
     command: () => command!,
     commandOptions: () => commandOptions,
     ctx,
@@ -211,6 +215,17 @@ const input = (patch: Record<string, unknown> = {}) => ({
 });
 
 describe("Intent Bridge Pi extension", () => {
+  it("registers Pi events and the bridge command in the contract order", () => {
+    expect(setup().registrationOrder).toEqual([
+      "input",
+      "before_agent_start",
+      "session_start",
+      "session_before_switch",
+      "session_shutdown",
+      "bridge",
+    ]);
+  });
+
   it("offers discoverable bridge subcommand completions", async () => {
     const complete = setup().commandOptions()?.getArgumentCompletions;
     expect(complete).toBeTypeOf("function");

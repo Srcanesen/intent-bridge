@@ -18,6 +18,10 @@
 - Preview and `/bridge last` now surface bounded, redacted assessment fields: outcome, decision reasons, active enforcement, risk level and reasons, confidence, clarification recommendation, and material ask_user ambiguities.
 - Separate `## Interpreter advisory — not user requirements` section in the compiled task (compiler version `pi-v2`). The advisory is omitted for clean compact or follow-up output, and is always distinguished from user-stated constraints.
 
+### Changed
+
+- Decomposed the Pi extension entry point into provider resolution, transformation/session control, and command-routing modules while preserving registration order and observable behavior.
+
 ## 1.0.0 — 2026-07-21
 
 First public GitHub release.

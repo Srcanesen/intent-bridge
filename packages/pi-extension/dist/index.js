@@ -5,9 +5,8 @@ var __export = (target, all) => {
 };
 
 import { randomUUID } from "node:crypto";
-import { existsSync } from "node:fs";
-import { dirname as dirname3, join as join4 } from "node:path";
-import { CONFIG_DIR_NAME } from "@earendil-works/pi-coding-agent";
+import { dirname as dirname4, join as join5 } from "node:path";
+import { CONFIG_DIR_NAME as CONFIG_DIR_NAME3 } from "@earendil-works/pi-coding-agent";
 
 import { mkdir, open, readFile, rename, unlink, writeFile } from "node:fs/promises";
 import { homedir } from "node:os";
@@ -1407,16 +1406,16 @@ function Any(options) {
   return CreateType({ [Kind]: "Any" }, options);
 }
 
-function Array2(items, options) {
-  return CreateType({ [Kind]: "Array", type: "array", items }, options);
+function Array2(items2, options) {
+  return CreateType({ [Kind]: "Array", type: "array", items: items2 }, options);
 }
 
 function Argument(index) {
   return CreateType({ [Kind]: "Argument", index });
 }
 
-function AsyncIterator(items, options) {
-  return CreateType({ [Kind]: "AsyncIterator", type: "AsyncIterator", items }, options);
+function AsyncIterator(items2, options) {
+  return CreateType({ [Kind]: "AsyncIterator", type: "AsyncIterator", items: items2 }, options);
 }
 
 function Computed(target, parameters, options) {
@@ -1830,8 +1829,8 @@ function IndexFromMappedKey(type, mappedKey, options) {
   return MappedResult(properties);
 }
 
-function Iterator(items, options) {
-  return CreateType({ [Kind]: "Iterator", type: "Iterator", items }, options);
+function Iterator(items2, options) {
+  return CreateType({ [Kind]: "Iterator", type: "Iterator", items: items2 }, options);
 }
 
 function RequiredArray(properties) {
@@ -5843,8 +5842,8 @@ var compactGuidance = (responseLanguage2) => [
   "Resolve low-risk uncertainty from repository evidence; ask only about material product decisions.",
   `Verify appropriately and explain the result in ${responseLanguage2}.`
 ];
-function list(items) {
-  return items.map((item) => `- ${item}`).join("\n");
+function list(items2) {
+  return items2.map((item) => `- ${item}`).join("\n");
 }
 function taskList(tasks, field) {
   const groups = tasks.filter((task2) => task2[field].length > 0).map((task2) => `### Task \`${task2.id}\`
@@ -6676,158 +6675,344 @@ Output mode: ${mode}. Return JSON only.${schemaInstruction}`;
   }
 };
 
-import { createHash as createHash3 } from "node:crypto";
-var DEFAULT_PENDING_TASK_TTL_MS = 5 * 60 * 1e3;
-var DEFAULT_PENDING_TASK_CAPACITY = 20;
-function fingerprint(prompt, imageCount) {
-  return createHash3("sha256").update(JSON.stringify([prompt, imageCount])).digest("hex");
-}
-var PendingTaskQueue = class {
-  entries = [];
-  sequence = 0;
-  quarantined = false;
-  now;
-  ttlMs;
-  capacity;
-  diagnostic;
-  constructor(options = {}) {
-    this.now = options.now ?? Date.now;
-    this.ttlMs = options.ttlMs ?? DEFAULT_PENDING_TASK_TTL_MS;
-    this.capacity = options.capacity ?? DEFAULT_PENDING_TASK_CAPACITY;
-    this.diagnostic = options.diagnostic ?? (() => void 0);
-  }
-  reserve(prompt, imageCount, traceId) {
-    const sequence = ++this.sequence;
-    const entry = {
-      sequence,
-      traceId,
-      fingerprint: fingerprint(prompt, imageCount),
-      expiresAt: this.now() + this.ttlMs,
-      status: "reserved"
-    };
-    if (this.quarantined) {
-      this.emit("capacity_eviction", entry);
-      return sequence;
-    }
-    if (this.entries.length >= this.capacity) {
-      this.emit("capacity_eviction", this.entries[0] ?? entry);
-      this.entries.length = 0;
-      this.quarantined = true;
-      return sequence;
-    }
-    this.entries.push(entry);
-    return sequence;
-  }
-  markReady(sequence, compiledContent) {
-    if (this.quarantined)
-      return false;
-    const entry = this.entries.find((candidate) => candidate.sequence === sequence);
-    if (!entry || entry.status !== "reserved")
-      return false;
-    entry.compiledContent = compiledContent;
-    entry.status = "ready";
-    return true;
-  }
-  skip(sequence) {
-    const entry = this.entries.find((candidate) => candidate.sequence === sequence);
-    if (!entry)
-      return false;
-    delete entry.compiledContent;
-    entry.status = "skipped";
-    return true;
-  }
-  cancel(sequence) {
-    const index = this.entries.findIndex((entry) => entry.sequence === sequence);
-    if (index < 0)
-      return false;
-    this.entries.splice(index, 1);
-    return true;
-  }
-  consumeForAgentStart(prompt, imageCount, now) {
-    const expected = fingerprint(prompt, imageCount);
-    if (this.quarantined) {
-      this.emitMiss(expected);
-      return null;
-    }
-    const index = this.entries.findIndex((entry2) => entry2.fingerprint === expected);
-    if (index < 0) {
-      this.emitMiss(expected);
-      return null;
-    }
-    const [entry] = this.entries.splice(index, 1);
-    if (!entry)
-      return null;
-    if (entry.expiresAt <= now) {
-      this.emit("expired", entry);
-      return null;
-    }
-    if (entry.status === "skipped")
-      return null;
-    if (entry.status !== "ready" || entry.compiledContent === void 0) {
-      this.emitMiss(expected, entry);
-      return null;
-    }
-    return entry.compiledContent;
-  }
-  clear() {
-    for (const entry of this.entries)
-      this.emit("session_reset", entry);
-    this.entries.length = 0;
-    this.quarantined = false;
-  }
-  emit(reason, entry) {
-    this.diagnostic({
-      reason,
-      sequence: entry.sequence,
-      traceId: entry.traceId,
-      fingerprint: entry.fingerprint,
-      status: entry.status
-    });
-  }
-  emitMiss(fingerprint2, entry) {
-    this.diagnostic({
-      reason: "correlation_miss",
-      fingerprint: fingerprint2,
-      ...entry ? {
-        sequence: entry.sequence,
-        traceId: entry.traceId,
-        status: entry.status
-      } : {}
-    });
-  }
-};
+import { existsSync } from "node:fs";
+import { dirname as dirname3, join as join4 } from "node:path";
+import { CONFIG_DIR_NAME } from "@earendil-works/pi-coding-agent";
 
-function isCompatiblePiModel(model) {
-  return model.input?.includes("text") === true && Number.isFinite(model.contextWindow) && (model.contextWindow ?? 0) > 0 && Number.isFinite(model.maxTokens) && (model.maxTokens ?? 0) > 0 && !(model.reasoning === true && model.thinkingLevelMap?.off === null);
+var PREVIEW_CHOICES = [
+  "Send transformed",
+  "Send original",
+  "Cancel"
+];
+var CAP = 5e3;
+var LIST_CAP = 10;
+var REASON_CAP = 120;
+function bounded(text) {
+  return text.length <= CAP ? text : `${text.slice(0, CAP - 14)}
+[truncated]`;
 }
-function compatiblePiModels(models) {
-  return models.filter(isCompatiblePiModel).sort((a, b) => a.name.localeCompare(b.name) || a.id.localeCompare(b.id) || a.provider.localeCompare(b.provider));
+function redactUserContent(text) {
+  return redactSecrets(text).text;
 }
-function piModelChoices(models) {
-  return models.map((model) => ({
-    model,
-    label: `${model.name} \u2014 ${model.id} (${model.provider})`
+var QUALITY_DECISION_REASONS = [
+  "high_risk",
+  "clarification_recommended",
+  "material_ambiguity_requires_user",
+  "confidence_below_threshold"
+];
+function redactAssessmentContent(text) {
+  const protectedReasons = QUALITY_DECISION_REASONS.map((reason, index) => ({
+    reason,
+    placeholder: `[QUALITY_REASON_${index}]`
   }));
+  let result = text;
+  for (const { reason, placeholder } of protectedReasons)
+    result = result.replaceAll(reason, placeholder);
+  result = redactSecrets(result).text;
+  for (const { reason, placeholder } of protectedReasons)
+    result = result.replaceAll(placeholder, reason);
+  return result;
 }
-function unavailable(code) {
-  throw new BridgeError({
-    code,
-    safeMessage: code === "CONFIG_MISSING" ? "Missing model." : "The selected Pi model is not compatible.",
-    retryable: false
-  });
+function list2(items2) {
+  return items2.length ? items2.map((item) => `- ${item}`).join("\n") : "- None";
 }
-function resolvePiModel(registry, provider, id) {
-  const model = registry.find(provider, id);
-  if (!model)
-    unavailable("CONFIG_MISSING");
-  if (!isCompatiblePiModel(model))
-    unavailable("CONFIG_INVALID");
-  return model;
+function safeReason(reason) {
+  const cleaned = redactUserContent(reason).replace(/[\r\n]+/g, " ");
+  return cleaned.length <= REASON_CAP ? cleaned : `${cleaned.slice(0, REASON_CAP - 14)}[truncated]`;
+}
+function boundedReasons(reasons) {
+  return list2(reasons.slice(0, LIST_CAP).map(safeReason));
+}
+function qualityDecisionReasonText(reasons) {
+  if (reasons.length === 0)
+    return "- None";
+  return list2(reasons.map((reason) => reason.replace(/[\r\n]+/g, " ")));
+}
+function materialAskUser(transformation) {
+  return transformation.intent.ambiguities.filter((ambiguity2) => ambiguity2.material && ambiguity2.preferredResolution === "ask_user");
+}
+function qualityEnforcementLine(config) {
+  return `Enforcement: ${config.enforcement}`;
+}
+function assessmentSection(transformation) {
+  const { intent, assessment, qualityConfig: qualityConfig2 } = transformation;
+  const askUser = materialAskUser(transformation);
+  const riskLine = intent.risk.level === "low" && intent.risk.reasons.length === 0 ? "- None" : list2([
+    `level=${intent.risk.level}`,
+    ...intent.risk.reasons.slice(0, LIST_CAP).map(safeReason)
+  ]);
+  const clarificationLine = intent.clarification.recommended ? `recommended \u2014 ${safeReason(intent.clarification.reason ?? "no reason provided")}` : "- None";
+  return [
+    "## Quality assessment",
+    `Outcome: ${assessment.outcome}`,
+    `Policy: ${assessment.policyVersion}`,
+    `Observed confidence: ${assessment.observedConfidence}`,
+    `Decision reasons: ${qualityDecisionReasonText(assessment.reasons)}`,
+    `Active ${qualityEnforcementLine(qualityConfig2)}`,
+    "\n## Risk",
+    riskLine,
+    "\n## Clarification",
+    clarificationLine,
+    "\n## Material ask_user ambiguities",
+    list2(askUser.slice(0, LIST_CAP).map((ambiguity2) => safeReason(ambiguity2.description)))
+  ].join("\n");
+}
+function transformationDetails(transformation) {
+  const intent = transformation.intent;
+  const tasks = intent.tasks.map((task2, index) => `${index + 1}. ${task2.objective}${task2.scope.length ? `
+   Scope: ${task2.scope.join("; ")}` : ""}${task2.constraints.length ? `
+   Constraints: ${task2.constraints.join("; ")}` : ""}`);
+  return [
+    "INTENT BRIDGE PREVIEW",
+    "\n## Source language",
+    intent.sourceLanguage.name ? `${intent.sourceLanguage.name} (${intent.sourceLanguage.code})` : intent.sourceLanguage.code,
+    "\n## Interpreted goal",
+    intent.goal,
+    "\n## Tasks",
+    list2(tasks),
+    "\n## Global constraints",
+    list2(intent.globalConstraints),
+    "\n## Task constraints",
+    list2(intent.tasks.flatMap((task2) => task2.constraints)),
+    "\n## Assumptions",
+    list2(intent.assumptions.map((assumption2) => assumption2.text)),
+    "\n## Ambiguities",
+    list2(intent.ambiguities.map((ambiguity2) => ambiguity2.description)),
+    "\n## Quality",
+    `Confidence: ${intent.confidence}`,
+    `Risk level: ${intent.risk.level}`,
+    `Risk reasons: ${intent.risk.reasons.length === 0 ? "- None" : boundedReasons(intent.risk.reasons)}`,
+    `Clarification recommended: ${intent.clarification.recommended ? `yes \u2014 ${safeReason(intent.clarification.reason ?? "no reason provided")}` : "no"}`,
+    `Material ask_user ambiguities: ${materialAskUser(transformation).length === 0 ? "- None" : list2(materialAskUser(transformation).slice(0, LIST_CAP).map((ambiguity2) => safeReason(ambiguity2.description)))}`,
+    "\n## English compiled task",
+    transformation.compiledTask.text
+  ].join("\n");
+}
+function formatCompilerOption(compiler) {
+  return `includeOriginalRequest=${compiler.includeOriginalRequest}`;
+}
+function formatTransformation(transformation, compiler) {
+  const details = redactUserContent(transformationDetails(transformation));
+  const assessment = redactAssessmentContent(assessmentSection(transformation));
+  const header = compiler ? `${formatCompilerOption(compiler)}
+
+` : "";
+  return bounded(`${header}${details}
+
+${assessment}`);
+}
+function formatLastTransformation(transformation, metadata) {
+  const details = redactUserContent(`${metadata}
+
+Original request:
+${transformation.originalText}
+
+${transformationDetails(transformation)}`);
+  const assessment = redactAssessmentContent(assessmentSection(transformation));
+  return bounded(`${details}
+
+${assessment}`);
 }
 
-import { createHash as createHash4 } from "node:crypto";
+var usage = "Usage: /bridge on|off|model [provider/model-id|model-id]|auto|preview [off]|status|test|last|rate good|bad|logs|privacy";
+var items = [
+  "on",
+  "off",
+  "auto",
+  "preview",
+  "preview off",
+  "model",
+  "status",
+  "test",
+  "last",
+  "rate good",
+  "rate bad",
+  "logs",
+  "privacy"
+].map((value) => ({ value, label: value }));
+function notify(ctx, message) {
+  ctx.ui.notify(message, "info");
+}
+function errorCode2(error) {
+  return error instanceof BridgeError ? error.code : "CONFIG_INVALID";
+}
+function createBridgeCommand(dependencies) {
+  const updateConfig = dependencies.updateConfig ?? updateBridgeConfigLayerAtomic;
+  return {
+    description: "Manage Intent Bridge settings",
+    getArgumentCompletions: (prefix) => {
+      const normalized = prefix.trimStart().toLowerCase();
+      const matches = items.filter(({ value }) => value.startsWith(normalized));
+      return matches.length > 0 ? matches : null;
+    },
+    handler: async (args, ctx) => {
+      const parts = args.trim().split(/\s+/).filter(Boolean);
+      const [command, value] = parts;
+      if (!command || parts.length > 2 || ![
+        "on",
+        "off",
+        "auto",
+        "preview",
+        "status",
+        "model",
+        "test",
+        "last",
+        "rate",
+        "logs",
+        "privacy"
+      ].includes(command)) {
+        notify(ctx, usage);
+        return;
+      }
+      if (command === "off" && !value)
+        dependencies.controller.clearPending();
+      try {
+        const config = await dependencies.getConfig(ctx);
+        const paths = resolveConfigPaths({
+          projectRoot: ctx.cwd,
+          configDirName: CONFIG_DIR_NAME,
+          environment: dependencies.environment
+        });
+        const target = ctx.isProjectTrusted() && paths.projectPath && existsSync(paths.projectPath) ? paths.projectPath : paths.globalPath;
+        const base = target === paths.projectPath ? await loadBridgeConfigLayer(paths.globalPath) : void 0;
+        const save = (patch) => updateConfig(target, base, patch);
+        const selectPiModel = async (requested) => {
+          const result = await dependencies.resolver.selectModel(ctx.modelRegistry, requested, ctx.hasUI ? (choices) => ctx.ui.select("Select Intent Bridge model", [...choices]) : void 0, ctx.signal);
+          if (result.kind === "no-compatible")
+            notify(ctx, "No compatible Pi models are available.");
+          else if (result.kind === "cancelled")
+            notify(ctx, "Intent Bridge model selection cancelled.");
+          else if (result.kind === "unavailable")
+            notify(ctx, "That model is not available. Use /bridge model to choose one.");
+          else if (result.kind === "failed")
+            notify(ctx, `Intent Bridge could not use that model.${result.hadPrevious ? " The previous selection was kept." : ""} Try /bridge model again.`);
+          else
+            notify(ctx, `Intent Bridge is ready with ${result.model.name}.`);
+          return result.kind === "selected";
+        };
+        if (command === "status") {
+          if (value) {
+            notify(ctx, usage);
+            return;
+          }
+          const effective2 = await dependencies.resolver.active(config);
+          const model = effective2.source === "pi" ? effective2.selection.model : effective2.profile?.model ?? "none";
+          notify(ctx, `Intent Bridge: enabled=${config.enabled}; mode=${config.mode}; model=${model}; context=${config.context.enabled ? ctx.isProjectTrusted() ? "enabled/trusted" : "enabled/untrusted" : "disabled"}; logging=${config.logging.mode}; last=${dependencies.controller.session().lastStatus}.`);
+          return;
+        }
+        if (command === "last") {
+          if (value) {
+            notify(ctx, usage);
+            return;
+          }
+          const state = dependencies.controller.session();
+          if (!state.latest || !state.latestMetadata) {
+            notify(ctx, "Intent Bridge: no transformation in this session.");
+            return;
+          }
+          const metadata = state.latestMetadata;
+          notify(ctx, formatLastTransformation(state.latest, `Status: ${state.lastStatus}; provider=${metadata.providerProfileId}; model=${metadata.model}; mode=${metadata.mode}; latency=${metadata.latencyMs === void 0 ? "unknown" : `${metadata.latencyMs}ms`}; rating=${state.rating ?? "none"}; includeOriginalRequest=${config.compiler.includeOriginalRequest}; timestamp=${state.latest.timestamp}.`));
+          return;
+        }
+        if (command === "rate") {
+          if (value !== "good" && value !== "bad") {
+            notify(ctx, usage);
+            return;
+          }
+          const state = dependencies.controller.session();
+          if (!state.latest || !state.latestMetadata) {
+            notify(ctx, "Intent Bridge: no transformation to rate.");
+            return;
+          }
+          const saved = await dependencies.controller.rate(value, config);
+          notify(ctx, saved ? "Intent Bridge rating saved." : "Intent Bridge rating recorded for this session.");
+          return;
+        }
+        if (command === "logs") {
+          if (value) {
+            notify(ctx, usage);
+            return;
+          }
+          const warning = fullLoggingWarning(config.logging);
+          notify(ctx, redactSecrets(`Logs: mode=${config.logging.mode}; retention=${config.logging.retentionDays} days; path=${join4(dirname3(resolveConfigPaths({ environment: dependencies.environment }).globalPath), "logs")}.${warning ? ` ${warning}` : ""}`).text);
+          return;
+        }
+        if (command === "privacy") {
+          if (value) {
+            notify(ctx, usage);
+            return;
+          }
+          const collected = await dependencies.collectContext({
+            cwd: ctx.cwd,
+            config: config.context,
+            projectTrusted: ctx.isProjectTrusted(),
+            configDirName: CONFIG_DIR_NAME
+          });
+          const entries = collected.manifest.entries;
+          const listed = (included) => entries.filter((entry) => entry.included === included).slice(0, 20).map((entry) => included ? entry.path : `${entry.path}${entry.reason ? ` (${entry.reason})` : ""}`).join(", ") || "none";
+          const warning = fullLoggingWarning(config.logging);
+          notify(ctx, redactSecrets(`Privacy: context=${config.context.enabled ? "enabled" : "disabled"}; trusted=${ctx.isProjectTrusted()}; included=${entries.filter((entry) => entry.included).length}; excluded=${entries.filter((entry) => !entry.included).length}; chars=${collected.manifest.totalCharacters}; included paths=${listed(true)}; excluded paths=${listed(false)}.${warning ? ` ${warning}` : ""}`).text);
+          return;
+        }
+        if (command === "preview" && value === "off") {
+          await save({ enabled: true, mode: "auto" });
+          notify(ctx, "Intent Bridge preview disabled.");
+          return;
+        }
+        if (["on", "off", "auto", "preview"].includes(command)) {
+          if (value) {
+            notify(ctx, usage);
+            return;
+          }
+          let selectedModel = false;
+          if (command === "on") {
+            const effective2 = await dependencies.resolver.active(config);
+            let ready = effective2.source === "profile" && Boolean(effective2.profile);
+            if (effective2.source === "pi")
+              ready = await dependencies.resolver.isSelectedModelAvailable(ctx.modelRegistry, effective2.selection);
+            if (!ready) {
+              selectedModel = await selectPiModel();
+              if (!selectedModel)
+                return;
+            }
+          }
+          await save({
+            enabled: command !== "off",
+            mode: command === "off" ? "off" : command === "preview" ? "preview" : "auto"
+          });
+          if (!selectedModel)
+            notify(ctx, `Intent Bridge ${command === "off" ? "disabled" : "enabled"}.`);
+          return;
+        }
+        if (command === "model") {
+          await selectPiModel(value);
+          return;
+        }
+        const effective = await dependencies.resolver.active(config);
+        if (value) {
+          notify(ctx, usage);
+          return;
+        }
+        const started = Date.now();
+        try {
+          const resolved = await dependencies.resolver.resolve(config, ctx.modelRegistry);
+          const health = await resolved.provider.testConnection({
+            ...ctx.signal ? { signal: ctx.signal } : {}
+          });
+          notify(ctx, `Intent Bridge test: ok; model=${resolved.model}; latency=${Math.max(0, health.latencyMs ?? Date.now() - started)}ms.`);
+        } catch (error) {
+          notify(ctx, `Intent Bridge test: failed (${errorCode2(error)}); model=${effective.source === "pi" ? effective.selection.model : effective.profile?.model ?? "none"}.`);
+        }
+      } catch {
+        notify(ctx, "Intent Bridge settings could not be updated.");
+      }
+    }
+  };
+}
 
-function unavailable2() {
+import { createHash as createHash3 } from "node:crypto";
+
+function unavailable() {
   throw new BridgeError({
     code: "CONFIG_INVALID",
     safeMessage: "The Pi model runtime is unavailable.",
@@ -6836,7 +7021,7 @@ function unavailable2() {
 }
 function resolvePiHostAdapter(registry) {
   if (typeof registry !== "object" || registry === null)
-    unavailable2();
+    unavailable();
   const host = registry;
   if (typeof host.completeSimple === "function")
     return {
@@ -6845,10 +7030,10 @@ function resolvePiHostAdapter(registry) {
     };
   const runtime = host.runtime;
   if (typeof runtime !== "object" || runtime === null)
-    unavailable2();
+    unavailable();
   const completeSimple = runtime.completeSimple;
   if (typeof completeSimple !== "function")
-    unavailable2();
+    unavailable();
   return {
     capabilitySource: "runtime_fallback",
     completeSimple: completeSimple.bind(runtime)
@@ -7008,7 +7193,7 @@ var PiNativeProvider = class {
         intent,
         ...usage2 && Object.keys(usage2).length ? { usage: usage2 } : {},
         ...responseId ? { requestId: responseId } : {},
-        rawResponseHash: createHash4("sha256").update(extracted).digest("hex"),
+        rawResponseHash: createHash3("sha256").update(extracted).digest("hex"),
         latencyMs: Math.max(0, this.#now() - startedAt)
       };
     } finally {
@@ -7042,140 +7227,246 @@ function createPiProvider(registry, model, options = {}) {
   return new PiNativeProvider(registry, model, typeof options === "string" ? { reasoning: options } : options);
 }
 
-var PREVIEW_CHOICES = [
-  "Send transformed",
-  "Send original",
-  "Cancel"
-];
-var CAP = 5e3;
-var LIST_CAP = 10;
-var REASON_CAP = 120;
-function bounded(text) {
-  return text.length <= CAP ? text : `${text.slice(0, CAP - 14)}
-[truncated]`;
+function isCompatiblePiModel(model) {
+  return model.input?.includes("text") === true && Number.isFinite(model.contextWindow) && (model.contextWindow ?? 0) > 0 && Number.isFinite(model.maxTokens) && (model.maxTokens ?? 0) > 0 && !(model.reasoning === true && model.thinkingLevelMap?.off === null);
 }
-function redactUserContent(text) {
-  return redactSecrets(text).text;
+function compatiblePiModels(models) {
+  return models.filter(isCompatiblePiModel).sort((a, b) => a.name.localeCompare(b.name) || a.id.localeCompare(b.id) || a.provider.localeCompare(b.provider));
 }
-var QUALITY_DECISION_REASONS = [
-  "high_risk",
-  "clarification_recommended",
-  "material_ambiguity_requires_user",
-  "confidence_below_threshold"
-];
-function redactAssessmentContent(text) {
-  const protectedReasons = QUALITY_DECISION_REASONS.map((reason, index) => ({
-    reason,
-    placeholder: `[QUALITY_REASON_${index}]`
+function piModelChoices(models) {
+  return models.map((model) => ({
+    model,
+    label: `${model.name} \u2014 ${model.id} (${model.provider})`
   }));
-  let result = text;
-  for (const { reason, placeholder } of protectedReasons)
-    result = result.replaceAll(reason, placeholder);
-  result = redactSecrets(result).text;
-  for (const { reason, placeholder } of protectedReasons)
-    result = result.replaceAll(placeholder, reason);
-  return result;
 }
-function list2(items) {
-  return items.length ? items.map((item) => `- ${item}`).join("\n") : "- None";
+function unavailable2(code) {
+  throw new BridgeError({
+    code,
+    safeMessage: code === "CONFIG_MISSING" ? "Missing model." : "The selected Pi model is not compatible.",
+    retryable: false
+  });
 }
-function safeReason(reason) {
-  const cleaned = redactUserContent(reason).replace(/[\r\n]+/g, " ");
-  return cleaned.length <= REASON_CAP ? cleaned : `${cleaned.slice(0, REASON_CAP - 14)}[truncated]`;
+function resolvePiModel(registry, provider, id) {
+  const model = registry.find(provider, id);
+  if (!model)
+    unavailable2("CONFIG_MISSING");
+  if (!isCompatiblePiModel(model))
+    unavailable2("CONFIG_INVALID");
+  return model;
 }
-function boundedReasons(reasons) {
-  return list2(reasons.slice(0, LIST_CAP).map(safeReason));
-}
-function qualityDecisionReasonText(reasons) {
-  if (reasons.length === 0)
-    return "- None";
-  return list2(reasons.map((reason) => reason.replace(/[\r\n]+/g, " ")));
-}
-function materialAskUser(transformation) {
-  return transformation.intent.ambiguities.filter((ambiguity2) => ambiguity2.material && ambiguity2.preferredResolution === "ask_user");
-}
-function qualityEnforcementLine(config) {
-  return `Enforcement: ${config.enforcement}`;
-}
-function assessmentSection(transformation) {
-  const { intent, assessment, qualityConfig: qualityConfig2 } = transformation;
-  const askUser = materialAskUser(transformation);
-  const riskLine = intent.risk.level === "low" && intent.risk.reasons.length === 0 ? "- None" : list2([
-    `level=${intent.risk.level}`,
-    ...intent.risk.reasons.slice(0, LIST_CAP).map(safeReason)
-  ]);
-  const clarificationLine = intent.clarification.recommended ? `recommended \u2014 ${safeReason(intent.clarification.reason ?? "no reason provided")}` : "- None";
-  return [
-    "## Quality assessment",
-    `Outcome: ${assessment.outcome}`,
-    `Policy: ${assessment.policyVersion}`,
-    `Observed confidence: ${assessment.observedConfidence}`,
-    `Decision reasons: ${qualityDecisionReasonText(assessment.reasons)}`,
-    `Active ${qualityEnforcementLine(qualityConfig2)}`,
-    "\n## Risk",
-    riskLine,
-    "\n## Clarification",
-    clarificationLine,
-    "\n## Material ask_user ambiguities",
-    list2(askUser.slice(0, LIST_CAP).map((ambiguity2) => safeReason(ambiguity2.description)))
-  ].join("\n");
-}
-function transformationDetails(transformation) {
-  const intent = transformation.intent;
-  const tasks = intent.tasks.map((task2, index) => `${index + 1}. ${task2.objective}${task2.scope.length ? `
-   Scope: ${task2.scope.join("; ")}` : ""}${task2.constraints.length ? `
-   Constraints: ${task2.constraints.join("; ")}` : ""}`);
-  return [
-    "INTENT BRIDGE PREVIEW",
-    "\n## Source language",
-    intent.sourceLanguage.name ? `${intent.sourceLanguage.name} (${intent.sourceLanguage.code})` : intent.sourceLanguage.code,
-    "\n## Interpreted goal",
-    intent.goal,
-    "\n## Tasks",
-    list2(tasks),
-    "\n## Global constraints",
-    list2(intent.globalConstraints),
-    "\n## Task constraints",
-    list2(intent.tasks.flatMap((task2) => task2.constraints)),
-    "\n## Assumptions",
-    list2(intent.assumptions.map((assumption2) => assumption2.text)),
-    "\n## Ambiguities",
-    list2(intent.ambiguities.map((ambiguity2) => ambiguity2.description)),
-    "\n## Quality",
-    `Confidence: ${intent.confidence}`,
-    `Risk level: ${intent.risk.level}`,
-    `Risk reasons: ${intent.risk.reasons.length === 0 ? "- None" : boundedReasons(intent.risk.reasons)}`,
-    `Clarification recommended: ${intent.clarification.recommended ? `yes \u2014 ${safeReason(intent.clarification.reason ?? "no reason provided")}` : "no"}`,
-    `Material ask_user ambiguities: ${materialAskUser(transformation).length === 0 ? "- None" : list2(materialAskUser(transformation).slice(0, LIST_CAP).map((ambiguity2) => safeReason(ambiguity2.description)))}`,
-    "\n## English compiled task",
-    transformation.compiledTask.text
-  ].join("\n");
-}
-function formatCompilerOption(compiler) {
-  return `includeOriginalRequest=${compiler.includeOriginalRequest}`;
-}
-function formatTransformation(transformation, compiler) {
-  const details = redactUserContent(transformationDetails(transformation));
-  const assessment = redactAssessmentContent(assessmentSection(transformation));
-  const header = compiler ? `${formatCompilerOption(compiler)}
 
-` : "";
-  return bounded(`${header}${details}
-
-${assessment}`);
+function requireProfile(profile2) {
+  if (profile2)
+    return profile2;
+  throw new BridgeError({
+    code: "CONFIG_MISSING",
+    safeMessage: "Missing profile.",
+    retryable: false
+  });
 }
-function formatLastTransformation(transformation, metadata) {
-  const details = redactUserContent(`${metadata}
-
-Original request:
-${transformation.originalText}
-
-${transformationDetails(transformation)}`);
-  const assessment = redactAssessmentContent(assessmentSection(transformation));
-  return bounded(`${details}
-
-${assessment}`);
+function createProviderResolver(dependencies) {
+  const loadSelection = dependencies.loadPiSelection ?? loadPiModelSelection;
+  const saveSelection = dependencies.savePiSelection ?? writePiModelSelectionAtomic;
+  const selection = () => loadSelection(dependencies.selectionPath);
+  const active = async (config) => {
+    const envProfile = dependencies.environment.INTENT_BRIDGE_ACTIVE_PROFILE?.trim();
+    if (envProfile)
+      return {
+        source: "profile",
+        id: envProfile,
+        profile: config.profiles[envProfile]
+      };
+    const selected = await selection();
+    if (selected)
+      return { source: "pi", selection: selected };
+    return {
+      source: "profile",
+      id: config.activeProfile,
+      profile: config.profiles[config.activeProfile]
+    };
+  };
+  const resolve2 = async (config, registry) => {
+    const effective = await active(config);
+    const model = effective.source === "pi" ? resolvePiModel(registry, effective.selection.provider, effective.selection.model) : void 0;
+    const profile2 = effective.source === "profile" ? effective.profile : void 0;
+    if (!model && !profile2)
+      requireProfile(profile2);
+    return {
+      effective,
+      provider: model ? dependencies.createPiProvider(registry, model, {
+        capabilityDiagnostic: dependencies.capabilityDiagnostic
+      }) : dependencies.createProvider(requireProfile(profile2)),
+      providerProfileId: model ? `pi:${model.provider}` : effective.source === "profile" ? effective.id : "",
+      model: model?.id ?? requireProfile(profile2).model,
+      promptVersion: model ? "pi-native-v2" : "openai-compatible-v2",
+      ...profile2?.pricing ? { pricing: profile2.pricing } : {}
+    };
+  };
+  const selectModel = async (registry, requested, pick, signal) => {
+    await registry.refresh();
+    const choices = piModelChoices(compatiblePiModels(registry.getAvailable()));
+    if (!choices.length && !requested)
+      return { kind: "no-compatible" };
+    let choice = requested ? (() => {
+      const [provider, id] = requested.split(/\/(.*)/s);
+      const matches = requested.includes("/") ? choices.filter(({ model }) => model.provider === provider && model.id === id) : choices.filter(({ model }) => model.id === requested);
+      return matches.length === 1 ? matches[0] : void 0;
+    })() : void 0;
+    if (!requested) {
+      if (!pick)
+        return { kind: "no-compatible" };
+      const picked = await pick(choices.map(({ label }) => label));
+      choice = choices.find(({ label }) => label === picked);
+      if (!choice)
+        return { kind: "cancelled" };
+    }
+    if (!choice)
+      return { kind: "unavailable" };
+    const previous = await selection();
+    try {
+      const model = resolvePiModel(registry, choice.model.provider, choice.model.id);
+      await dependencies.createPiProvider(registry, model, {
+        capabilityDiagnostic: dependencies.capabilityDiagnostic
+      }).testConnection({ ...signal ? { signal } : {} });
+      await saveSelection(dependencies.selectionPath, {
+        version: 1,
+        provider: choice.model.provider,
+        model: choice.model.id
+      });
+      return { kind: "selected", model: choice.model };
+    } catch {
+      return { kind: "failed", hadPrevious: Boolean(previous) };
+    }
+  };
+  const isSelectedModelAvailable = async (registry, selected) => {
+    await registry.refresh();
+    return compatiblePiModels(registry.getAvailable()).some((model) => model.provider === selected.provider && model.id === selected.model);
+  };
+  return { active, resolve: resolve2, selectModel, isSelectedModelAvailable };
 }
+
+import { CONFIG_DIR_NAME as CONFIG_DIR_NAME2 } from "@earendil-works/pi-coding-agent";
+
+import { createHash as createHash4 } from "node:crypto";
+var DEFAULT_PENDING_TASK_TTL_MS = 5 * 60 * 1e3;
+var DEFAULT_PENDING_TASK_CAPACITY = 20;
+function fingerprint(prompt, imageCount) {
+  return createHash4("sha256").update(JSON.stringify([prompt, imageCount])).digest("hex");
+}
+var PendingTaskQueue = class {
+  entries = [];
+  sequence = 0;
+  quarantined = false;
+  now;
+  ttlMs;
+  capacity;
+  diagnostic;
+  constructor(options = {}) {
+    this.now = options.now ?? Date.now;
+    this.ttlMs = options.ttlMs ?? DEFAULT_PENDING_TASK_TTL_MS;
+    this.capacity = options.capacity ?? DEFAULT_PENDING_TASK_CAPACITY;
+    this.diagnostic = options.diagnostic ?? (() => void 0);
+  }
+  reserve(prompt, imageCount, traceId) {
+    const sequence = ++this.sequence;
+    const entry = {
+      sequence,
+      traceId,
+      fingerprint: fingerprint(prompt, imageCount),
+      expiresAt: this.now() + this.ttlMs,
+      status: "reserved"
+    };
+    if (this.quarantined) {
+      this.emit("capacity_eviction", entry);
+      return sequence;
+    }
+    if (this.entries.length >= this.capacity) {
+      this.emit("capacity_eviction", this.entries[0] ?? entry);
+      this.entries.length = 0;
+      this.quarantined = true;
+      return sequence;
+    }
+    this.entries.push(entry);
+    return sequence;
+  }
+  markReady(sequence, compiledContent) {
+    if (this.quarantined)
+      return false;
+    const entry = this.entries.find((candidate) => candidate.sequence === sequence);
+    if (!entry || entry.status !== "reserved")
+      return false;
+    entry.compiledContent = compiledContent;
+    entry.status = "ready";
+    return true;
+  }
+  skip(sequence) {
+    const entry = this.entries.find((candidate) => candidate.sequence === sequence);
+    if (!entry)
+      return false;
+    delete entry.compiledContent;
+    entry.status = "skipped";
+    return true;
+  }
+  cancel(sequence) {
+    const index = this.entries.findIndex((entry) => entry.sequence === sequence);
+    if (index < 0)
+      return false;
+    this.entries.splice(index, 1);
+    return true;
+  }
+  consumeForAgentStart(prompt, imageCount, now) {
+    const expected = fingerprint(prompt, imageCount);
+    if (this.quarantined) {
+      this.emitMiss(expected);
+      return null;
+    }
+    const index = this.entries.findIndex((entry2) => entry2.fingerprint === expected);
+    if (index < 0) {
+      this.emitMiss(expected);
+      return null;
+    }
+    const [entry] = this.entries.splice(index, 1);
+    if (!entry)
+      return null;
+    if (entry.expiresAt <= now) {
+      this.emit("expired", entry);
+      return null;
+    }
+    if (entry.status === "skipped")
+      return null;
+    if (entry.status !== "ready" || entry.compiledContent === void 0) {
+      this.emitMiss(expected, entry);
+      return null;
+    }
+    return entry.compiledContent;
+  }
+  clear() {
+    for (const entry of this.entries)
+      this.emit("session_reset", entry);
+    this.entries.length = 0;
+    this.quarantined = false;
+  }
+  emit(reason, entry) {
+    this.diagnostic({
+      reason,
+      sequence: entry.sequence,
+      traceId: entry.traceId,
+      fingerprint: entry.fingerprint,
+      status: entry.status
+    });
+  }
+  emitMiss(fingerprint2, entry) {
+    this.diagnostic({
+      reason: "correlation_miss",
+      fingerprint: fingerprint2,
+      ...entry ? {
+        sequence: entry.sequence,
+        traceId: entry.traceId,
+        status: entry.status
+      } : {}
+    });
+  }
+};
 
 var smallTalk = /* @__PURE__ */ new Set([
   "merhaba",
@@ -7241,85 +7532,32 @@ function messageType(event, hasPriorUserMessage2) {
   }
 }
 
-var usage = "Usage: /bridge on|off|model [provider/model-id|model-id]|auto|preview [off]|status|test|last|rate good|bad|logs|privacy";
-var bridgeArgumentItems = [
-  "on",
-  "off",
-  "auto",
-  "preview",
-  "preview off",
-  "model",
-  "status",
-  "test",
-  "last",
-  "rate good",
-  "rate bad",
-  "logs",
-  "privacy"
-].map((value) => ({ value, label: value }));
 var BufferedTraceSink = class {
   trace;
   async append(trace) {
     this.trace = trace;
   }
 };
-function decideDelivery({ mode, assessment, enforcement, hasUI }) {
+function decideDelivery(mode, assessment, enforcement, hasUI) {
   if (mode === "preview")
-    return { kind: "preview" };
-  if (mode === "auto" && enforcement === "review" && assessment.outcome === "review") {
-    return hasUI ? { kind: "preview" } : { kind: "review_required_no_ui" };
-  }
-  return { kind: "inject" };
+    return "preview";
+  if (mode === "auto" && enforcement === "review" && assessment.outcome === "review")
+    return hasUI ? "preview" : "review_required_no_ui";
+  return "inject";
 }
 function hasPriorUserMessage(ctx) {
   return ctx.sessionManager.getBranch().some((entry) => entry.type === "message" && entry.message?.role === "user");
 }
-function errorCode2(error) {
-  return error instanceof BridgeError ? error.code : "CONFIG_INVALID";
-}
-function notify(ctx, message) {
+function notify2(ctx, message) {
   ctx.ui.notify(message, "info");
 }
-function requireProfile(profile2) {
-  if (profile2)
-    return profile2;
-  throw new BridgeError({
-    code: "CONFIG_MISSING",
-    safeMessage: "Missing profile.",
-    retryable: false
-  });
-}
-function configOptions(ctx, environment) {
-  return {
-    projectRoot: ctx.cwd,
-    configDirName: CONFIG_DIR_NAME,
-    projectTrusted: ctx.isProjectTrusted(),
-    environment
-  };
-}
-function createIntentBridgeExtension(pi, dependencies = {}) {
-  const environment = dependencies.environment ?? process.env;
-  const uuid = dependencies.uuid ?? randomUUID;
-  const now = dependencies.now ?? (() => /* @__PURE__ */ new Date());
-  const loadConfig = dependencies.loadConfig ?? loadLayeredConfig;
+function createTransformationController(dependencies) {
+  const { pi, getConfig, resolver, traceWriter, uuid, now } = dependencies;
   const collectContext = dependencies.collectContext ?? collectProjectContext;
-  const createProvider = dependencies.createProvider ?? ((profile2, resolver) => new OpenAICompatibleProvider(profile2, {
-    environment: resolver ?? ((name) => environment[name])
-  }));
-  const createPiNativeProvider = dependencies.createPiProvider ?? createPiProvider;
-  const createTraceWriter = dependencies.createTraceWriter ?? ((path) => new JsonlTraceWriter(path, now));
-  let runtimeFallbackReported = false;
-  const capabilityDiagnostic = (metadata) => {
-    if (metadata.capabilitySource !== "runtime_fallback" || runtimeFallbackReported)
-      return;
-    runtimeFallbackReported = true;
-    try {
-      pi.appendEntry("intent-bridge.pi-host", metadata);
-    } catch {
-    }
-  };
-  const updateConfig = dependencies.updateConfig ?? updateBridgeConfigLayerAtomic;
-  const state = { lastStatus: "none" };
+  let lastStatus = "none";
+  let latest;
+  let latestMetadata;
+  let rating;
   const pendingTasks = new PendingTaskQueue({
     now: () => now().getTime(),
     diagnostic: (payload) => {
@@ -7329,35 +7567,14 @@ function createIntentBridgeExtension(pi, dependencies = {}) {
       }
     }
   });
-  const globalDir = dirname3(resolveConfigPaths({ environment }).globalPath);
-  const selectionPath = join4(globalDir, "pi-model-selection.json");
-  const logsDir = join4(globalDir, "logs");
-  const traceWriter = createTraceWriter(logsDir);
-  const getConfig = (ctx) => loadConfig(configOptions(ctx, environment));
-  const piSelection = () => loadPiModelSelection(selectionPath);
-  const activeProfile = (config, selection) => {
-    const envProfile = environment.INTENT_BRIDGE_ACTIVE_PROFILE?.trim();
-    if (envProfile)
-      return {
-        source: "profile",
-        id: envProfile,
-        profile: config.profiles[envProfile]
-      };
-    if (selection)
-      return { source: "pi", selection };
-    return {
-      source: "profile",
-      id: config.activeProfile,
-      profile: config.profiles[config.activeProfile]
-    };
-  };
   const append = async (trace, logging) => traceWriter.append(trace, logging).catch(() => void 0);
-  const setLatest = (latest, metadata) => {
-    state.latest = latest;
-    state.latestMetadata = metadata;
-    delete state.rating;
+  const session = () => Object.freeze({ lastStatus, latest, latestMetadata, rating });
+  const setLatest = (value, metadata) => {
+    latest = value;
+    latestMetadata = metadata;
+    rating = void 0;
   };
-  pi.on("input", async (event, ctx) => {
+  const handleInput = async (event, ctx) => {
     const syntax = eligibility(event);
     if (!syntax.eligible && syntax.reason !== "disabled" && syntax.reason !== "mode")
       return { action: "continue" };
@@ -7370,9 +7587,8 @@ function createIntentBridgeExtension(pi, dependencies = {}) {
       reserved = false;
       return true;
     };
-    let config;
     try {
-      config = await getConfig(ctx);
+      const config = await getConfig(ctx);
       if (!eligibility(event, config).eligible)
         return { action: "continue" };
       const source = event.source === "rpc" ? "rpc" : "interactive";
@@ -7388,27 +7604,18 @@ function createIntentBridgeExtension(pi, dependencies = {}) {
       };
       if (config.mode === "preview" && !ctx.hasUI) {
         await append(inputMeta, config.logging);
-        state.lastStatus = "bypass";
+        lastStatus = "bypass";
         return { action: "continue" };
       }
-      const effective = activeProfile(config, await piSelection());
-      const model = effective.source === "pi" ? resolvePiModel(ctx.modelRegistry, effective.selection.provider, effective.selection.model) : void 0;
-      const profile2 = effective.profile;
-      if (!model && !profile2)
-        throw new BridgeError({
-          code: "CONFIG_MISSING",
-          safeMessage: "Missing profile.",
-          retryable: false
-        });
-      const providerId = model ? `pi:${model.provider}` : effective.id ?? "";
+      const resolved = await resolver.resolve(config, ctx.modelRegistry);
       const context = await collectContext({
         cwd: ctx.cwd,
         config: config.context,
         projectTrusted: ctx.isProjectTrusted(),
-        configDirName: CONFIG_DIR_NAME
+        configDirName: CONFIG_DIR_NAME2
       });
       const buffered = new BufferedTraceSink();
-      const pipeline = new InterpretationPipeline(model ? createPiNativeProvider(ctx.modelRegistry, model, { capabilityDiagnostic }) : createProvider(requireProfile(profile2)), new PiCompilerV1(config.compiler), buffered, now);
+      const pipeline = new InterpretationPipeline(resolved.provider, new PiCompilerV1(config.compiler), buffered, now);
       const result = await pipeline.run({
         traceId,
         receivedAt: timestamp,
@@ -7422,10 +7629,10 @@ function createIntentBridgeExtension(pi, dependencies = {}) {
         mode: config.mode,
         logging: config.logging,
         quality: config.quality,
-        providerProfileId: providerId,
-        model: model?.id ?? requireProfile(profile2).model,
-        ...profile2?.pricing ? { pricing: profile2.pricing } : {},
-        promptVersion: model ? "pi-native-v2" : "openai-compatible-v2",
+        providerProfileId: resolved.providerProfileId,
+        model: resolved.model,
+        ...resolved.pricing ? { pricing: resolved.pricing } : {},
+        promptVersion: resolved.promptVersion,
         retryPolicy: config.retry,
         contextManifest: context.manifest,
         projectId: ctx.cwd,
@@ -7435,26 +7642,21 @@ function createIntentBridgeExtension(pi, dependencies = {}) {
       if (result.status !== "transformed") {
         if (buffered.trace)
           await append(buffered.trace, config.logging);
-        state.lastStatus = "fail_open";
-        notify(ctx, "Intent Bridge skipped this message; the original was sent unchanged.");
+        lastStatus = "fail_open";
+        notify2(ctx, "Intent Bridge skipped this message; the original was sent unchanged.");
         return { action: "continue" };
       }
-      const latest = pipeline.getLatest();
-      if (!latest)
+      const transformation = pipeline.getLatest();
+      if (!transformation)
         throw new Error("Missing latest transformation.");
-      setLatest(latest, {
-        providerProfileId: providerId,
-        model: model?.id ?? requireProfile(profile2).model,
+      setLatest(transformation, {
+        providerProfileId: resolved.providerProfileId,
+        model: resolved.model,
         mode: config.mode,
         ...buffered.trace?.latencyMs === void 0 ? {} : { latencyMs: buffered.trace.latencyMs }
       });
-      const decision = decideDelivery({
-        mode: config.mode,
-        assessment: result.assessment,
-        enforcement: config.quality.enforcement,
-        hasUI: ctx.hasUI
-      });
-      if (decision.kind === "review_required_no_ui") {
+      const decision = decideDelivery(config.mode, result.assessment, config.quality.enforcement, ctx.hasUI);
+      if (decision === "review_required_no_ui") {
         if (buffered.trace) {
           buffered.trace.status = "bypass";
           buffered.trace.bypassReason = "quality_review_required_no_ui";
@@ -7469,23 +7671,23 @@ function createIntentBridgeExtension(pi, dependencies = {}) {
           });
         } catch {
         }
-        state.lastStatus = "bypass";
+        lastStatus = "bypass";
         return { action: "continue" };
       }
-      if (decision.kind === "inject") {
+      if (decision === "inject") {
         if (buffered.trace)
           await append(buffered.trace, config.logging);
         if (!approve(result.compiledTask)) {
-          state.lastStatus = "fail_open";
-          notify(ctx, "Intent Bridge skipped this message; the original was sent unchanged.");
+          lastStatus = "fail_open";
+          notify2(ctx, "Intent Bridge skipped this message; the original was sent unchanged.");
           return { action: "continue" };
         }
-        state.lastStatus = "transformed";
+        lastStatus = "transformed";
         return { action: "continue" };
       }
       let choice;
       try {
-        choice = await ctx.ui.select(formatTransformation(latest, config.compiler), [...PREVIEW_CHOICES]);
+        choice = await ctx.ui.select(formatTransformation(transformation, config.compiler), [...PREVIEW_CHOICES]);
       } catch {
         choice = void 0;
         if (buffered.trace) {
@@ -7494,7 +7696,7 @@ function createIntentBridgeExtension(pi, dependencies = {}) {
         }
         if (buffered.trace)
           await append(buffered.trace, config.logging);
-        state.lastStatus = "bypass";
+        lastStatus = "bypass";
         return { action: "continue" };
       }
       const action = choice === "Send transformed" ? "transform" : choice === "Send original" ? "continue" : "handled";
@@ -7512,11 +7714,11 @@ function createIntentBridgeExtension(pi, dependencies = {}) {
         });
       } catch {
       }
-      state.lastStatus = action === "transform" ? "transformed" : "bypass";
+      lastStatus = action === "transform" ? "transformed" : "bypass";
       if (action === "transform") {
         if (!approve(result.compiledTask)) {
-          state.lastStatus = "fail_open";
-          notify(ctx, "Intent Bridge skipped this message; the original was sent unchanged.");
+          lastStatus = "fail_open";
+          notify2(ctx, "Intent Bridge skipped this message; the original was sent unchanged.");
         }
         return { action: "continue" };
       }
@@ -7524,281 +7726,138 @@ function createIntentBridgeExtension(pi, dependencies = {}) {
         pendingTasks.cancel(reservation);
         reserved = false;
       }
-      return { action };
+      return action === "continue" ? { action: "continue" } : { action: "handled" };
     } catch {
-      state.lastStatus = "fail_open";
-      notify(ctx, "Intent Bridge skipped this message; the original was sent unchanged.");
+      lastStatus = "fail_open";
+      notify2(ctx, "Intent Bridge skipped this message; the original was sent unchanged.");
       return { action: "continue" };
     } finally {
       if (reserved)
         pendingTasks.skip(reservation);
     }
-  });
-  pi.on("before_agent_start", (event) => {
-    const content = pendingTasks.consumeForAgentStart(event.prompt, event.images?.length ?? 0, now().getTime());
-    if (content === null)
-      return;
-    return {
-      message: {
-        customType: "intent-bridge.task",
-        content,
-        display: false
-      }
-    };
-  });
-  pi.on("session_start", async (_event, ctx) => {
-    pendingTasks.clear();
-    try {
-      const config = await getConfig(ctx);
-      await traceWriter.prune(config.logging.retentionDays).catch(() => void 0);
-    } catch {
-    }
-  });
-  pi.on("session_before_switch", () => {
-    pendingTasks.clear();
-  });
-  pi.on("session_shutdown", () => {
-    pendingTasks.clear();
-    state.latest = void 0;
-    delete state.latestMetadata;
-    delete state.rating;
-    state.lastStatus = "none";
-  });
-  pi.registerCommand("bridge", {
-    description: "Manage Intent Bridge settings",
-    getArgumentCompletions: (prefix) => {
-      const normalized = prefix.trimStart().toLowerCase();
-      const matches = bridgeArgumentItems.filter(({ value }) => value.startsWith(normalized));
-      return matches.length > 0 ? matches : null;
+  };
+  return {
+    handleInput,
+    beforeAgentStart: (event) => {
+      const content = pendingTasks.consumeForAgentStart(event.prompt, event.images?.length ?? 0, now().getTime());
+      return content === null ? void 0 : {
+        message: {
+          customType: "intent-bridge.task",
+          content,
+          display: false
+        }
+      };
     },
-    handler: async (args, ctx) => {
-      const parts = args.trim().split(/\s+/).filter(Boolean);
-      const [command, value] = parts;
-      if (!command || parts.length > 2 || ![
-        "on",
-        "off",
-        "auto",
-        "preview",
-        "status",
-        "model",
-        "test",
-        "last",
-        "rate",
-        "logs",
-        "privacy"
-      ].includes(command)) {
-        notify(ctx, usage);
-        return;
-      }
-      if (command === "off" && !value)
-        pendingTasks.clear();
+    sessionStart: async (ctx) => {
+      pendingTasks.clear();
       try {
         const config = await getConfig(ctx);
-        const paths = resolveConfigPaths({
-          projectRoot: ctx.cwd,
-          configDirName: CONFIG_DIR_NAME,
-          environment
-        });
-        const target = ctx.isProjectTrusted() && paths.projectPath && existsSync(paths.projectPath) ? paths.projectPath : paths.globalPath;
-        const base = target === paths.projectPath ? await loadBridgeConfigLayer(paths.globalPath) : void 0;
-        const save = (patch) => updateConfig(target, base, patch);
-        const selectPiModel = async (requested) => {
-          await ctx.modelRegistry.refresh();
-          const choices = piModelChoices(compatiblePiModels(ctx.modelRegistry.getAvailable()));
-          let choice = requested ? (() => {
-            const [provider, id] = requested.split(/\/(.*)/s);
-            const matches = requested.includes("/") ? choices.filter(({ model }) => model.provider === provider && model.id === id) : choices.filter(({ model }) => model.id === requested);
-            return matches.length === 1 ? matches[0] : void 0;
-          })() : void 0;
-          if (!requested) {
-            if (!choices.length || !ctx.hasUI) {
-              notify(ctx, "No compatible Pi models are available.");
-              return false;
-            }
-            const picked = await ctx.ui.select("Select Intent Bridge model", choices.map(({ label }) => label));
-            choice = choices.find(({ label }) => label === picked);
-            if (!choice) {
-              notify(ctx, "Intent Bridge model selection cancelled.");
-              return false;
-            }
-          }
-          if (!choice) {
-            notify(ctx, "That model is not available. Use /bridge model to choose one.");
-            return false;
-          }
-          const previous = await piSelection();
-          try {
-            const model = resolvePiModel(ctx.modelRegistry, choice.model.provider, choice.model.id);
-            await createPiNativeProvider(ctx.modelRegistry, model, { capabilityDiagnostic }).testConnection({ ...ctx.signal ? { signal: ctx.signal } : {} });
-            await writePiModelSelectionAtomic(selectionPath, {
-              version: 1,
-              provider: choice.model.provider,
-              model: choice.model.id
-            });
-            notify(ctx, `Intent Bridge is ready with ${choice.model.name}.`);
-            return true;
-          } catch {
-            notify(ctx, `Intent Bridge could not use that model.${previous ? " The previous selection was kept." : ""} Try /bridge model again.`);
-            return false;
-          }
-        };
-        if (command === "status") {
-          if (value) {
-            notify(ctx, usage);
-            return;
-          }
-          const effective2 = activeProfile(config, await piSelection());
-          const model = effective2.source === "pi" ? effective2.selection.model : effective2.profile?.model ?? "none";
-          notify(ctx, `Intent Bridge: enabled=${config.enabled}; mode=${config.mode}; model=${model}; context=${config.context.enabled ? ctx.isProjectTrusted() ? "enabled/trusted" : "enabled/untrusted" : "disabled"}; logging=${config.logging.mode}; last=${state.lastStatus}.`);
-          return;
-        }
-        if (command === "last") {
-          if (value) {
-            notify(ctx, usage);
-            return;
-          }
-          const latest = state.latest;
-          const metadata = state.latestMetadata;
-          if (!latest || !metadata) {
-            notify(ctx, "Intent Bridge: no transformation in this session.");
-            return;
-          }
-          notify(ctx, formatLastTransformation(latest, `Status: ${state.lastStatus}; provider=${metadata.providerProfileId}; model=${metadata.model}; mode=${metadata.mode}; latency=${metadata.latencyMs === void 0 ? "unknown" : `${metadata.latencyMs}ms`}; rating=${state.rating ?? "none"}; includeOriginalRequest=${config.compiler.includeOriginalRequest}; timestamp=${latest.timestamp}.`));
-          return;
-        }
-        if (command === "rate") {
-          if (value !== "good" && value !== "bad") {
-            notify(ctx, usage);
-            return;
-          }
-          const latest = state.latest;
-          const metadata = state.latestMetadata;
-          if (!latest || !metadata) {
-            notify(ctx, "Intent Bridge: no transformation to rate.");
-            return;
-          }
-          const timestamp = now().toISOString();
-          const ratingTrace = {
-            version: 1,
-            traceId: latest.traceId,
-            timestamp,
-            mode: metadata.mode,
-            status: "success",
-            userRating: value,
-            providerProfile: metadata.providerProfileId,
-            model: metadata.model
-          };
-          let saved = true;
-          try {
-            await append(ratingTrace, config.logging);
-          } catch {
-            saved = false;
-          }
-          try {
-            pi.appendEntry("intent-bridge.rating", {
-              traceId: latest.traceId,
-              rating: value,
-              timestamp,
-              provider: metadata.providerProfileId,
-              model: metadata.model,
-              mode: metadata.mode
-            });
-          } catch {
-            saved = false;
-          }
-          state.rating = value;
-          notify(ctx, saved ? "Intent Bridge rating saved." : "Intent Bridge rating recorded for this session.");
-          return;
-        }
-        if (command === "logs") {
-          if (value) {
-            notify(ctx, usage);
-            return;
-          }
-          const warning = fullLoggingWarning(config.logging);
-          notify(ctx, redactSecrets(`Logs: mode=${config.logging.mode}; retention=${config.logging.retentionDays} days; path=${join4(dirname3(resolveConfigPaths({ environment }).globalPath), "logs")}.${warning ? ` ${warning}` : ""}`).text);
-          return;
-        }
-        if (command === "privacy") {
-          if (value) {
-            notify(ctx, usage);
-            return;
-          }
-          const collected = await collectContext({
-            cwd: ctx.cwd,
-            config: config.context,
-            projectTrusted: ctx.isProjectTrusted(),
-            configDirName: CONFIG_DIR_NAME
-          });
-          const entries = collected.manifest.entries;
-          const listed = (included) => entries.filter((entry) => entry.included === included).slice(0, 20).map((entry) => included ? entry.path : `${entry.path}${entry.reason ? ` (${entry.reason})` : ""}`).join(", ") || "none";
-          const warning = fullLoggingWarning(config.logging);
-          notify(ctx, redactSecrets(`Privacy: context=${config.context.enabled ? "enabled" : "disabled"}; trusted=${ctx.isProjectTrusted()}; included=${entries.filter((entry) => entry.included).length}; excluded=${entries.filter((entry) => !entry.included).length}; chars=${collected.manifest.totalCharacters}; included paths=${listed(true)}; excluded paths=${listed(false)}.${warning ? ` ${warning}` : ""}`).text);
-          return;
-        }
-        if (command === "preview" && value === "off") {
-          await save({ enabled: true, mode: "auto" });
-          notify(ctx, "Intent Bridge preview disabled.");
-          return;
-        }
-        if (["on", "off", "auto", "preview"].includes(command)) {
-          if (value) {
-            notify(ctx, usage);
-            return;
-          }
-          let selectedModel = false;
-          if (command === "on") {
-            const effective2 = activeProfile(config, await piSelection());
-            let ready = effective2.source === "profile" && Boolean(effective2.profile);
-            if (effective2.source === "pi") {
-              await ctx.modelRegistry.refresh();
-              ready = compatiblePiModels(ctx.modelRegistry.getAvailable()).some((model) => model.provider === effective2.selection.provider && model.id === effective2.selection.model);
-            }
-            if (!ready) {
-              selectedModel = await selectPiModel();
-              if (!selectedModel)
-                return;
-            }
-          }
-          await save({
-            enabled: command !== "off",
-            mode: command === "off" ? "off" : command === "preview" ? "preview" : "auto"
-          });
-          if (!selectedModel)
-            notify(ctx, `Intent Bridge ${command === "off" ? "disabled" : "enabled"}.`);
-          return;
-        }
-        if (command === "model") {
-          await selectPiModel(value);
-          return;
-        }
-        const effective = activeProfile(config, await piSelection());
-        const profile2 = effective.source === "profile" ? effective.profile : void 0;
-        if (value) {
-          notify(ctx, usage);
-          return;
-        }
-        const started = Date.now();
-        try {
-          const model = effective.source === "pi" ? resolvePiModel(ctx.modelRegistry, effective.selection.provider, effective.selection.model) : void 0;
-          if (!model && !profile2)
-            throw new BridgeError({
-              code: "CONFIG_MISSING",
-              safeMessage: "Missing profile.",
-              retryable: false
-            });
-          const health = await (model ? createPiNativeProvider(ctx.modelRegistry, model, { capabilityDiagnostic }) : createProvider(requireProfile(profile2))).testConnection({
-            ...ctx.signal ? { signal: ctx.signal } : {}
-          });
-          notify(ctx, `Intent Bridge test: ok; model=${model?.id ?? requireProfile(profile2).model}; latency=${Math.max(0, health.latencyMs ?? Date.now() - started)}ms.`);
-        } catch (error) {
-          notify(ctx, `Intent Bridge test: failed (${errorCode2(error)}); model=${effective.source === "pi" ? effective.selection.model : profile2?.model ?? "none"}.`);
-        }
+        await traceWriter.prune(config.logging.retentionDays).catch(() => void 0);
       } catch {
-        notify(ctx, "Intent Bridge settings could not be updated.");
       }
+    },
+    clearPending: () => pendingTasks.clear(),
+    shutdown: () => {
+      pendingTasks.clear();
+      latest = void 0;
+      latestMetadata = void 0;
+      rating = void 0;
+      lastStatus = "none";
+    },
+    session,
+    rate: async (value, config) => {
+      if (!latest || !latestMetadata)
+        return void 0;
+      const timestamp = now().toISOString();
+      const trace = {
+        version: 1,
+        traceId: latest.traceId,
+        timestamp,
+        mode: latestMetadata.mode,
+        status: "success",
+        userRating: value,
+        providerProfile: latestMetadata.providerProfileId,
+        model: latestMetadata.model
+      };
+      let saved = true;
+      try {
+        await append(trace, config.logging);
+      } catch {
+        saved = false;
+      }
+      try {
+        pi.appendEntry("intent-bridge.rating", {
+          traceId: latest.traceId,
+          rating: value,
+          timestamp,
+          provider: latestMetadata.providerProfileId,
+          model: latestMetadata.model,
+          mode: latestMetadata.mode
+        });
+      } catch {
+        saved = false;
+      }
+      rating = value;
+      return saved;
     }
+  };
+}
+
+function createIntentBridgeExtension(pi, dependencies = {}) {
+  const environment = dependencies.environment ?? process.env;
+  const now = dependencies.now ?? (() => /* @__PURE__ */ new Date());
+  const loadConfig = dependencies.loadConfig ?? loadLayeredConfig;
+  const collectContext = dependencies.collectContext ?? collectProjectContext;
+  const globalDir = dirname4(resolveConfigPaths({ environment }).globalPath);
+  const selectionPath = join5(globalDir, "pi-model-selection.json");
+  const traceWriter = (dependencies.createTraceWriter ?? ((path) => new JsonlTraceWriter(path, now)))(join5(globalDir, "logs"));
+  let runtimeFallbackReported = false;
+  const capabilityDiagnostic = (metadata) => {
+    if (metadata.capabilitySource !== "runtime_fallback" || runtimeFallbackReported)
+      return;
+    runtimeFallbackReported = true;
+    try {
+      pi.appendEntry("intent-bridge.pi-host", metadata);
+    } catch {
+    }
+  };
+  const resolver = createProviderResolver({
+    environment,
+    selectionPath,
+    createProvider: dependencies.createProvider ?? ((profile2, resolver2) => new OpenAICompatibleProvider(profile2, {
+      environment: resolver2 ?? ((name) => environment[name])
+    })),
+    createPiProvider: dependencies.createPiProvider ?? createPiProvider,
+    capabilityDiagnostic
   });
+  const getConfig = (ctx) => loadConfig({
+    projectRoot: ctx.cwd,
+    configDirName: CONFIG_DIR_NAME3,
+    projectTrusted: ctx.isProjectTrusted(),
+    environment
+  });
+  const controller = createTransformationController({
+    pi,
+    getConfig,
+    collectContext,
+    resolver,
+    traceWriter,
+    uuid: dependencies.uuid ?? randomUUID,
+    now
+  });
+  pi.on("input", (event, ctx) => controller.handleInput(event, ctx));
+  pi.on("before_agent_start", (event) => controller.beforeAgentStart(event));
+  pi.on("session_start", (_event, ctx) => controller.sessionStart(ctx));
+  pi.on("session_before_switch", () => controller.clearPending());
+  pi.on("session_shutdown", () => controller.shutdown());
+  pi.registerCommand("bridge", createBridgeCommand({
+    environment,
+    getConfig,
+    collectContext,
+    ...dependencies.updateConfig ? { updateConfig: dependencies.updateConfig } : {},
+    resolver,
+    controller
+  }));
 }
 function intentBridgeExtension(pi) {
   createIntentBridgeExtension(pi);
