@@ -1,5 +1,6 @@
 import type { CompiledTask, HarnessCompiler } from "./contracts.js";
 import type { IntentDocument } from "./intent.js";
+import type { IntentEvidenceV1 } from "./intent-evidence.js";
 import { redactSecrets } from "./privacy.js";
 import type { TransformationAssessment } from "./quality-policy.js";
 
@@ -41,6 +42,37 @@ function taskList(
   const groups = tasks
     .filter((task) => task[field].length > 0)
     .map((task) => `### Task \`${task.id}\`\n${list(task[field])}`);
+  return groups.length > 0 ? groups.join("\n\n") : undefined;
+}
+
+function sourcedConstraints(
+  intent: IntentDocument,
+  evidence: IntentEvidenceV1,
+  sources: ReadonlySet<IntentEvidenceV1["items"][number]["source"]>,
+): string | undefined {
+  const sourceByPath = new Map(
+    evidence.items.map((item) => [item.path, item.source]),
+  );
+  const hasSource = (path: string) => {
+    const source = sourceByPath.get(path);
+    return source !== undefined && sources.has(source);
+  };
+  const global = intent.globalConstraints.filter((_, index) =>
+    hasSource(`/globalConstraints/${index}`),
+  );
+  const tasks = intent.tasks
+    .map((task, taskIndex) => ({
+      id: task.id,
+      constraints: task.constraints.filter((_, index) =>
+        hasSource(`/tasks/${taskIndex}/constraints/${index}`),
+      ),
+    }))
+    .filter((task) => task.constraints.length > 0)
+    .map((task) => `### Task \`${task.id}\`\n${list(task.constraints)}`);
+  const groups = [
+    global.length > 0 ? `### Global\n${list(global)}` : undefined,
+    ...tasks,
+  ].filter((content): content is string => content !== undefined);
   return groups.length > 0 ? groups.join("\n\n") : undefined;
 }
 
@@ -139,6 +171,7 @@ export class PiCompilerV1 implements HarnessCompiler<IntentDocument> {
     originalText,
     attachmentSummary,
     assessment,
+    evidence,
   }: Parameters<HarnessCompiler<IntentDocument>["compile"]>[0]): CompiledTask {
     const responseLanguage = intent.responseLanguage.name
       ? `${intent.responseLanguage.name} (${intent.responseLanguage.code})`
@@ -154,6 +187,22 @@ export class PiCompilerV1 implements HarnessCompiler<IntentDocument> {
     ]
       .filter((content): content is string => content !== undefined)
       .join("\n\n");
+    const constraintSections = evidence
+      ? [
+          section(
+            "User-stated constraints",
+            sourcedConstraints(intent, evidence, new Set(["user_original"])),
+          ),
+          section(
+            "Project-context constraints",
+            sourcedConstraints(
+              intent,
+              evidence,
+              new Set(["project_summary", "project_instruction"]),
+            ),
+          ),
+        ]
+      : [section("User-stated constraints", constraints || undefined)];
     const sections = [
       section("Intended outcome", intent.goal),
       section(
@@ -165,7 +214,7 @@ export class PiCompilerV1 implements HarnessCompiler<IntentDocument> {
           .join("\n"),
       ),
       section("Scope", taskList(intent.tasks, "scope")),
-      section("User-stated constraints", constraints || undefined),
+      ...constraintSections,
       section("Success criteria", taskList(intent.tasks, "successCriteria")),
       section(
         "Assumptions — not requirements",

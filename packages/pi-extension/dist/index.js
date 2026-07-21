@@ -5823,6 +5823,82 @@ function parseIntentDocument(input, options = {}) {
   return { intent, diagnostics: normalized.diagnostics };
 }
 
+var INTENT_EVIDENCE_LIMITS = {
+  pathLength: 128,
+  quoteLength: 1e3,
+  itemCount: 1241
+};
+var evidenceItem = Type.Object({
+  path: Type.String({
+    minLength: 1,
+    maxLength: INTENT_EVIDENCE_LIMITS.pathLength
+  }),
+  source: Type.Union([
+    Type.Literal("user_original"),
+    Type.Literal("project_summary"),
+    Type.Literal("project_instruction")
+  ]),
+  quote: Type.String({
+    minLength: 1,
+    maxLength: INTENT_EVIDENCE_LIMITS.quoteLength
+  }),
+  instructionIndex: Type.Optional(Type.Integer({ minimum: 0 }))
+}, { additionalProperties: false });
+var IntentEvidenceV1Schema = Type.Object({
+  version: Type.Literal(1),
+  items: Type.Array(evidenceItem, {
+    minItems: 1,
+    maxItems: INTENT_EVIDENCE_LIMITS.itemCount
+  })
+}, { additionalProperties: false });
+var compiledEvidence = TypeCompiler.Compile(IntentEvidenceV1Schema);
+function invalidEvidence() {
+  throw new BridgeError({
+    code: "INTENT_SCHEMA_INVALID",
+    safeMessage: "The provider response contained invalid intent evidence.",
+    retryable: false
+  });
+}
+function requiredPaths(intent) {
+  const paths = /* @__PURE__ */ new Set(["/goal"]);
+  for (const [taskIndex, task2] of intent.tasks.entries()) {
+    paths.add(`/tasks/${taskIndex}/objective`);
+    for (const field of ["scope", "constraints", "successCriteria"])
+      for (const index of task2[field].keys())
+        paths.add(`/tasks/${taskIndex}/${field}/${index}`);
+  }
+  for (const index of intent.globalConstraints.keys())
+    paths.add(`/globalConstraints/${index}`);
+  return paths;
+}
+function parseIntentEvidence(input, intent, sources) {
+  if (!compiledEvidence.Check(input))
+    invalidEvidence();
+  const evidence = input;
+  const expected = requiredPaths(intent);
+  const seen = /* @__PURE__ */ new Set();
+  for (const item of evidence.items) {
+    if (!expected.has(item.path) || seen.has(item.path))
+      invalidEvidence();
+    seen.add(item.path);
+    let sourceText;
+    if (item.source === "project_instruction") {
+      if (item.instructionIndex === void 0)
+        invalidEvidence();
+      sourceText = sources.project.instructionExcerpts[item.instructionIndex];
+    } else {
+      if (item.instructionIndex !== void 0)
+        invalidEvidence();
+      sourceText = item.source === "user_original" ? sources.originalText : sources.project.summary;
+    }
+    if (sourceText === void 0 || !sourceText.includes(item.quote))
+      invalidEvidence();
+  }
+  if (seen.size !== expected.size)
+    invalidEvidence();
+  return evidence;
+}
+
 var DEFAULT_COMPILER_OPTIONS = {
   includeOriginalRequest: true
 };
@@ -5848,6 +5924,25 @@ function list(items2) {
 function taskList(tasks, field) {
   const groups = tasks.filter((task2) => task2[field].length > 0).map((task2) => `### Task \`${task2.id}\`
 ${list(task2[field])}`);
+  return groups.length > 0 ? groups.join("\n\n") : void 0;
+}
+function sourcedConstraints(intent, evidence, sources) {
+  const sourceByPath = new Map(evidence.items.map((item) => [item.path, item.source]));
+  const hasSource = (path) => {
+    const source = sourceByPath.get(path);
+    return source !== void 0 && sources.has(source);
+  };
+  const global = intent.globalConstraints.filter((_, index) => hasSource(`/globalConstraints/${index}`));
+  const tasks = intent.tasks.map((task2, taskIndex) => ({
+    id: task2.id,
+    constraints: task2.constraints.filter((_, index) => hasSource(`/tasks/${taskIndex}/constraints/${index}`))
+  })).filter((task2) => task2.constraints.length > 0).map((task2) => `### Task \`${task2.id}\`
+${list(task2.constraints)}`);
+  const groups = [
+    global.length > 0 ? `### Global
+${list(global)}` : void 0,
+    ...tasks
+  ].filter((content) => content !== void 0);
   return groups.length > 0 ? groups.join("\n\n") : void 0;
 }
 function codeFence(text) {
@@ -5904,7 +5999,7 @@ var PiCompilerV1 = class {
   constructor(options) {
     this.options = { ...DEFAULT_COMPILER_OPTIONS, ...options };
   }
-  compile({ intent, originalText, attachmentSummary, assessment }) {
+  compile({ intent, originalText, attachmentSummary, assessment, evidence }) {
     const responseLanguage2 = intent.responseLanguage.name ? `${intent.responseLanguage.name} (${intent.responseLanguage.code})` : intent.responseLanguage.code;
     const compact = intent.messageType === "steer" || intent.messageType === "follow_up";
     const fence = codeFence(originalText);
@@ -5913,11 +6008,15 @@ var PiCompilerV1 = class {
 ${list(intent.globalConstraints)}` : void 0,
       taskList(intent.tasks, "constraints")
     ].filter((content) => content !== void 0).join("\n\n");
+    const constraintSections = evidence ? [
+      section("User-stated constraints", sourcedConstraints(intent, evidence, /* @__PURE__ */ new Set(["user_original"]))),
+      section("Project-context constraints", sourcedConstraints(intent, evidence, /* @__PURE__ */ new Set(["project_summary", "project_instruction"])))
+    ] : [section("User-stated constraints", constraints || void 0)];
     const sections = [
       section("Intended outcome", intent.goal),
       section("Requested work", intent.tasks.map((task2, index) => `${index + 1}. \`${task2.id}\`: ${task2.objective}`).join("\n")),
       section("Scope", taskList(intent.tasks, "scope")),
-      section("User-stated constraints", constraints || void 0),
+      ...constraintSections,
       section("Success criteria", taskList(intent.tasks, "successCriteria")),
       section("Assumptions \u2014 not requirements", intent.assumptions.length > 0 ? list(intent.assumptions.map((assumption2) => `[${assumption2.confidence}] ${assumption2.text}`)) : void 0),
       section("Unresolved ambiguities", intent.ambiguities.length > 0 ? list(intent.ambiguities.map((ambiguity2) => `[${ambiguity2.material ? "material" : "non-material"}; preferred resolution: ${ambiguity2.preferredResolution}] ${ambiguity2.description}`)) : void 0),
@@ -6105,6 +6204,10 @@ var InterpretationPipeline = class {
       const intent = preserveResponseLanguage(parseIntentDocument(providerResult.intent, {
         expectedMessageType: input.messageType
       }).intent);
+      const evidence = providerResult.evidence === void 0 ? void 0 : parseIntentEvidence(providerResult.evidence, intent, {
+        originalText: input.originalText,
+        project: input.project
+      });
       guardNoCodeLeak(intent, input);
       const qualityConfig2 = options.quality ?? DEFAULT_QUALITY_CONFIG;
       const assessment = assessQuality(intent, qualityConfig2);
@@ -6114,7 +6217,8 @@ var InterpretationPipeline = class {
           intent,
           originalText: input.originalText,
           attachmentSummary: input.attachmentSummary,
-          assessment
+          assessment,
+          ...evidence === void 0 ? {} : { evidence }
         });
       } catch (cause) {
         throw new BridgeError({
