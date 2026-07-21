@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "id": "en-informal-10",
+  "title": "Add data export",
+  "language": "en",
+  "messageType": "initial",
+  "input": "users want to download their data as csv. add a button somewhere in settings that triggers a download with all their stuff.",
+  "expected": {
+    "requiredGoalConcepts": ["Add data export"],
+    "requiredConstraints": ["users want to download their data as csv."],
+    "forbiddenAdditions": [
+      "Do not add notifications, billing, or sharing features not requested while addressing “Add data export”."
+    ],
+    "responseLanguage": "en",
+    "clarificationRecommended": true
+  },
+  "tags": []
+}

@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "id": "tr-smoke-04",
+  "title": "Duman kullanıcı içeriğini güvenli göster",
+  "language": "tr",
+  "messageType": "initial",
+  "input": "bir kullanıcı profiline '<script>alert(1)</script>''i yazmış. çalıştırmadan güvenli şekilde göster.",
+  "expected": {
+    "requiredGoalConcepts": ["Duman kullanıcı içeriğini güvenli göster"],
+    "requiredConstraints": [
+      "bir kullanıcı profiline '<script>alert(1)</script>''i yazmış. çalıştırmadan güvenli şekilde göster."
+    ],
+    "forbiddenAdditions": [
+      "Do not add executable behavior beyond safely handling Duman kullanıcı içeriğini güvenli göster."
+    ],
+    "responseLanguage": "tr",
+    "clarificationRecommended": false
+  },
+  "tags": ["paths-commands", "prompt-injection-like"]
+}

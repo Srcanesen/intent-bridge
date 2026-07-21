@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "id": "tr-informal-08",
+  "title": "Arama ucu ekle",
+  "language": "tr",
+  "messageType": "initial",
+  "input": "ürünlerde arama yapabileceğimiz bi api ucu lazım. sorgu parametresi alıp eşleşen ürünleri dönsün. isim ve açıklamada arasın.",
+  "expected": {
+    "requiredGoalConcepts": ["Arama ucu ekle"],
+    "requiredConstraints": [],
+    "forbiddenAdditions": [
+      "“Arama ucu ekle” için istenmeyen kimlik doğrulama, sayfalama veya filtreleme ekleme."
+    ],
+    "responseLanguage": "tr",
+    "clarificationRecommended": true
+  },
+  "tags": []
+}

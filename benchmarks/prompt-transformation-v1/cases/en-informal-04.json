@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "id": "en-informal-04",
+  "title": "Add rate limiting",
+  "language": "en",
+  "messageType": "initial",
+  "input": "the api is getting hammered by one user. can we put some rate limiting on the endpoints? maybe 100 requests per minute per ip or something reasonable.",
+  "expected": {
+    "requiredGoalConcepts": ["Add rate limiting"],
+    "requiredConstraints": [
+      "maybe 100 requests per minute per ip or something reasonable."
+    ],
+    "forbiddenAdditions": [
+      "Do not add new storage systems or background jobs while addressing “Add rate limiting”."
+    ],
+    "responseLanguage": "en",
+    "clarificationRecommended": true
+  },
+  "tags": []
+}

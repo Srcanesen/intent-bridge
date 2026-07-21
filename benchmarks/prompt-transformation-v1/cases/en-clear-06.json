@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "id": "en-clear-06",
+  "title": "Add request logging middleware",
+  "language": "en",
+  "messageType": "initial",
+  "input": "add express middleware that logs every request with method, path, status code, and duration in milliseconds. use console.log with ISO timestamp prefix. skip logging for /health endpoint.",
+  "expected": {
+    "requiredGoalConcepts": ["Add request logging middleware"],
+    "requiredConstraints": [
+      "add express middleware that logs every request with method, path, status code, and duration in milliseconds. use console.log with ISO timestamp prefix. skip logging for /health endpoint."
+    ],
+    "forbiddenAdditions": [
+      "Do not add new storage systems or background jobs while addressing “Add request logging middleware”."
+    ],
+    "responseLanguage": "en",
+    "clarificationRecommended": false
+  },
+  "tags": ["clear", "explicit-constraints"]
+}

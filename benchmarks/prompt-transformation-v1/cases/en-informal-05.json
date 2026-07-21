@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "id": "en-informal-05",
+  "title": "Update npm package",
+  "language": "en",
+  "messageType": "initial",
+  "input": "there's a security warning about an old version of lodash we're using. can you bump it to the latest? i think it's a minor version update.",
+  "expected": {
+    "requiredGoalConcepts": ["Update npm package"],
+    "requiredConstraints": [],
+    "forbiddenAdditions": [
+      "Do not add unrelated dependency upgrades while addressing “Update npm package”."
+    ],
+    "responseLanguage": "en",
+    "clarificationRecommended": true
+  },
+  "tags": []
+}

@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "id": "en-clear-02",
+  "title": "Create status endpoint",
+  "language": "en",
+  "messageType": "initial",
+  "input": "create a GET /api/v1/status endpoint that returns JSON { status: 'ok', version: '1.0.0', uptime: <seconds> }. no authentication required.",
+  "expected": {
+    "requiredGoalConcepts": ["Create status endpoint"],
+    "requiredConstraints": [
+      "create a GET /api/v1/status endpoint that returns JSON { status: 'ok', version: '1.0.0', uptime: <seconds> }. no authentication required."
+    ],
+    "forbiddenAdditions": [
+      "Do not add authentication, pagination, or filtering not requested while addressing “Create status endpoint”."
+    ],
+    "responseLanguage": "en",
+    "clarificationRecommended": false
+  },
+  "tags": ["clear", "explicit-constraints"]
+}

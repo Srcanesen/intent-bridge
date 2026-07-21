@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "id": "en-smoke-02",
+  "title": "Smoke add environment variable",
+  "language": "en",
+  "messageType": "initial",
+  "input": "add a DATABASE_URL environment variable to the .env.example file with a placeholder value of postgresql://user:pass@localhost:5432/mydb.",
+  "expected": {
+    "requiredGoalConcepts": ["Smoke add environment variable"],
+    "requiredConstraints": [
+      "add a DATABASE_URL environment variable to the .env.example file with a placeholder value of postgresql://user:pass@localhost:5432/mydb."
+    ],
+    "forbiddenAdditions": [
+      "Do not add new storage systems or background jobs while addressing “Smoke add environment variable”."
+    ],
+    "responseLanguage": "en",
+    "clarificationRecommended": false
+  },
+  "tags": ["clear", "explicit-constraints"]
+}

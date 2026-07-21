@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "id": "tr-smoke-02",
+  "title": "Duman ortam değişkeni ekle",
+  "language": "tr",
+  "messageType": "initial",
+  "input": ".env.example dosyasına DATABASE_URL ortam değişkenini postgresql://kullanici:sifre@localhost:5432/veritabani varsayılan değeriyle ekle.",
+  "expected": {
+    "requiredGoalConcepts": ["Duman ortam değişkeni ekle"],
+    "requiredConstraints": [
+      ".env.example dosyasına DATABASE_URL ortam değişkenini postgresql://kullanici:sifre@localhost:5432/veritabani varsayılan değeriyle ekle."
+    ],
+    "forbiddenAdditions": [
+      "“Duman ortam değişkeni ekle” için yeni veri depoları veya arka plan işleri ekleme."
+    ],
+    "responseLanguage": "tr",
+    "clarificationRecommended": false
+  },
+  "tags": ["clear", "explicit-constraints"]
+}

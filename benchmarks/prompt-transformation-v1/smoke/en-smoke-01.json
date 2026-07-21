@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "id": "en-smoke-01",
+  "title": "Smoke fix button alignment",
+  "language": "en",
+  "messageType": "initial",
+  "input": "the submit button on the contact form is misaligned. it's floating left instead of center. can you center it?",
+  "expected": {
+    "requiredGoalConcepts": ["Smoke fix button alignment"],
+    "requiredConstraints": [],
+    "forbiddenAdditions": [
+      "Do not add unrelated page redesigns while addressing “Smoke fix button alignment”."
+    ],
+    "responseLanguage": "en",
+    "clarificationRecommended": true
+  },
+  "tags": []
+}

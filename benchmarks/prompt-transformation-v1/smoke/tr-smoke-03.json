@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "id": "tr-smoke-03",
+  "title": "Duman aramayı iyileştir",
+  "language": "tr",
+  "messageType": "initial",
+  "input": "arama fonksiyonu pek iyi değil. iyileştirebilir misin? kullanıcılar şikayet ediyor.",
+  "expected": {
+    "requiredGoalConcepts": ["Duman aramayı iyileştir"],
+    "requiredConstraints": [],
+    "forbiddenAdditions": [
+      "“Duman aramayı iyileştir” için istenmeyen bildirim, faturalama veya paylaşım özellikleri ekleme."
+    ],
+    "responseLanguage": "tr",
+    "clarificationRecommended": true
+  },
+  "tags": ["vague"]
+}

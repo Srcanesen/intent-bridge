@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "id": "en-informal-13",
+  "title": "Optimize database query",
+  "language": "en",
+  "messageType": "initial",
+  "input": "the main dashboard query takes like 5 seconds now that we have more users. can you add an index or optimize the join? it's the one that aggregates monthly stats.",
+  "expected": {
+    "requiredGoalConcepts": ["Optimize database query"],
+    "requiredConstraints": [
+      "the main dashboard query takes like 5 seconds now that we have more users."
+    ],
+    "forbiddenAdditions": [
+      "Do not add caches or infrastructure changes without evidence while addressing “Optimize database query”."
+    ],
+    "responseLanguage": "en",
+    "clarificationRecommended": true
+  },
+  "tags": []
+}

@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "id": "tr-clear-04",
+  "title": "Buton rengini güncelle",
+  "language": "tr",
+  "messageType": "initial",
+  "input": "ana işlem butonunun rengini #007bff'den #2563eb'a değiştir. hover rengi de #1d4ed8 olsun. butonun class'ı .btn-primary.",
+  "expected": {
+    "requiredGoalConcepts": ["Buton rengini güncelle"],
+    "requiredConstraints": [
+      "ana işlem butonunun rengini #007bff'den #2563eb'a değiştir. hover rengi de #1d4ed8 olsun. butonun class'ı .btn-primary."
+    ],
+    "forbiddenAdditions": [
+      "“Buton rengini güncelle” için istenmeyen masaüstü tasarım değişiklikleri ekleme."
+    ],
+    "responseLanguage": "tr",
+    "clarificationRecommended": false
+  },
+  "tags": ["clear", "explicit-constraints"]
+}

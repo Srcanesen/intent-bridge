@@ -2,7 +2,7 @@
 
 The existing 50-case interpretation corpus and reports remain unchanged. A separate 12-case implementation benchmark lives in [`implementation-outcome`](implementation-outcome/README.md); it measures downstream repository outcomes and uses its own strict contracts rather than `BenchmarkReportV2`.
 
-The pre-registered [`prompt-transformation-v1`](prompt-transformation-v1/README.md) benchmark targets the core product promise directly: faithful, clearer harness tasks from short informal Turkish and English requests. It has separate corpus, execution, and evidence PR boundaries.
+The pre-registered [`prompt-transformation-v1`](prompt-transformation-v1/README.md) benchmark targets the core product promise directly: faithful, clearer harness tasks from short informal Turkish and English requests. It has separate corpus, execution, and evidence PR boundaries. The frozen bilingual corpus contains 80 confirmatory cases (40 TR, 40 EN) and 8 balanced smoke cases with gold annotations, deterministic manifest hash, and offline validation commands.
 
 Phase 8 provides 50 human-reviewed seed cases: 20 Turkish, 20 English, and 10 Spanish. Inputs and titles are unique. The corpus covers initial, normal, steer, and follow-up messages plus bug fixes, UI, refactoring, tests, architecture, multi-task work, attachments, explicit constraints, risky ambiguity, paths/commands, mixed language, injection-like quoted data, and synthetic secret-like values.
 
@@ -78,6 +78,8 @@ corepack pnpm benchmark -- compare /tmp/profile-a-report.json /tmp/profile-b-rep
 corepack pnpm benchmark -- apply-review /tmp/report.json /tmp/review.json --out /tmp/final.json
 corepack pnpm benchmark:pi-local
 corepack pnpm benchmark:pi-corpus --help
+corepack pnpm benchmark -- pt-v1 validate
+corepack pnpm benchmark -- pt-v1 summarize report.json manifest.json annotations.json [--out file]
 ```
 
 `benchmark apply-review` is offline and makes no provider calls. It requires `--out`, accepts only V2 source reports without an existing owner review, verifies the canonical strict-parsed report SHA-256, and writes deterministic pretty JSON.

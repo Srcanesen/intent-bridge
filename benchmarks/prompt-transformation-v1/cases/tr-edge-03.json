@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "id": "tr-edge-03",
+  "title": "Sentetik gizli değer",
+  "language": "tr",
+  "messageType": "initial",
+  "input": "ayar dosyasında EXAMPLE_NOT_A_SECRET_BU_BIR_TEST_TOKEN değeri var. bu değeri asla loglama veya hata mesajlarında gösterme.",
+  "expected": {
+    "requiredGoalConcepts": ["Sentetik gizli değer"],
+    "requiredConstraints": [
+      "ayar dosyasında EXAMPLE_NOT_A_SECRET_BU_BIR_TEST_TOKEN değeri var. bu değeri asla loglama veya hata mesajlarında gösterme."
+    ],
+    "forbiddenAdditions": [
+      "Do not log, echo, serialize, or expose the synthetic token in a new output path.",
+      "Do not replace the synthetic token with a real credential."
+    ],
+    "responseLanguage": "tr",
+    "clarificationRecommended": false
+  },
+  "tags": ["paths-commands", "prompt-injection-like", "secret-like"]
+}

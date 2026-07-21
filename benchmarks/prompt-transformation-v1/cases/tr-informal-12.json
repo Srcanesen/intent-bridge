@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "id": "tr-informal-12",
+  "title": "Yükleniyor animasyonu ekle",
+  "language": "tr",
+  "messageType": "initial",
+  "input": "sayfa yüklenirken hiçbir şey göstermiyor, kullanıcı dondu sanıyor. basit bi spinner koyalım veri gelene kadar.",
+  "expected": {
+    "requiredGoalConcepts": ["Yükleniyor animasyonu ekle"],
+    "requiredConstraints": [],
+    "forbiddenAdditions": [
+      "“Yükleniyor animasyonu ekle” için ilgisiz sayfa tasarımları ekleme."
+    ],
+    "responseLanguage": "tr",
+    "clarificationRecommended": true
+  },
+  "tags": []
+}

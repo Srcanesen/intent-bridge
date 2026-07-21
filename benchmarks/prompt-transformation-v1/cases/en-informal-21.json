@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "id": "en-informal-21",
+  "title": "Update API documentation",
+  "language": "en",
+  "messageType": "initial",
+  "input": "the api docs are outdated, they still show the old endpoint paths. can you update them to match the current routes? especially the users and orders sections.",
+  "expected": {
+    "requiredGoalConcepts": ["Update API documentation"],
+    "requiredConstraints": [],
+    "forbiddenAdditions": [
+      "Do not add new endpoints or product behavior while addressing “Update API documentation”."
+    ],
+    "responseLanguage": "en",
+    "clarificationRecommended": true
+  },
+  "tags": []
+}

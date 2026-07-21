@@ -149,3 +149,50 @@ A sanitized aggregate report is evidence only after strict parsing and secret sc
 - **PR 19 — Live evidence:** sanitized aggregate report and documentation only, after the approved sandbox run.
 
 If PR 18 requires a product behavior change to make the benchmark pass, stop. Product changes belong to a later release and must not alter the `v1.1.0` subject under test.
+
+## PR 18 — Frozen corpus and offline validation
+
+### Corpus location
+
+- `cases/` — 80 confirmatory cases (40 TR, 40 EN)
+- `smoke/` — 8 separate balanced smoke cases (4 TR, 4 EN)
+- `annotations.json` — semantic gold annotations for all 80 confirmatory cases
+- `annotations-smoke.json` — semantic gold annotations for all 8 smoke cases
+- `manifest.json` — frozen manifest with distribution, subject SHA, seed, and content hashes
+
+### Content hash
+
+- Confirmatory cases SHA-256: `d25bb4bf705923dcfc698279ade9ebf0fac07dc9783f87467940f5c0502c3d55`
+- Smoke cases SHA-256: `e82b418efdab66212a9fc0e9a9e7810c4ec495e653274d92e80b73fb4e3cdda6`
+- Seed: `42`
+- Subject commit: `962a431292dae8d082abf5442329939207e38c48`
+
+Hash is computed as SHA-256 of canonical, sorted case JSON (sorted keys, sorted by ID) concatenated with the README rubric; only the two published hash values are normalized to avoid self-reference. Validator rejects any other drift.
+
+### Distribution
+
+| Stratum | Turkish | English | Total |
+| --- | ---: | ---: | ---: |
+| Short informal requests | 24 | 24 | 48 |
+| Already-clear controls | 6 | 6 | 12 |
+| Material ambiguity | 6 | 6 | 12 |
+| Edge and safety | 4 | 4 | 8 |
+| **Total** | **40** | **40** | **80** |
+
+Smoke corpus: 4 TR + 4 EN, balanced 1 per stratum per language = 8 total.
+
+### Offline validation commands
+
+```bash
+corepack pnpm benchmark:validate:offline
+```
+
+### CLI commands
+
+```bash
+corepack pnpm build
+node packages/benchmark/dist/cli.js pt-v1 validate
+node packages/benchmark/dist/cli.js pt-v1 summarize <report.json> <manifest.json> <annotations.json> [--out file]
+```
+
+The `validate` command checks case distribution, hash integrity, duplicate inputs/titles, credential safety, annotation coverage, and manifest consistency. The `summarize` command produces a sanitized aggregate report with Wilson intervals and gate statuses. Raw prompts, intents, and compiled tasks never appear in summarizer output.

@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "id": "en-informal-08",
+  "title": "Add search endpoint",
+  "language": "en",
+  "messageType": "initial",
+  "input": "we need a search endpoint that takes a query and returns matching items. just simple text search, nothing fancy. return id, name, and a snippet.",
+  "expected": {
+    "requiredGoalConcepts": ["Add search endpoint"],
+    "requiredConstraints": ["return id, name, and a snippet."],
+    "forbiddenAdditions": [
+      "Do not add authentication, pagination, or filtering not requested while addressing “Add search endpoint”."
+    ],
+    "responseLanguage": "en",
+    "clarificationRecommended": true
+  },
+  "tags": []
+}

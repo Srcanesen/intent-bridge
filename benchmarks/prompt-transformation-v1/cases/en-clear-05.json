@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "id": "en-clear-05",
+  "title": "Sort users alphabetically",
+  "language": "en",
+  "messageType": "initial",
+  "input": "sort the user list on the admin page by last_name ascending, then first_name ascending. the sort should happen server-side before returning results.",
+  "expected": {
+    "requiredGoalConcepts": ["Sort users alphabetically"],
+    "requiredConstraints": [
+      "sort the user list on the admin page by last_name ascending, then first_name ascending. the sort should happen server-side before returning results."
+    ],
+    "forbiddenAdditions": [
+      "Do not add new storage systems or background jobs while addressing “Sort users alphabetically”."
+    ],
+    "responseLanguage": "en",
+    "clarificationRecommended": false
+  },
+  "tags": ["clear", "explicit-constraints"]
+}

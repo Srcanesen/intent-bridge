@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "id": "tr-informal-02",
+  "title": "Karanlık tema ekle",
+  "language": "tr",
+  "messageType": "initial",
+  "input": "uygulamaya karanlık bi tema ekleyelim mi? kullanıcılar istiyor. header'a bi anahtar koy, açıp kapasınlar.",
+  "expected": {
+    "requiredGoalConcepts": ["Karanlık tema ekle"],
+    "requiredConstraints": [],
+    "forbiddenAdditions": [
+      "“Karanlık tema ekle” için ilgisiz sayfa tasarımları ekleme."
+    ],
+    "responseLanguage": "tr",
+    "clarificationRecommended": true
+  },
+  "tags": []
+}

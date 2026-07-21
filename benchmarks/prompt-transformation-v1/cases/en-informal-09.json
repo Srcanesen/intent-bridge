@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "id": "en-informal-09",
+  "title": "Update error messages",
+  "language": "en",
+  "messageType": "initial",
+  "input": "the error messages are really technical and scare users. can you make them more friendly? like 'something went wrong' instead of stack traces.",
+  "expected": {
+    "requiredGoalConcepts": ["Update error messages"],
+    "requiredConstraints": [
+      "like 'something went wrong' instead of stack traces."
+    ],
+    "forbiddenAdditions": [
+      "Do not add unrelated page redesigns while addressing “Update error messages”."
+    ],
+    "responseLanguage": "en",
+    "clarificationRecommended": true
+  },
+  "tags": []
+}

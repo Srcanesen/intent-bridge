@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "id": "tr-informal-05",
+  "title": "Paket güncelle",
+  "language": "tr",
+  "messageType": "initial",
+  "input": "eski bi bağımlılık var, güvenlik uyarısı veriyor. axios'u en son sürüme güncelle. major değilse direkt geç.",
+  "expected": {
+    "requiredGoalConcepts": ["Paket güncelle"],
+    "requiredConstraints": [],
+    "forbiddenAdditions": [
+      "“Paket güncelle” için ilgisiz bağımlılık güncellemeleri ekleme."
+    ],
+    "responseLanguage": "tr",
+    "clarificationRecommended": true
+  },
+  "tags": []
+}

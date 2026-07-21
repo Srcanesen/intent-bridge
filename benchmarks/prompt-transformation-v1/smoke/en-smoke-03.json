@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "id": "en-smoke-03",
+  "title": "Smoke improve search",
+  "language": "en",
+  "messageType": "initial",
+  "input": "the search function could be better. can you improve it? users are complaining.",
+  "expected": {
+    "requiredGoalConcepts": ["Smoke improve search"],
+    "requiredConstraints": [],
+    "forbiddenAdditions": [
+      "Do not add notifications, billing, or sharing features not requested while addressing “Smoke improve search”."
+    ],
+    "responseLanguage": "en",
+    "clarificationRecommended": true
+  },
+  "tags": ["vague"]
+}

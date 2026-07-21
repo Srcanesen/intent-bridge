@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "id": "tr-informal-21",
+  "title": "API dökümantasyonunu güncelle",
+  "language": "tr",
+  "messageType": "initial",
+  "input": "api dökümanları güncel değil, eski endpoint'leri gösteriyor. yeni route'lara göre düzelt. özellikle kullanıcı ve sipariş kısımları.",
+  "expected": {
+    "requiredGoalConcepts": ["API dökümantasyonunu güncelle"],
+    "requiredConstraints": ["özellikle kullanıcı ve sipariş kısımları."],
+    "forbiddenAdditions": [
+      "“API dökümantasyonunu güncelle” için yeni endpoint veya ürün davranışı ekleme."
+    ],
+    "responseLanguage": "tr",
+    "clarificationRecommended": true
+  },
+  "tags": []
+}

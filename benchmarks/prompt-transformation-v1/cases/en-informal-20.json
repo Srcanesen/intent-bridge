@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "id": "en-informal-20",
+  "title": "Add input sanitization",
+  "language": "en",
+  "messageType": "initial",
+  "input": "we're not sanitizing user input before rendering it in the comments section. someone could paste scripts there. add basic sanitization please.",
+  "expected": {
+    "requiredGoalConcepts": ["Add input sanitization"],
+    "requiredConstraints": ["someone could paste scripts there."],
+    "forbiddenAdditions": [
+      "Do not add identity, moderation, or tracking features while addressing “Add input sanitization”."
+    ],
+    "responseLanguage": "en",
+    "clarificationRecommended": true
+  },
+  "tags": []
+}

@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "id": "en-informal-18",
+  "title": "Add websocket reconnect",
+  "language": "en",
+  "messageType": "initial",
+  "input": "the websocket connection drops sometimes and never reconnects. can you add an auto-reconnect with exponential backoff? max 5 retries or something.",
+  "expected": {
+    "requiredGoalConcepts": ["Add websocket reconnect"],
+    "requiredConstraints": [
+      "can you add an auto-reconnect with exponential backoff?",
+      "max 5 retries or something."
+    ],
+    "forbiddenAdditions": [
+      "Do not add notifications, billing, or sharing features not requested while addressing “Add websocket reconnect”."
+    ],
+    "responseLanguage": "en",
+    "clarificationRecommended": true
+  },
+  "tags": []
+}

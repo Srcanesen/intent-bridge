@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "id": "en-ambiguity-05",
+  "title": "Improve error handling",
+  "language": "en",
+  "messageType": "initial",
+  "input": "error handling is poor throughout the app. when things fail the user sees nothing or a crash. improve it.",
+  "expected": {
+    "requiredGoalConcepts": ["Improve error handling"],
+    "requiredConstraints": [],
+    "forbiddenAdditions": [
+      "Do not add new storage systems or background jobs while addressing “Improve error handling”."
+    ],
+    "responseLanguage": "en",
+    "clarificationRecommended": true
+  },
+  "tags": ["risky-assumptions", "vague"]
+}

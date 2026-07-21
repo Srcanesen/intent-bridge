@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "id": "en-ambiguity-02",
+  "title": "Make checkout faster",
+  "language": "en",
+  "messageType": "initial",
+  "input": "the checkout flow feels slow. can you optimize it so users don't abandon their carts? just make it snappier.",
+  "expected": {
+    "requiredGoalConcepts": ["Make checkout faster"],
+    "requiredConstraints": [],
+    "forbiddenAdditions": [
+      "Do not add caches or infrastructure changes without evidence while addressing “Make checkout faster”."
+    ],
+    "responseLanguage": "en",
+    "clarificationRecommended": true
+  },
+  "tags": ["risky-assumptions", "vague"]
+}

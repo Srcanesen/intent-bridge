@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "id": "tr-informal-10",
+  "title": "Veri dışa aktar",
+  "language": "tr",
+  "messageType": "initial",
+  "input": "kullanıcılar kendi verilerini CSV olarak indirebilsin. ayarlara bi buton koy, tıklayınca tüm verileri içeren bi dosya indirsin.",
+  "expected": {
+    "requiredGoalConcepts": ["Veri dışa aktar"],
+    "requiredConstraints": [
+      "kullanıcılar kendi verilerini CSV olarak indirebilsin."
+    ],
+    "forbiddenAdditions": [
+      "“Veri dışa aktar” için istenmeyen bildirim, faturalama veya paylaşım özellikleri ekleme."
+    ],
+    "responseLanguage": "tr",
+    "clarificationRecommended": true
+  },
+  "tags": []
+}

@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "id": "en-informal-22",
+  "title": "Add keyboard shortcuts",
+  "language": "en",
+  "messageType": "initial",
+  "input": "power users want keyboard shortcuts. like press g then d for dashboard, g then s for settings. can you add a simple shortcut handler?",
+  "expected": {
+    "requiredGoalConcepts": ["Add keyboard shortcuts"],
+    "requiredConstraints": [
+      "like press g then d for dashboard, g then s for settings."
+    ],
+    "forbiddenAdditions": [
+      "Do not add shortcuts beyond the named key sequences while addressing “Add keyboard shortcuts”."
+    ],
+    "responseLanguage": "en",
+    "clarificationRecommended": true
+  },
+  "tags": []
+}

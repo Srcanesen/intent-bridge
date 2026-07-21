@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "id": "tr-informal-11",
+  "title": "Saat dilimi düzelt",
+  "language": "tr",
+  "messageType": "initial",
+  "input": "tarihler hep UTC gösteriliyor ama kullanıcılar Türkiye'de. saat dilimine göre çevirip öyle göster. can sıkıcı bi hata.",
+  "expected": {
+    "requiredGoalConcepts": ["Saat dilimi düzelt"],
+    "requiredConstraints": [
+      "tarihler hep UTC gösteriliyor ama kullanıcılar Türkiye'de.",
+      "saat dilimine göre çevirip öyle göster."
+    ],
+    "forbiddenAdditions": [
+      "“Saat dilimi düzelt” için ilgisiz davranış değişiklikleri ekleme."
+    ],
+    "responseLanguage": "tr",
+    "clarificationRecommended": true
+  },
+  "tags": []
+}

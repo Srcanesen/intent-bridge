@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "id": "tr-informal-14",
+  "title": "CSV içe aktar",
+  "language": "tr",
+  "messageType": "initial",
+  "input": "adminler CSV dosyasından kullanıcıları toplu ekleyebilsin. dosyayı yükle, parse et, hesapları oluştur. yeni kullanıcılara hoşgeldin maili at.",
+  "expected": {
+    "requiredGoalConcepts": ["CSV içe aktar"],
+    "requiredConstraints": [
+      "adminler CSV dosyasından kullanıcıları toplu ekleyebilsin."
+    ],
+    "forbiddenAdditions": [
+      "“CSV içe aktar” için istenmeyen bildirim, faturalama veya paylaşım özellikleri ekleme."
+    ],
+    "responseLanguage": "tr",
+    "clarificationRecommended": true
+  },
+  "tags": []
+}

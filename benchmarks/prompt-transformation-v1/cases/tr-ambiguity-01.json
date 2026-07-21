@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "id": "tr-ambiguity-01",
+  "title": "Kullanıcı profili sayfası",
+  "language": "tr",
+  "messageType": "initial",
+  "input": "kullanıcı profili sayfası yapmamız lazım. kullanıcılar bilgilerini görüp düzenleyebilsin. güzel dursun.",
+  "expected": {
+    "requiredGoalConcepts": ["Kullanıcı profili sayfası"],
+    "requiredConstraints": [],
+    "forbiddenAdditions": [
+      "“Kullanıcı profili sayfası” için istenmeyen bildirim, faturalama veya paylaşım özellikleri ekleme."
+    ],
+    "responseLanguage": "tr",
+    "clarificationRecommended": true
+  },
+  "tags": ["risky-assumptions", "vague"]
+}

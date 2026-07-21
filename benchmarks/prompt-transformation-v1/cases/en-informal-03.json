@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "id": "en-informal-03",
+  "title": "Sort table by date",
+  "language": "en",
+  "messageType": "initial",
+  "input": "the table on the dashboard shows results in random order. could you make it sort by date descending by default? that's how people expect to see it.",
+  "expected": {
+    "requiredGoalConcepts": ["Sort table by date"],
+    "requiredConstraints": [
+      "could you make it sort by date descending by default?"
+    ],
+    "forbiddenAdditions": [
+      "Do not add unrelated page redesigns while addressing “Sort table by date”."
+    ],
+    "responseLanguage": "en",
+    "clarificationRecommended": true
+  },
+  "tags": []
+}

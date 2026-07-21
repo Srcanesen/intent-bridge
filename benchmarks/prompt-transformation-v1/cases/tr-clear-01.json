@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "id": "tr-clear-01",
+  "title": "Kullanıcı tablosuna sütun ekle",
+  "language": "tr",
+  "messageType": "initial",
+  "input": "kullanıcılar tablosuna 'phone' adında VARCHAR(20) tipinde bir sütun ekle. nullable olsun ve unique index'i olsun. kullanıcı oluşturma sorgusunu da güncelle.",
+  "expected": {
+    "requiredGoalConcepts": ["Kullanıcı tablosuna sütun ekle"],
+    "requiredConstraints": [
+      "kullanıcılar tablosuna 'phone' adında VARCHAR(20) tipinde bir sütun ekle. nullable olsun ve unique index'i olsun. kullanıcı oluşturma sorgusunu da güncelle."
+    ],
+    "forbiddenAdditions": [
+      "“Kullanıcı tablosuna sütun ekle” için yeni veri depoları veya arka plan işleri ekleme."
+    ],
+    "responseLanguage": "tr",
+    "clarificationRecommended": false
+  },
+  "tags": ["clear", "explicit-constraints"]
+}

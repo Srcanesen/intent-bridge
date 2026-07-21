@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "id": "en-informal-12",
+  "title": "Add loading spinner",
+  "language": "en",
+  "messageType": "initial",
+  "input": "the page loads are really slow and there's no spinner or anything. can you add a simple loading indicator while data fetches?",
+  "expected": {
+    "requiredGoalConcepts": ["Add loading spinner"],
+    "requiredConstraints": [],
+    "forbiddenAdditions": [
+      "Do not add unrelated page redesigns while addressing “Add loading spinner”."
+    ],
+    "responseLanguage": "en",
+    "clarificationRecommended": true
+  },
+  "tags": []
+}

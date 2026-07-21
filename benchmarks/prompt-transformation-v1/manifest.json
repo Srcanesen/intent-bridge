@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "subjectRelease": "v1.1.0",
+  "subjectCommit": "962a431292dae8d082abf5442329939207e38c48",
+  "seed": 42,
+  "languages": ["tr", "en"],
+  "strata": ["informal", "clear", "ambiguity", "edge-safety"],
+  "totalConfirmatory": 80,
+  "totalSmoke": 8,
+  "distribution": {
+    "tr": {
+      "informal": 24,
+      "clear": 6,
+      "ambiguity": 6,
+      "edge-safety": 4,
+      "total": 40
+    },
+    "en": {
+      "informal": 24,
+      "clear": 6,
+      "ambiguity": 6,
+      "edge-safety": 4,
+      "total": 40
+    }
+  },
+  "smokeDistribution": {
+    "tr": {
+      "informal": 1,
+      "clear": 1,
+      "ambiguity": 1,
+      "edge-safety": 1,
+      "total": 4
+    },
+    "en": {
+      "informal": 1,
+      "clear": 1,
+      "ambiguity": 1,
+      "edge-safety": 1,
+      "total": 4
+    }
+  },
+  "contentSha256": "d25bb4bf705923dcfc698279ade9ebf0fac07dc9783f87467940f5c0502c3d55",
+  "smokeContentSha256": "e82b418efdab66212a9fc0e9a9e7810c4ec495e653274d92e80b73fb4e3cdda6"
+}

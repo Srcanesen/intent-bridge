@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "id": "en-informal-14",
+  "title": "Add CSV import",
+  "language": "en",
+  "messageType": "initial",
+  "input": "we need to let admins import users from a csv file. upload the file, parse it, create accounts. send welcome emails for new ones.",
+  "expected": {
+    "requiredGoalConcepts": ["Add CSV import"],
+    "requiredConstraints": [
+      "we need to let admins import users from a csv file."
+    ],
+    "forbiddenAdditions": [
+      "Do not add notifications, billing, or sharing features not requested while addressing “Add CSV import”."
+    ],
+    "responseLanguage": "en",
+    "clarificationRecommended": true
+  },
+  "tags": []
+}

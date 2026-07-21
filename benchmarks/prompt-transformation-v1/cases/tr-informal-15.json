@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "id": "tr-informal-15",
+  "title": "Mobil düzeni düzelt",
+  "language": "tr",
+  "messageType": "initial",
+  "input": "site mobilde berbat görünüyor, her şey üst üste biniyor. menüyü hamburger yap, kartları dikey sırala. responsive yap şunu.",
+  "expected": {
+    "requiredGoalConcepts": ["Mobil düzeni düzelt"],
+    "requiredConstraints": [],
+    "forbiddenAdditions": [
+      "“Mobil düzeni düzelt” için istenmeyen masaüstü tasarım değişiklikleri ekleme."
+    ],
+    "responseLanguage": "tr",
+    "clarificationRecommended": true
+  },
+  "tags": []
+}
