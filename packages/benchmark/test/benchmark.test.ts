@@ -9,6 +9,7 @@ import {
   runBenchmark,
   createReport,
 } from "../src/index.js";
+import { evidenceFor } from "./helpers.js";
 const profile: ProviderProfileV1 = {
   id: "mock",
   protocol: "openai-compatible",
@@ -65,9 +66,12 @@ describe("benchmark", () => {
     expect(() => parseBenchmarkCaseV1({ ...c, extra: true })).toThrow();
     const provider: IntentProvider = {
       id: "mock",
-      interpret: vi
-        .fn()
-        .mockResolvedValue({ intent, rawResponseHash: "x", latencyMs: 1 }),
+      interpret: vi.fn().mockResolvedValue({
+        intent,
+        evidence: evidenceFor(intent),
+        rawResponseHash: "x",
+        latencyMs: 1,
+      }),
       testConnection: vi.fn(),
     };
     const results = await runBenchmark({

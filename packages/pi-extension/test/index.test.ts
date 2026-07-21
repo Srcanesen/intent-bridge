@@ -78,6 +78,29 @@ const reviewIntent = (messageType = "initial") => ({
   risk: { level: "high" as const, reasons: ["x"] },
 });
 
+const providerResult = (value = intent(), quote = "Profil") => {
+  const paths = ["/goal"];
+  for (const [taskIndex, task] of value.tasks.entries()) {
+    paths.push(`/tasks/${taskIndex}/objective`);
+    for (const field of ["scope", "constraints", "successCriteria"] as const)
+      for (const index of task[field].keys())
+        paths.push(`/tasks/${taskIndex}/${field}/${index}`);
+  }
+  for (const index of value.globalConstraints.keys())
+    paths.push(`/globalConstraints/${index}`);
+  return {
+    intent: value,
+    evidence: {
+      version: 1 as const,
+      items: paths.map((path) => ({
+        path,
+        source: "user_original" as const,
+        quote,
+      })),
+    },
+  };
+};
+
 let setupSequence = 0;
 
 function setup(
@@ -154,7 +177,7 @@ function setup(
   const provider = options.provider ?? {
     id: "local",
     interpret: vi.fn().mockImplementation(async (request) => ({
-      intent: intent(request.messageType),
+      ...providerResult(intent(request.messageType), request.originalText),
       rawResponseHash: "hash",
       latencyMs: 1,
     })),
@@ -498,7 +521,7 @@ describe("Intent Bridge Pi extension", () => {
           }),
         )
         .mockResolvedValueOnce({
-          intent: intent(),
+          ...providerResult(),
           rawResponseHash: "hash",
           latencyMs: 1,
         }),
@@ -675,7 +698,11 @@ describe("Intent Bridge Pi extension", () => {
             ? "FIRST_COMPILED_SECRET"
             : "SECOND_COMPILED_SECRET";
         await new Promise<void>((resolve) => releases.push(resolve));
-        return { intent: occurrence, rawResponseHash: "hash", latencyMs: 1 };
+        return {
+          ...providerResult(occurrence, request.originalText),
+          rawResponseHash: "hash",
+          latencyMs: 1,
+        };
       }),
       testConnection: vi.fn(),
     };
@@ -1162,7 +1189,7 @@ describe("Intent Bridge Pi extension", () => {
     const provider = {
       id: "pi:pi",
       interpret: vi.fn().mockResolvedValue({
-        intent: intent(),
+        ...providerResult(),
         rawResponseHash: "hash",
         latencyMs: 1,
       }),
@@ -1222,11 +1249,11 @@ describe("Intent Bridge Pi extension", () => {
     );
     const provider = {
       id: "pi:pi",
-      interpret: vi.fn().mockResolvedValue({
-        intent: intent(),
+      interpret: vi.fn().mockImplementation(async (request) => ({
+        ...providerResult(intent(), request.originalText),
         rawResponseHash: "hash",
         latencyMs: 1,
-      }),
+      })),
       testConnection: vi.fn(),
     } as unknown as IntentProvider;
     const test = setup({
@@ -1697,7 +1724,7 @@ describe("Intent Bridge quality review delivery matrix", () => {
     const provider = {
       id: "local",
       interpret: vi.fn().mockResolvedValue({
-        intent: reviewIntent(),
+        ...providerResult(reviewIntent()),
         rawResponseHash: "hash",
         latencyMs: 1,
       }),
@@ -1724,7 +1751,7 @@ describe("Intent Bridge quality review delivery matrix", () => {
     const provider = {
       id: "local",
       interpret: vi.fn().mockResolvedValue({
-        intent: intent(),
+        ...providerResult(),
         rawResponseHash: "hash",
         latencyMs: 1,
       }),
@@ -1758,7 +1785,7 @@ describe("Intent Bridge quality review delivery matrix", () => {
     const provider = {
       id: "local",
       interpret: vi.fn().mockResolvedValue({
-        intent: reviewIntent(),
+        ...providerResult(reviewIntent()),
         rawResponseHash: "hash",
         latencyMs: 1,
       }),
@@ -1798,7 +1825,7 @@ describe("Intent Bridge quality review delivery matrix", () => {
     const provider = {
       id: "local",
       interpret: vi.fn().mockResolvedValue({
-        intent: reviewIntent(),
+        ...providerResult(reviewIntent()),
         rawResponseHash: "hash",
         latencyMs: 1,
       }),
@@ -1876,7 +1903,7 @@ describe("Intent Bridge quality review delivery matrix", () => {
     const provider = {
       id: "local",
       interpret: vi.fn().mockResolvedValue({
-        intent: reviewIntent(),
+        ...providerResult(reviewIntent()),
         rawResponseHash: "hash",
         latencyMs: 1,
       }),

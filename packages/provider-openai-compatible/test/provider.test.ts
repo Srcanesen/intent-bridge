@@ -7,7 +7,6 @@ import {
 
 import {
   type BridgeError,
-  IntentDocumentV2JsonSchema,
   parseIntentDocumentV2,
   type InterpretationRequest,
   type ProviderProfileV1,
@@ -17,6 +16,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import {
   MAX_RESPONSE_BYTES,
   OpenAICompatibleIntentDocumentV2JsonSchema,
+  OpenAICompatibleInterpretationEnvelopeJsonSchema,
   OpenAICompatibleProvider,
 } from "../src/index.js";
 
@@ -56,6 +56,31 @@ const intent = (messageType = "initial") => ({
   confidence: 1,
   clarification: { recommended: false },
 });
+
+const evidenceFor = (
+  value = intent(),
+  quote = ".",
+  source: "user_original" | "project_summary" = "user_original",
+) => {
+  const paths = ["/goal"];
+  for (const [taskIndex, task] of value.tasks.entries()) {
+    paths.push(`/tasks/${taskIndex}/objective`);
+    for (const field of ["scope", "constraints", "successCriteria"] as const)
+      for (const index of task[field].keys())
+        paths.push(`/tasks/${taskIndex}/${field}/${index}`);
+  }
+  for (const index of value.globalConstraints.keys())
+    paths.push(`/globalConstraints/${index}`);
+  return {
+    version: 1 as const,
+    items: paths.map((path) => ({ path, source, quote })),
+  };
+};
+
+const envelope = (messageType = "initial", quote = ".") => {
+  const value = intent(messageType);
+  return { intent: value, evidence: evidenceFor(value, quote) };
+};
 
 const profiles: ProviderProfileV1 = {
   id: "local",
@@ -150,6 +175,7 @@ describe("OpenAICompatibleProvider HTTP contract", () => {
     );
     expect(schema).toEqual(OpenAICompatibleIntentDocumentV2JsonSchema);
     assertStrictSchema(schema);
+    assertStrictSchema(OpenAICompatibleInterpretationEnvelopeJsonSchema);
     const properties = (schema as { properties: Record<string, unknown> })
       .properties;
     for (const [property, optionalProperty] of [
@@ -182,6 +208,7 @@ describe("OpenAICompatibleProvider HTTP contract", () => {
   });
 
   it("sends one json_schema request with the stable payload and maps response metadata", async () => {
+    const exactEnvelope = ` ${JSON.stringify(envelope())}\n`;
     let calls = 0;
     let received:
       | {
@@ -205,7 +232,7 @@ describe("OpenAICompatibleProvider HTTP contract", () => {
         reply(
           response,
           {
-            choices: [{ message: { content: JSON.stringify(intent()) } }],
+            choices: [{ message: { content: exactEnvelope } }],
             usage: { prompt_tokens: 3, completion_tokens: 4, total_tokens: 7 },
           },
           200,
@@ -223,13 +250,13 @@ describe("OpenAICompatibleProvider HTTP contract", () => {
       max_tokens: 123,
       response_format: {
         type: "json_schema",
-        json_schema: { name: "intent_document_v2", strict: true },
+        json_schema: { name: "intent_interpretation_v2", strict: true },
       },
     });
     expect(
       (received?.body.response_format as { json_schema: { schema: unknown } })
         .json_schema.schema,
-    ).toEqual(OpenAICompatibleIntentDocumentV2JsonSchema);
+    ).toEqual(OpenAICompatibleInterpretationEnvelopeJsonSchema);
     const messages = received?.body.messages as Array<{ content: string }>;
     const system = messages[0]?.content ?? "";
     const user = messages[1]?.content ?? "{}";
@@ -237,7 +264,10 @@ describe("OpenAICompatibleProvider HTTP contract", () => {
     expect(system).toContain(
       "responseLanguage.source to user_explicit only when the user explicitly changes the assistant's final response or explanation language",
     );
-    expect(system).toContain("interpreterPromptVersion: openai-compatible-v3");
+    expect(system).toContain("interpreterPromptVersion: openai-compatible-v4");
+    expect(system).toContain("exact substring");
+    expect(system).toContain("Evidence proves attribution only");
+    expect(system).toContain("material ask_user ambiguity");
     expect(JSON.parse(user)).toEqual({
       messageType: request.messageType,
       originalText: request.originalText,
@@ -258,12 +288,12 @@ describe("OpenAICompatibleProvider HTTP contract", () => {
       "Do not write implementation code",
     );
     expect(result).toMatchObject({
-      intent: intent(),
+      ...envelope(),
       usage: { inputTokens: 3, outputTokens: 4, totalTokens: 7 },
       requestId: "req-123",
     });
     expect(result.rawResponseHash).toBe(
-      createHash("sha256").update(JSON.stringify(intent())).digest("hex"),
+      createHash("sha256").update(exactEnvelope).digest("hex"),
     );
   });
 
@@ -280,7 +310,7 @@ describe("OpenAICompatibleProvider HTTP contract", () => {
       incoming.on("end", () => {
         body = JSON.parse(raw);
         reply(response, {
-          choices: [{ message: { content: JSON.stringify(intent()) } }],
+          choices: [{ message: { content: JSON.stringify(envelope()) } }],
         });
       });
     });
@@ -291,29 +321,73 @@ describe("OpenAICompatibleProvider HTTP contract", () => {
     const system = (body?.messages as Array<{ content: string }>)[0]?.content;
     expect(system).toContain("JSON");
     expect(system).toContain(
-      `Required JSON Schema:\n${JSON.stringify(IntentDocumentV2JsonSchema)}`,
+      `Required JSON Schema:\n${JSON.stringify(OpenAICompatibleInterpretationEnvelopeJsonSchema)}`,
     );
   });
 
   it.each([
     [
       "fenced JSON",
-      `\`\`\`json\n${JSON.stringify(intent())}\n\`\`\``,
+      `\`\`\`json\n${JSON.stringify(envelope())}\n\`\`\``,
       "success",
     ],
     ["malformed JSON", "{", "PROVIDER_INVALID_JSON"],
     [
       "prose",
-      `Here is JSON: ${JSON.stringify(intent())}`,
+      `Here is JSON: ${JSON.stringify(envelope())}`,
       "PROVIDER_INVALID_JSON",
     ],
     ["missing choices", undefined, "PROVIDER_INVALID_JSON"],
     ["refusal", null, "PROVIDER_INVALID_JSON"],
-    ["schema invalid", JSON.stringify({}), "INTENT_SCHEMA_INVALID"],
+    [
+      "schema invalid",
+      JSON.stringify({ intent: {}, evidence: evidenceFor() }),
+      "INTENT_SCHEMA_INVALID",
+    ],
     [
       "message type mismatch",
-      JSON.stringify(intent("steer")),
+      JSON.stringify(envelope("steer")),
       "INTENT_SCHEMA_INVALID",
+    ],
+    ["bare IntentDocument", JSON.stringify(intent()), "PROVIDER_INVALID_JSON"],
+    [
+      "missing evidence",
+      JSON.stringify({ intent: intent() }),
+      "PROVIDER_INVALID_JSON",
+    ],
+    [
+      "wrong evidence quote",
+      JSON.stringify({
+        intent: intent(),
+        evidence: evidenceFor(intent(), "NOT_IN_SOURCE"),
+      }),
+      "INTENT_SCHEMA_INVALID",
+    ],
+    [
+      "wrong evidence path",
+      JSON.stringify({
+        intent: intent(),
+        evidence: {
+          ...evidenceFor(),
+          items: evidenceFor().items.map((item, index) =>
+            index === 0 ? { ...item, path: "/wrong" } : item,
+          ),
+        },
+      }),
+      "INTENT_SCHEMA_INVALID",
+    ],
+    [
+      "wrong evidence source",
+      JSON.stringify({
+        intent: intent(),
+        evidence: evidenceFor(intent(), ".", "project_summary"),
+      }),
+      "INTENT_SCHEMA_INVALID",
+    ],
+    [
+      "unknown envelope key",
+      JSON.stringify({ ...envelope(), unknown: true }),
+      "PROVIDER_INVALID_JSON",
     ],
   ])("handles %s in one call", async (_, content, expected) => {
     let calls = 0;
@@ -449,7 +523,7 @@ describe("OpenAICompatibleProvider HTTP contract", () => {
       calls += 1;
       reply(
         response,
-        { choices: [{ message: { content: JSON.stringify(intent()) } }] },
+        { choices: [{ message: { content: JSON.stringify(envelope()) } }] },
         200,
         { "x-request-id": "x".repeat(257) },
       );

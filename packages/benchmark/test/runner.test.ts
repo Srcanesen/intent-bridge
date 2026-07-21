@@ -5,6 +5,7 @@ import { BridgeError } from "@intent-bridge/core";
 import { describe, expect, it, vi } from "vitest";
 import { compareReports, createReport, runBenchmark } from "../src/index.js";
 import {
+  evidenceFor,
   makeCase,
   makeIntent,
   profile,
@@ -12,12 +13,16 @@ import {
   reportInput,
 } from "./helpers.js";
 
-const success = (id = "x", latencyMs = 5) => ({
-  intent: makeIntent(),
-  rawResponseHash: id,
-  latencyMs,
-  usage: { inputTokens: 10, outputTokens: 4, totalTokens: 14 },
-});
+const success = (id = "x", latencyMs = 5) => {
+  const intent = makeIntent();
+  return {
+    intent,
+    evidence: evidenceFor(intent),
+    rawResponseHash: id,
+    latencyMs,
+    usage: { inputTokens: 10, outputTokens: 4, totalTokens: 14 },
+  };
+};
 
 describe("benchmark runner", () => {
   it("enforces concurrency bounds 1..8", async () => {
@@ -217,7 +222,11 @@ describe("benchmark runner", () => {
         profileId: "mock",
         profile,
         cases: [item],
-        provider: providerWith(async () => ({ ...success(), intent })),
+        provider: providerWith(async () => ({
+          ...success(),
+          intent,
+          evidence: evidenceFor(intent, item.input),
+        })),
         evaluator,
         contextDir,
       });

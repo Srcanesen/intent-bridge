@@ -80,7 +80,7 @@ export interface ProviderProfileV1 {
 
 export interface ProviderInterpretationResult {
   intent: import("./intent.js").IntentDocument;
-  evidence?: import("./intent-evidence.js").IntentEvidenceV1;
+  evidence: import("./intent-evidence.js").IntentEvidenceV1;
   usage?: {
     inputTokens?: number;
     outputTokens?: number;
