@@ -54,7 +54,7 @@ INTENT_BRIDGE_LIVE_TESTS=1 corepack pnpm benchmark:implementation-outcome -- run
 
 Both exact models must be uniquely available; fallback is rejected. Every arm uses a fresh in-memory session/settings instance, explicit fixture cwd, the same `read/bash/edit/write` allowlist, thinking level, timeout policy, and empty resource discovery (no global/project extensions, skills, prompts, settings, or AGENTS files). Tool-call hooks count and block obvious boundary, network, and destructive attempts as defense in depth only.
 
-Clarification observation is a deterministic boolean heuristic over bounded English/Turkish/Spanish clarification phrases; bare `?` punctuation is not sufficient, and no assistant text is retained. Repeated mutation count comes only from repeated `edit`/`write` path calls. Implementation-agent token/cost fields use Pi's session statistics when available and otherwise remain `null`. Response-language safety is `unavailable`. Synthetic attachment metadata is intentionally omitted because the runner has no corresponding image bytes to pass identically to both arms.
+Clarification observation is a deterministic boolean heuristic over bounded English/Turkish/Spanish clarification phrases; bare `?` punctuation is not sufficient, and no assistant text is retained. Repeated mutation count comes only from repeated `edit`/`write` path calls. Implementation-agent token/cost fields use Pi's session statistics when available and otherwise remain `null`. Synthetic attachment metadata is intentionally omitted because the runner has no corresponding image bytes to pass identically to both arms.
 
 ## Corpus matrix
 
