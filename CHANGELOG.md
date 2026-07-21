@@ -5,6 +5,9 @@
 ### Added
 
 - Deterministic core quality assessment with bounded review reasons, backward-compatible configuration defaults, and privacy-safe trace metadata.
+- Quality review delivery wiring: `config.quality` flows into the pipeline, and the Pi extension routes auto-mode review candidates through the existing preview selector (or preserves the original when no UI is available). The `quality_review_required_no_ui` reason is recorded in the trace and `intent-bridge.preview` session entry.
+- Preview and `/bridge last` now surface bounded, redacted assessment fields: outcome, decision reasons, active enforcement, risk level and reasons, confidence, clarification recommendation, and material ask_user ambiguities.
+- Separate `## Interpreter advisory — not user requirements` section in the compiled task (compiler version `pi-v2`). The advisory is omitted for clean compact or follow-up output, and is always distinguished from user-stated constraints.
 
 ## 1.0.0 — 2026-07-21
 

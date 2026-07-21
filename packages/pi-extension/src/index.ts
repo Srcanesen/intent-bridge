@@ -101,6 +101,33 @@ class BufferedTraceSink implements TraceSink {
   }
 }
 
+type DeliveryDecision =
+  | { kind: "inject" }
+  | { kind: "preview" }
+  | { kind: "review_required_no_ui" };
+
+function decideDelivery({
+  mode,
+  assessment,
+  enforcement,
+  hasUI,
+}: {
+  mode: "auto" | "preview" | "off";
+  assessment: { outcome: "accept" | "review" };
+  enforcement: "observe" | "review";
+  hasUI: boolean;
+}): DeliveryDecision {
+  if (mode === "preview") return { kind: "preview" };
+  if (
+    mode === "auto" &&
+    enforcement === "review" &&
+    assessment.outcome === "review"
+  ) {
+    return hasUI ? { kind: "preview" } : { kind: "review_required_no_ui" };
+  }
+  return { kind: "inject" };
+}
+
 function hasPriorUserMessage(ctx: ExtensionContext): boolean {
   return ctx.sessionManager
     .getBranch()
@@ -281,6 +308,7 @@ export function createIntentBridgeExtension(
         {
           mode: config.mode,
           logging: config.logging,
+          quality: config.quality,
           providerProfileId: providerId,
           model: model?.id ?? requireProfile(profile).model,
           ...(profile?.pricing ? { pricing: profile.pricing } : {}),
@@ -311,12 +339,35 @@ export function createIntentBridgeExtension(
           ? {}
           : { latencyMs: buffered.trace.latencyMs }),
       });
-      if (config.mode !== "preview") {
+      const decision = decideDelivery({
+        mode: config.mode,
+        assessment: result.assessment,
+        enforcement: config.quality.enforcement,
+        hasUI: ctx.hasUI,
+      });
+      if (decision.kind === "review_required_no_ui") {
+        if (buffered.trace) {
+          buffered.trace.status = "bypass";
+          buffered.trace.bypassReason = "quality_review_required_no_ui";
+        }
+        if (buffered.trace) await append(buffered.trace, config.logging);
+        try {
+          pi.appendEntry("intent-bridge.preview", {
+            traceId,
+            action: "review_required_no_ui",
+            timestamp: now().toISOString(),
+          });
+        } catch {}
+        state.lastStatus = "bypass";
+        return { action: "continue" };
+      }
+      if (decision.kind === "inject") {
         if (buffered.trace) await append(buffered.trace, config.logging);
         state.lastStatus = "transformed";
         queueTask(event.text, result.compiledTask);
         return { action: "continue" };
       }
+      // decision.kind === "preview" — open the existing selector.
       let choice: string | undefined;
       try {
         choice = await ctx.ui.select(formatTransformation(latest), [

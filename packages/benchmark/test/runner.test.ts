@@ -239,7 +239,7 @@ describe("benchmark runner", () => {
         candidate: {
           intent,
           compiledTask: expect.objectContaining({
-            compilerVersion: "pi-v1",
+            compilerVersion: "pi-v2",
             responseLanguageCode: "tr",
             text: expect.stringContaining(item.input),
           }),

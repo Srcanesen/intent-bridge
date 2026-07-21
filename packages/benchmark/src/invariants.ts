@@ -35,7 +35,8 @@ export function evaluateInvariants(
   add("schema_valid", intent.schemaVersion === "1");
   add(
     "compiler_valid",
-    compiled.compilerVersion === "pi-v1" &&
+    (compiled.compilerVersion === "pi-v1" ||
+      compiled.compilerVersion === "pi-v2") &&
       compiled.responseLanguageCode === intent.responseLanguage.code &&
       compiled.text.length > 0,
   );

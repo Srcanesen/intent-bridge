@@ -37,7 +37,14 @@ const config = (patch: Partial<BridgeConfigV1> = {}): BridgeConfigV1 => ({
   },
   context: { enabled: true, maxCharacters: 100, maxFileCharacters: 100 },
   logging: { mode: "metadata", retentionDays: 7 },
-  quality: {},
+  quality: {
+    enforcement: "observe",
+    reviewOnHighRisk: true,
+    reviewOnClarification: true,
+    reviewOnMaterialAskUser: true,
+    minConfidence: null,
+    noUiAction: "send_original",
+  },
   retry: { maxRetries: 1, baseDelayMs: 250, totalBudgetMs: 45000 },
   ...patch,
 });
@@ -63,6 +70,11 @@ const intent = (messageType = "initial") => ({
   risk: { level: "low" as const, reasons: [] },
   confidence: 0.9,
   clarification: { recommended: false },
+});
+
+const reviewIntent = (messageType = "initial") => ({
+  ...intent(messageType),
+  risk: { level: "high" as const, reasons: ["x"] },
 });
 
 let setupSequence = 0;
@@ -1376,5 +1388,240 @@ describe("Intent Bridge Pi extension", () => {
       enabled: false,
       mode: "off",
     });
+  });
+});
+
+describe("Intent Bridge quality review delivery matrix", () => {
+  it("passes config.quality into the pipeline run", async () => {
+    const test = setup({
+      config: config({
+        quality: {
+          enforcement: "review",
+          reviewOnHighRisk: true,
+          reviewOnClarification: true,
+          reviewOnMaterialAskUser: true,
+          minConfidence: 0.5,
+          noUiAction: "send_original",
+        },
+      }),
+    });
+    await test.handlers.input(input(), test.ctx);
+    const successTrace = test.trace.append.mock.calls[0]?.[0];
+    expect(successTrace).toMatchObject({ status: "success" });
+    const assessment = (
+      successTrace as { assessment?: { policyVersion: string } }
+    ).assessment;
+    expect(assessment?.policyVersion).toBe("quality-policy-v1");
+  });
+
+  it("observes a review-candidate in auto mode and still injects the compiled task", async () => {
+    const provider = {
+      id: "local",
+      interpret: vi.fn().mockResolvedValue({
+        intent: reviewIntent(),
+        rawResponseHash: "hash",
+        latencyMs: 1,
+      }),
+      testConnection: vi.fn(),
+    } as unknown as IntentProvider;
+    const test = setup({ provider });
+    await expect(test.handlers.input(input(), test.ctx)).resolves.toEqual({
+      action: "continue",
+    });
+    expect(
+      test.handlers.before_agent_start(
+        { prompt: "Profil sayfasını düzelt" },
+        test.ctx,
+      ),
+    ).toMatchObject({
+      message: { display: false, content: expect.any(String) },
+    });
+    expect(test.notices.join(" ")).not.toMatch(
+      /Intent Bridge skipped this message/,
+    );
+  });
+
+  it("injects when auto + review enforcement + accept outcome", async () => {
+    const provider = {
+      id: "local",
+      interpret: vi.fn().mockResolvedValue({
+        intent: intent(),
+        rawResponseHash: "hash",
+        latencyMs: 1,
+      }),
+      testConnection: vi.fn(),
+    } as unknown as IntentProvider;
+    const test = setup({
+      provider,
+      config: config({
+        quality: {
+          enforcement: "review",
+          reviewOnHighRisk: true,
+          reviewOnClarification: true,
+          reviewOnMaterialAskUser: true,
+          minConfidence: null,
+          noUiAction: "send_original",
+        },
+      }),
+    });
+    await test.handlers.input(input(), test.ctx);
+    expect(
+      test.handlers.before_agent_start(
+        { prompt: "Profil sayfasını düzelt" },
+        test.ctx,
+      ),
+    ).toMatchObject({
+      message: { display: false, content: expect.any(String) },
+    });
+  });
+
+  it("opens the existing preview selector when auto + review + UI is available", async () => {
+    const provider = {
+      id: "local",
+      interpret: vi.fn().mockResolvedValue({
+        intent: reviewIntent(),
+        rawResponseHash: "hash",
+        latencyMs: 1,
+      }),
+      testConnection: vi.fn(),
+    } as unknown as IntentProvider;
+    const select = vi.fn(async (title: string) => {
+      expect(title).toContain("## Quality assessment");
+      return "Send transformed";
+    });
+    const test = setup({
+      provider,
+      config: config({
+        quality: {
+          enforcement: "review",
+          reviewOnHighRisk: true,
+          reviewOnClarification: true,
+          reviewOnMaterialAskUser: true,
+          minConfidence: null,
+          noUiAction: "send_original",
+        },
+      }),
+      select,
+    });
+    await expect(test.handlers.input(input(), test.ctx)).resolves.toEqual({
+      action: "continue",
+    });
+    expect(select).toHaveBeenCalledTimes(1);
+    expect(
+      test.handlers.before_agent_start(
+        { prompt: "Profil sayfasını düzelt" },
+        test.ctx,
+      ),
+    ).toMatchObject({ message: { display: false } });
+  });
+
+  it("preserves the original and queues nothing when auto + review + no UI", async () => {
+    const provider = {
+      id: "local",
+      interpret: vi.fn().mockResolvedValue({
+        intent: reviewIntent(),
+        rawResponseHash: "hash",
+        latencyMs: 1,
+      }),
+      testConnection: vi.fn(),
+    } as unknown as IntentProvider;
+    const test = setup({
+      provider,
+      config: config({
+        quality: {
+          enforcement: "review",
+          reviewOnHighRisk: true,
+          reviewOnClarification: true,
+          reviewOnMaterialAskUser: true,
+          minConfidence: null,
+          noUiAction: "send_original",
+        },
+      }),
+    });
+    test.ctx.hasUI = false;
+    await expect(test.handlers.input(input(), test.ctx)).resolves.toEqual({
+      action: "continue",
+    });
+    expect(
+      test.handlers.before_agent_start(
+        { prompt: "Profil sayfasını düzelt" },
+        test.ctx,
+      ),
+    ).toBeUndefined();
+    expect(test.trace.append).toHaveBeenCalledWith(
+      expect.objectContaining({
+        status: "bypass",
+        bypassReason: "quality_review_required_no_ui",
+      }),
+      expect.anything(),
+    );
+    expect(test.notices.join(" ")).not.toMatch(
+      /Intent Bridge skipped this message/,
+    );
+    await test.command()("status", test.ctx);
+    expect(test.notices.at(-1)).toContain("last=bypass");
+  });
+
+  it("preserves the original on preview + no UI before any context or provider work", async () => {
+    const test = setup({ config: config({ mode: "preview" }) });
+    test.ctx.hasUI = false;
+    await expect(test.handlers.input(input(), test.ctx)).resolves.toEqual({
+      action: "continue",
+    });
+    expect(test.collectContext).not.toHaveBeenCalled();
+    expect(test.createProvider).not.toHaveBeenCalled();
+    expect(test.trace.append).toHaveBeenCalledWith(
+      expect.objectContaining({ bypassReason: "preview_ui_unavailable" }),
+      expect.anything(),
+    );
+  });
+
+  it("renders assessment fields in preview and last diagnostics", async () => {
+    const test = setup({
+      config: config({ mode: "preview" }),
+      select: async () => "Send original",
+    });
+    const sensitivePrompt = `fix profile ${["api", "key"].join("_")}=SENTINEL_SECRET_VALUE`;
+    await test.handlers.input(input({ text: sensitivePrompt }), test.ctx);
+    await test.command()("last", test.ctx);
+    const last = test.notices.at(-1) ?? "";
+    expect(last).toContain("## Quality assessment");
+    expect(last).toContain("## Risk");
+    expect(last).toContain("## Clarification");
+    expect(last).toContain("## Material ask_user ambiguities");
+    expect(last).toContain("Enforcement: observe");
+    expect(last).not.toContain("SENTINEL_SECRET_VALUE");
+  });
+
+  it("renders the active review enforcement and a high risk signal in last diagnostics", async () => {
+    const provider = {
+      id: "local",
+      interpret: vi.fn().mockResolvedValue({
+        intent: reviewIntent(),
+        rawResponseHash: "hash",
+        latencyMs: 1,
+      }),
+      testConnection: vi.fn(),
+    } as unknown as IntentProvider;
+    const test = setup({
+      provider,
+      config: config({
+        quality: {
+          enforcement: "review",
+          reviewOnHighRisk: true,
+          reviewOnClarification: true,
+          reviewOnMaterialAskUser: true,
+          minConfidence: null,
+          noUiAction: "send_original",
+        },
+      }),
+      select: async () => "Send original",
+    });
+    await test.handlers.input(input(), test.ctx);
+    await test.command()("last", test.ctx);
+    const last = test.notices.at(-1) ?? "";
+    expect(last).toContain("Outcome: review");
+    expect(last).toContain("high_risk");
+    expect(last).toContain("Enforcement: review");
   });
 });

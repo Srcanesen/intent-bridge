@@ -100,7 +100,7 @@ export interface IntentProvider {
 }
 
 export interface CompiledTask {
-  compilerVersion: "pi-v1";
+  compilerVersion: "pi-v1" | "pi-v2";
   text: string;
   responseLanguageCode: string;
 }
@@ -110,6 +110,7 @@ export interface HarnessCompiler<TIntent> {
     intent: TIntent;
     originalText: string;
     attachmentSummary: { imageCount: number };
+    assessment?: import("./quality-policy.js").TransformationAssessment;
   }): CompiledTask;
 }
 

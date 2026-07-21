@@ -5777,6 +5777,8 @@ function parseIntentDocumentV1(input, options = {}) {
   };
 }
 
+var ADVISORY_HEADING = "Interpreter advisory \u2014 not user requirements";
+var ADVISORY_BUDGET = 1e3;
 var fullGuidance = (responseLanguage2) => [
   "Inspect relevant repository context before implementation.",
   "Do not treat assumptions as user requirements.",
@@ -5807,8 +5809,49 @@ function section(title, content) {
   return content === void 0 || content === "" ? void 0 : `## ${title}
 ${content}`;
 }
+function safeLine(text) {
+  return redactSecrets(text).text.replace(/\r/g, "").replace(/\n+/g, " ").replace(/[ \t]+\n/g, "\n");
+}
+function materialAskUserAmbiguities(intent) {
+  return intent.ambiguities.filter((ambiguity2) => ambiguity2.material && ambiguity2.preferredResolution === "ask_user");
+}
+function riskReasons(intent) {
+  return intent.risk.reasons.slice(0, 10);
+}
+function confidenceOnlyReview(assessment) {
+  return assessment.reasons.length === 1 && assessment.reasons[0] === "confidence_below_threshold";
+}
+function advisoryContent(intent, assessment) {
+  const reasons = riskReasons(intent);
+  const askUser = materialAskUserAmbiguities(intent);
+  const clarification = intent.clarification;
+  const confidenceOnly = confidenceOnlyReview(assessment);
+  const hasSignals = intent.risk.level === "high" || clarification.recommended || askUser.length > 0;
+  if (!confidenceOnly && !hasSignals)
+    return void 0;
+  const assessmentReasons = assessment.reasons.length > 0 ? ` (${assessment.reasons.join(", ")})` : "";
+  const assessmentLine = `- Assessment outcome: ${assessment.outcome}${assessmentReasons}. This section is interpreter advisory, not user-stated requirements.`;
+  const lines = [];
+  if (confidenceOnly)
+    lines.push(`- Observed confidence: ${assessment.observedConfidence}.`);
+  if (intent.risk.level === "high") {
+    const reasonSuffix = reasons.length > 0 ? ` \u2014 ${reasons.join("; ")}` : "";
+    lines.push(`- Risk: high${reasonSuffix}.`);
+  }
+  if (clarification.recommended) {
+    const reasonSuffix = clarification.reason ? ` \u2014 ${clarification.reason}` : "";
+    lines.push(`- Clarification recommended${reasonSuffix}.`);
+  }
+  for (const ambiguity2 of askUser)
+    lines.push(`- Material ask_user ambiguity: ${ambiguity2.description}.`);
+  const body = [assessmentLine, ...lines.map((line) => safeLine(line))].join("\n");
+  if (body.length <= ADVISORY_BUDGET)
+    return body;
+  return `${body.slice(0, ADVISORY_BUDGET - 14)}
+[truncated]`;
+}
 var PiCompilerV1 = class {
-  compile({ intent, originalText, attachmentSummary }) {
+  compile({ intent, originalText, attachmentSummary, assessment }) {
     const responseLanguage2 = intent.responseLanguage.name ? `${intent.responseLanguage.name} (${intent.responseLanguage.code})` : intent.responseLanguage.code;
     const compact = intent.messageType === "steer" || intent.messageType === "follow_up";
     const fence = codeFence(originalText);
@@ -5826,13 +5869,14 @@ ${list(intent.globalConstraints)}` : void 0,
       section("Assumptions \u2014 not requirements", intent.assumptions.length > 0 ? list(intent.assumptions.map((assumption2) => `[${assumption2.confidence}] ${assumption2.text}`)) : void 0),
       section("Unresolved ambiguities", intent.ambiguities.length > 0 ? list(intent.ambiguities.map((ambiguity2) => `[${ambiguity2.material ? "material" : "non-material"}; preferred resolution: ${ambiguity2.preferredResolution}] ${ambiguity2.description}`)) : void 0),
       attachmentSummary.imageCount === 0 ? void 0 : section("Attached material", attachmentSummary.imageCount === 1 ? "The user attached 1 image. Inspect it directly; the bridge did not analyze it." : `The user attached ${attachmentSummary.imageCount} images. Inspect them directly; the bridge did not analyze them.`),
+      section(ADVISORY_HEADING, assessment ? advisoryContent(intent, assessment) : void 0),
       section("Execution guidance", list((compact ? compactGuidance : fullGuidance)(responseLanguage2))),
       section("Original user request", `${fence}
 ${originalText}
 ${fence}`)
     ].filter((content) => content !== void 0);
     return {
-      compilerVersion: "pi-v1",
+      compilerVersion: "pi-v2",
       text: [
         "[INTENT BRIDGE TASK \u2014 v1]",
         `Message type: ${intent.messageType}
@@ -5966,12 +6010,15 @@ var InterpretationPipeline = class {
       const intent = preserveResponseLanguage(parseIntentDocumentV1(providerResult.intent, {
         expectedMessageType: input.messageType
       }).intent);
+      const qualityConfig2 = options.quality ?? DEFAULT_QUALITY_CONFIG;
+      const assessment = assessQuality(intent, qualityConfig2);
       let compiledTask;
       try {
         compiledTask = this.compiler.compile({
           intent,
           originalText: input.originalText,
-          attachmentSummary: input.attachmentSummary
+          attachmentSummary: input.attachmentSummary,
+          assessment
         });
       } catch (cause) {
         throw new BridgeError({
@@ -5982,13 +6029,13 @@ var InterpretationPipeline = class {
         });
       }
       const quality = calculateQualitySignals(intent, { compilerValid: true });
-      const assessment = assessQuality(intent, options.quality ?? DEFAULT_QUALITY_CONFIG);
       this.state.lastTransformation = {
         originalText: input.originalText,
         intent,
         compiledTask,
         quality,
         assessment,
+        qualityConfig: qualityConfig2,
         traceId: input.traceId,
         timestamp,
         ...options.contextManifest === void 0 ? {} : { contextManifest: options.contextManifest }
@@ -6568,20 +6615,84 @@ var PREVIEW_CHOICES = [
   "Cancel"
 ];
 var CAP = 5e3;
+var LIST_CAP = 10;
+var REASON_CAP = 120;
 function bounded(text) {
-  const redacted = redactSecrets(text).text;
-  return redacted.length <= CAP ? redacted : `${redacted.slice(0, CAP - 14)}
+  return text.length <= CAP ? text : `${text.slice(0, CAP - 14)}
 [truncated]`;
+}
+function redactUserContent(text) {
+  return redactSecrets(text).text;
+}
+var QUALITY_DECISION_REASONS = [
+  "high_risk",
+  "clarification_recommended",
+  "material_ambiguity_requires_user",
+  "confidence_below_threshold"
+];
+function redactAssessmentContent(text) {
+  const protectedReasons = QUALITY_DECISION_REASONS.map((reason, index) => ({
+    reason,
+    placeholder: `[QUALITY_REASON_${index}]`
+  }));
+  let result = text;
+  for (const { reason, placeholder } of protectedReasons)
+    result = result.replaceAll(reason, placeholder);
+  result = redactSecrets(result).text;
+  for (const { reason, placeholder } of protectedReasons)
+    result = result.replaceAll(placeholder, reason);
+  return result;
 }
 function list2(items) {
   return items.length ? items.map((item) => `- ${item}`).join("\n") : "- None";
+}
+function safeReason(reason) {
+  const cleaned = redactUserContent(reason).replace(/[\r\n]+/g, " ");
+  return cleaned.length <= REASON_CAP ? cleaned : `${cleaned.slice(0, REASON_CAP - 14)}[truncated]`;
+}
+function boundedReasons(reasons) {
+  return list2(reasons.slice(0, LIST_CAP).map(safeReason));
+}
+function qualityDecisionReasonText(reasons) {
+  if (reasons.length === 0)
+    return "- None";
+  return list2(reasons.map((reason) => reason.replace(/[\r\n]+/g, " ")));
+}
+function materialAskUser(transformation) {
+  return transformation.intent.ambiguities.filter((ambiguity2) => ambiguity2.material && ambiguity2.preferredResolution === "ask_user");
+}
+function qualityEnforcementLine(config) {
+  return `Enforcement: ${config.enforcement}`;
+}
+function assessmentSection(transformation) {
+  const { intent, assessment, qualityConfig: qualityConfig2 } = transformation;
+  const askUser = materialAskUser(transformation);
+  const riskLine = intent.risk.level === "low" && intent.risk.reasons.length === 0 ? "- None" : list2([
+    `level=${intent.risk.level}`,
+    ...intent.risk.reasons.slice(0, LIST_CAP).map(safeReason)
+  ]);
+  const clarificationLine = intent.clarification.recommended ? `recommended \u2014 ${safeReason(intent.clarification.reason ?? "no reason provided")}` : "- None";
+  return [
+    "## Quality assessment",
+    `Outcome: ${assessment.outcome}`,
+    `Policy: ${assessment.policyVersion}`,
+    `Observed confidence: ${assessment.observedConfidence}`,
+    `Decision reasons: ${qualityDecisionReasonText(assessment.reasons)}`,
+    `Active ${qualityEnforcementLine(qualityConfig2)}`,
+    "\n## Risk",
+    riskLine,
+    "\n## Clarification",
+    clarificationLine,
+    "\n## Material ask_user ambiguities",
+    list2(askUser.slice(0, LIST_CAP).map((ambiguity2) => safeReason(ambiguity2.description)))
+  ].join("\n");
 }
 function transformationDetails(transformation) {
   const intent = transformation.intent;
   const tasks = intent.tasks.map((task2, index) => `${index + 1}. ${task2.objective}${task2.scope.length ? `
    Scope: ${task2.scope.join("; ")}` : ""}${task2.constraints.length ? `
    Constraints: ${task2.constraints.join("; ")}` : ""}`);
-  const text = [
+  return [
     "INTENT BRIDGE PREVIEW",
     "\n## Source language",
     intent.sourceLanguage.name ? `${intent.sourceLanguage.name} (${intent.sourceLanguage.code})` : intent.sourceLanguage.code,
@@ -6597,21 +6708,34 @@ function transformationDetails(transformation) {
     list2(intent.assumptions.map((assumption2) => assumption2.text)),
     "\n## Ambiguities",
     list2(intent.ambiguities.map((ambiguity2) => ambiguity2.description)),
+    "\n## Quality",
+    `Confidence: ${intent.confidence}`,
+    `Risk level: ${intent.risk.level}`,
+    `Risk reasons: ${intent.risk.reasons.length === 0 ? "- None" : boundedReasons(intent.risk.reasons)}`,
+    `Clarification recommended: ${intent.clarification.recommended ? `yes \u2014 ${safeReason(intent.clarification.reason ?? "no reason provided")}` : "no"}`,
+    `Material ask_user ambiguities: ${materialAskUser(transformation).length === 0 ? "- None" : list2(materialAskUser(transformation).slice(0, LIST_CAP).map((ambiguity2) => safeReason(ambiguity2.description)))}`,
     "\n## English compiled task",
     transformation.compiledTask.text
   ].join("\n");
-  return text;
 }
 function formatTransformation(transformation) {
-  return bounded(transformationDetails(transformation));
+  const details = redactUserContent(transformationDetails(transformation));
+  const assessment = redactAssessmentContent(assessmentSection(transformation));
+  return bounded(`${details}
+
+${assessment}`);
 }
 function formatLastTransformation(transformation, metadata) {
-  return bounded(`${metadata}
+  const details = redactUserContent(`${metadata}
 
 Original request:
 ${transformation.originalText}
 
 ${transformationDetails(transformation)}`);
+  const assessment = redactAssessmentContent(assessmentSection(transformation));
+  return bounded(`${details}
+
+${assessment}`);
 }
 
 var smallTalk = /* @__PURE__ */ new Set([
@@ -6923,6 +7047,14 @@ var BufferedTraceSink = class {
     this.trace = trace;
   }
 };
+function decideDelivery({ mode, assessment, enforcement, hasUI }) {
+  if (mode === "preview")
+    return { kind: "preview" };
+  if (mode === "auto" && enforcement === "review" && assessment.outcome === "review") {
+    return hasUI ? { kind: "preview" } : { kind: "review_required_no_ui" };
+  }
+  return { kind: "inject" };
+}
 function hasPriorUserMessage(ctx) {
   return ctx.sessionManager.getBranch().some((entry) => entry.type === "message" && entry.message?.role === "user");
 }
@@ -7052,6 +7184,7 @@ function createIntentBridgeExtension(pi, dependencies = {}) {
       }, {
         mode: config.mode,
         logging: config.logging,
+        quality: config.quality,
         providerProfileId: providerId,
         model: model?.id ?? requireProfile(profile2).model,
         ...profile2?.pricing ? { pricing: profile2.pricing } : {},
@@ -7078,7 +7211,31 @@ function createIntentBridgeExtension(pi, dependencies = {}) {
         mode: config.mode,
         ...buffered.trace?.latencyMs === void 0 ? {} : { latencyMs: buffered.trace.latencyMs }
       });
-      if (config.mode !== "preview") {
+      const decision = decideDelivery({
+        mode: config.mode,
+        assessment: result.assessment,
+        enforcement: config.quality.enforcement,
+        hasUI: ctx.hasUI
+      });
+      if (decision.kind === "review_required_no_ui") {
+        if (buffered.trace) {
+          buffered.trace.status = "bypass";
+          buffered.trace.bypassReason = "quality_review_required_no_ui";
+        }
+        if (buffered.trace)
+          await append(buffered.trace, config.logging);
+        try {
+          pi.appendEntry("intent-bridge.preview", {
+            traceId,
+            action: "review_required_no_ui",
+            timestamp: now().toISOString()
+          });
+        } catch {
+        }
+        state.lastStatus = "bypass";
+        return { action: "continue" };
+      }
+      if (decision.kind === "inject") {
         if (buffered.trace)
           await append(buffered.trace, config.logging);
         state.lastStatus = "transformed";

@@ -103,6 +103,14 @@ The selection stores only provider and model identifiers. Pi continues to own au
 | `/bridge logs` | Show local trace-log information. |
 | `/bridge privacy` | Show project-context eligibility. |
 
+## Quality review
+
+`quality` lives under the same JSON config (global or trusted project layer) and is file-only — there is no CLI control.
+
+Default behaviour observes every transformation (`enforcement: "observe"`), with `reviewOnHighRisk`, `reviewOnClarification`, and `reviewOnMaterialAskUser` set to `true` and `minConfidence` to `null`. A transformation that would be reviewed is still injected under observe; the assessment is observable in `/bridge last` and the trace but never blocks delivery.
+
+Set `quality.enforcement` to `"review"` to gate the same candidates through the existing preview selector. In auto mode a review candidate with an interactive UI opens that selector; without UI the original message is sent unchanged, the `quality_review_required_no_ui` reason is recorded in the trace and the session entry, and no technical error notification is shown. The same `config.quality` always flows into the pipeline so the assessment is consistent between trace, latest state, and preview.
+
 ## Failure and retry behavior
 
 Production calls use the selected provider/model with thinking disabled and native SDK retries disabled. The Bridge pipeline may retry once, using the same provider and model, only for transient timeout, reachability, rate-limit, or server failures. Authentication, configuration, JSON, schema, safety, compiler, response-size, and unknown failures are not retried.

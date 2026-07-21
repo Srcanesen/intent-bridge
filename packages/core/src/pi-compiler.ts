@@ -1,5 +1,10 @@
 import type { CompiledTask, HarnessCompiler } from "./contracts.js";
 import type { IntentDocumentV1 } from "./intent.js";
+import { redactSecrets } from "./privacy.js";
+import type { TransformationAssessment } from "./quality-policy.js";
+
+const ADVISORY_HEADING = "Interpreter advisory — not user requirements";
+const ADVISORY_BUDGET = 1_000;
 
 const fullGuidance = (responseLanguage: string) => [
   "Inspect relevant repository context before implementation.",
@@ -48,11 +53,78 @@ function section(
     : `## ${title}\n${content}`;
 }
 
+function safeLine(text: string): string {
+  return redactSecrets(text)
+    .text.replace(/\r/g, "")
+    .replace(/\n+/g, " ")
+    .replace(/[ \t]+\n/g, "\n");
+}
+
+function materialAskUserAmbiguities(
+  intent: IntentDocumentV1,
+): IntentDocumentV1["ambiguities"] {
+  return intent.ambiguities.filter(
+    (ambiguity) =>
+      ambiguity.material && ambiguity.preferredResolution === "ask_user",
+  );
+}
+
+function riskReasons(intent: IntentDocumentV1): readonly string[] {
+  return intent.risk.reasons.slice(0, 10);
+}
+
+function confidenceOnlyReview(assessment: TransformationAssessment): boolean {
+  return (
+    assessment.reasons.length === 1 &&
+    assessment.reasons[0] === "confidence_below_threshold"
+  );
+}
+
+function advisoryContent(
+  intent: IntentDocumentV1,
+  assessment: TransformationAssessment,
+): string | undefined {
+  const reasons = riskReasons(intent);
+  const askUser = materialAskUserAmbiguities(intent);
+  const clarification = intent.clarification;
+  const confidenceOnly = confidenceOnlyReview(assessment);
+  const hasSignals =
+    intent.risk.level === "high" ||
+    clarification.recommended ||
+    askUser.length > 0;
+  if (!confidenceOnly && !hasSignals) return undefined;
+
+  const assessmentReasons =
+    assessment.reasons.length > 0 ? ` (${assessment.reasons.join(", ")})` : "";
+  const assessmentLine = `- Assessment outcome: ${assessment.outcome}${assessmentReasons}. This section is interpreter advisory, not user-stated requirements.`;
+  const lines: string[] = [];
+  if (confidenceOnly)
+    lines.push(`- Observed confidence: ${assessment.observedConfidence}.`);
+  if (intent.risk.level === "high") {
+    const reasonSuffix = reasons.length > 0 ? ` — ${reasons.join("; ")}` : "";
+    lines.push(`- Risk: high${reasonSuffix}.`);
+  }
+  if (clarification.recommended) {
+    const reasonSuffix = clarification.reason
+      ? ` — ${clarification.reason}`
+      : "";
+    lines.push(`- Clarification recommended${reasonSuffix}.`);
+  }
+  for (const ambiguity of askUser)
+    lines.push(`- Material ask_user ambiguity: ${ambiguity.description}.`);
+  const body = [assessmentLine, ...lines.map((line) => safeLine(line))].join(
+    "\n",
+  );
+  if (body.length <= ADVISORY_BUDGET) return body;
+  return `${body.slice(0, ADVISORY_BUDGET - 14)}\n[truncated]`;
+}
+
 export class PiCompilerV1 implements HarnessCompiler<IntentDocumentV1> {
   compile({
     intent,
     originalText,
     attachmentSummary,
+    assessment,
   }: Parameters<
     HarnessCompiler<IntentDocumentV1>["compile"]
   >[0]): CompiledTask {
@@ -113,6 +185,10 @@ export class PiCompilerV1 implements HarnessCompiler<IntentDocumentV1> {
               : `The user attached ${attachmentSummary.imageCount} images. Inspect them directly; the bridge did not analyze them.`,
           ),
       section(
+        ADVISORY_HEADING,
+        assessment ? advisoryContent(intent, assessment) : undefined,
+      ),
+      section(
         "Execution guidance",
         list((compact ? compactGuidance : fullGuidance)(responseLanguage)),
       ),
@@ -120,7 +196,7 @@ export class PiCompilerV1 implements HarnessCompiler<IntentDocumentV1> {
     ].filter((content): content is string => content !== undefined);
 
     return {
-      compilerVersion: "pi-v1",
+      compilerVersion: "pi-v2",
       text: [
         "[INTENT BRIDGE TASK — v1]",
         `Message type: ${intent.messageType}\nRequired user-facing response language: ${responseLanguage}`,

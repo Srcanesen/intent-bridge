@@ -65,6 +65,7 @@ export interface FullInMemoryTransformation {
   compiledTask: CompiledTask;
   quality: QualitySignalsV1;
   assessment: TransformationAssessment;
+  qualityConfig: QualityConfigV1;
   traceId: string;
   timestamp: string;
   contextManifest?: unknown;
@@ -215,12 +216,15 @@ export class InterpretationPipeline {
           expectedMessageType: input.messageType,
         }).intent,
       );
+      const qualityConfig = options.quality ?? DEFAULT_QUALITY_CONFIG;
+      const assessment = assessQuality(intent, qualityConfig);
       let compiledTask: CompiledTask;
       try {
         compiledTask = this.compiler.compile({
           intent,
           originalText: input.originalText,
           attachmentSummary: input.attachmentSummary,
+          assessment,
         });
       } catch (cause) {
         throw new BridgeError({
@@ -231,16 +235,13 @@ export class InterpretationPipeline {
         });
       }
       const quality = calculateQualitySignals(intent, { compilerValid: true });
-      const assessment = assessQuality(
-        intent,
-        options.quality ?? DEFAULT_QUALITY_CONFIG,
-      );
       this.state.lastTransformation = {
         originalText: input.originalText,
         intent,
         compiledTask,
         quality,
         assessment,
+        qualityConfig,
         traceId: input.traceId,
         timestamp,
         ...(options.contextManifest === undefined
