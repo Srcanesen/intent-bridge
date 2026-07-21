@@ -111,6 +111,28 @@ const validIntent = {
   clarification: { recommended: false },
 };
 
+const validGroundedEnvelope = {
+  version: 1,
+  groundedIntent: {
+    ...validIntent,
+    goal: {
+      value: validIntent.goal,
+      evidence: { source: "user_original", quote: "synthetic request" },
+    },
+    tasks: validIntent.tasks.map((task) => ({
+      ...task,
+      objective: {
+        value: task.objective,
+        evidence: { source: "user_original", quote: "synthetic request" },
+      },
+      scope: [],
+      constraints: [],
+      successCriteria: [],
+    })),
+    globalConstraints: [],
+  },
+};
+
 export async function collectBaseline({
   configRuns = 100,
   corpusPasses = 100,
@@ -153,8 +175,8 @@ export async function collectBaseline({
           content: [
             {
               type: "toolCall",
-              name: "emit_intent",
-              arguments: { intentJson: JSON.stringify(validIntent) },
+              name: "emit_grounded_intent",
+              arguments: validGroundedEnvelope,
             },
           ],
         };
