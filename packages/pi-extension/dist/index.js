@@ -7836,11 +7836,11 @@ function createTransformationController(dependencies) {
         providerProfile: latestMetadata.providerProfileId,
         model: latestMetadata.model
       };
-      let saved = true;
+      let persisted = false;
       try {
-        await append(trace, config.logging);
+        await traceWriter.append(trace, config.logging);
+        persisted = config.logging.mode !== "off";
       } catch {
-        saved = false;
       }
       try {
         pi.appendEntry("intent-bridge.rating", {
@@ -7852,10 +7852,9 @@ function createTransformationController(dependencies) {
           mode: latestMetadata.mode
         });
       } catch {
-        saved = false;
       }
       rating = value;
-      return saved;
+      return persisted;
     }
   };
 }

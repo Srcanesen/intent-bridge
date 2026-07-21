@@ -1,14 +1,13 @@
 import { mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-
-import {
-  BridgeError,
-  loadLayeredConfig,
-  type BridgeConfigV1,
-  type IntentProvider,
-} from "@intent-bridge/core";
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
+import {
+  type BridgeConfigV1,
+  BridgeError,
+  type IntentProvider,
+  loadLayeredConfig,
+} from "@intent-bridge/core";
 import { describe, expect, it, vi } from "vitest";
 
 import { createIntentBridgeExtension } from "../src/index.js";
@@ -1524,6 +1523,43 @@ describe("Intent Bridge Pi extension", () => {
       "intent-bridge.rating",
       expect.objectContaining({ rating: "bad" }),
     );
+  });
+
+  it("reports persisted=false when trace writer rejects", async () => {
+    const test = setup();
+    await test.handlers.input(input(), test.ctx);
+    test.trace.append.mockRejectedValueOnce(new Error("writer failure"));
+    test.pi.appendEntry.mockRejectedValueOnce(new Error("entry failure"));
+    await test.command()("rate good", test.ctx);
+    expect(test.notices.at(-1)).toBe(
+      "Intent Bridge rating recorded for this session.",
+    );
+    await test.command()("last", test.ctx);
+    expect(test.notices.at(-1)).toContain("rating=good");
+  });
+
+  it("reports persisted=true when session appendEntry rejects but trace persists", async () => {
+    const test = setup();
+    await test.handlers.input(input(), test.ctx);
+    test.pi.appendEntry.mockRejectedValueOnce(new Error("entry failure"));
+    await test.command()("rate bad", test.ctx);
+    expect(test.notices.at(-1)).toBe("Intent Bridge rating saved.");
+    await test.command()("last", test.ctx);
+    expect(test.notices.at(-1)).toContain("rating=bad");
+  });
+
+  it("reports persisted=false when logging mode is off", async () => {
+    const test = setup({
+      config: config({ logging: { mode: "off", retentionDays: 7 } }),
+    });
+    await test.handlers.input(input(), test.ctx);
+    test.trace.append.mockClear();
+    await test.command()("rate good", test.ctx);
+    expect(test.notices.at(-1)).toBe(
+      "Intent Bridge rating recorded for this session.",
+    );
+    await test.command()("last", test.ctx);
+    expect(test.notices.at(-1)).toContain("rating=good");
   });
 
   it("reports logs and privacy metadata without reading bodies", async () => {
