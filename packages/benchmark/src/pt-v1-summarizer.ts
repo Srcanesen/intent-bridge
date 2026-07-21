@@ -1,5 +1,6 @@
 import type { BenchmarkResultV1 } from "./contracts.js";
 import { isSafetyCase } from "./invariants.js";
+import { benchmarkReportSha256 } from "./report.js";
 import type {
   PtV1GoldAnnotation,
   PtV1Language,
@@ -80,6 +81,9 @@ export function summarizePtV1(
   const { report, manifest, annotations } = input;
 
   if (report.version !== 2) throw new Error("PT_V1_SUMMARIZE_REQUIRES_V2");
+  if (!report.corpus) throw new Error("PT_V1_SUMMARIZE_CORPUS_REQUIRED");
+  if (report.schemaVersion !== "2" || report.compilerVersion !== "pi-v2")
+    throw new Error("PT_V1_SUMMARIZE_PROVENANCE_INVALID");
   if (report.results.length !== manifest.totalConfirmatory)
     throw new Error("PT_V1_SUMMARIZE_CASE_COUNT_MISMATCH");
 
@@ -439,6 +443,10 @@ export function summarizePtV1(
   const totalInputTokens = report.aggregates.inputTokens;
   const totalOutputTokens = report.aggregates.outputTokens;
   const totalCostUsd = report.aggregates.totalCostUsd;
+  const candidateCalls = attempted.length;
+  const evaluatorCalls = transformed.filter(
+    (result) => result.evaluation || result.evaluatorError,
+  ).length;
 
   // ── Limitations ───────────────────────────────────────────────────────────
   const limitations: string[] = [
@@ -448,9 +456,24 @@ export function summarizePtV1(
     "Rates use fixed denominators; missing evaluator verdicts cannot improve scores.",
     "Two-sided 95% Wilson intervals are reported for all binary rates.",
     "Gates are preregistered in benchmarks/prompt-transformation-v1/README.md.",
+    "Reported cost covers candidate-provider metering only; the authenticated evaluator does not expose per-call API cost.",
   ];
 
   return {
+    version: 1,
+    sourceReportSha256: benchmarkReportSha256(report),
+    sourceCorpus: report.corpus,
+    candidate: report.profile,
+    evaluator: report.evaluator ?? null,
+    run: {
+      schemaVersion: report.schemaVersion,
+      promptVersion: report.promptVersion,
+      compilerVersion: report.compilerVersion,
+      runnerVersion: report.runnerVersion,
+      startedAt: report.startedAt,
+      completedAt: report.completedAt,
+      concurrency: report.concurrency,
+    },
     manifestSha256: manifest.contentSha256,
     smokeManifestSha256: manifest.smokeContentSha256,
     subjectRelease: manifest.subjectRelease,
@@ -461,6 +484,9 @@ export function summarizePtV1(
     gates,
     stratifiedRates,
     callCostMetadata: {
+      candidateCalls,
+      evaluatorCalls,
+      totalCalls: candidateCalls + evaluatorCalls,
       totalLatencyMs,
       totalInputTokens,
       totalOutputTokens,

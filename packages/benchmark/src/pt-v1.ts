@@ -1,4 +1,7 @@
-import type { BenchmarkReportV2 } from "./contracts.js";
+import type {
+  BenchmarkEvaluatorMetadataV1,
+  BenchmarkReportV2,
+} from "./contracts.js";
 
 // ── Stratum and language types ──────────────────────────────────────────────
 export type PtV1Language = "tr" | "en";
@@ -75,6 +78,24 @@ export type PtV1StratifiedRate = {
 };
 
 export type PtV1SummarizerOutput = {
+  version: 1;
+  sourceReportSha256: string;
+  sourceCorpus: {
+    total: number;
+    caseIdSequenceSha256: string;
+    contentSha256: string;
+  };
+  candidate: { id: string; model: string };
+  evaluator: BenchmarkEvaluatorMetadataV1 | null;
+  run: {
+    schemaVersion: "2";
+    promptVersion: string;
+    compilerVersion: "pi-v2";
+    runnerVersion: "benchmark-v2";
+    startedAt: string;
+    completedAt: string;
+    concurrency: number;
+  };
   manifestSha256: string;
   smokeManifestSha256: string;
   subjectRelease: string;
@@ -85,6 +106,9 @@ export type PtV1SummarizerOutput = {
   gates: PtV1GateResult[];
   stratifiedRates: PtV1StratifiedRate[];
   callCostMetadata: {
+    candidateCalls: number;
+    evaluatorCalls: number;
+    totalCalls: number;
     totalLatencyMs: number | null;
     totalInputTokens: number;
     totalOutputTokens: number;
