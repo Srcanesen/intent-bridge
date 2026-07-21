@@ -1,0 +1,165 @@
+{
+  "schemaVersion": 1,
+  "benchmarkId": "source-grounded-evidence-v1",
+  "subjectRelease": "v1.2.0-rc",
+  "subjectCommit": "9d54bb4a8ba6a9cc63c0776023d5856c46199697",
+  "manifestSha256": "7e9ef1df4ebb8a0e29f6a3353543b19670fe71e06049332a4148de923486c36a",
+  "sourceReportV2Sha256s": [
+    "2a790c90d64395f275a9684fcb9d6fe6152ecab63088b76c1aedff23bb7eb78f"
+  ],
+  "prompts": {
+    "pi": "pi-native-v4",
+    "openaiCompatible": "openai-compatible-v4"
+  },
+  "candidate": {
+    "provider": "opencode-go",
+    "runtimeProviderAlias": "opencode-go-gateway",
+    "model": "deepseek-v4-flash"
+  },
+  "evaluator": null,
+  "corpus": {
+    "confirmatorySha256": "d25bb4bf705923dcfc698279ade9ebf0fac07dc9783f87467940f5c0502c3d55",
+    "smokeCasesSha256": "f0ef68b6fb49eb7641af1d088ecc79e68905ed70589aef671804b5772ce8eba6",
+    "smokeAnnotationsSha256": "ae6466edeec01c65b638f4d1379b9449a867b703c94b7132d384dde0273126f9"
+  },
+  "sandboxPolicyHash": "ff543e5d23f28ac644c81040b361166f12fed75f23821c841313313c81af5960",
+  "calls": {
+    "total": 9,
+    "candidate": 9,
+    "evaluator": 0
+  },
+  "cost": {
+    "providerMeteredUsd": 0
+  },
+  "gates": [
+    {
+      "gate": "smoke",
+      "rate": 0,
+      "numerator": 0,
+      "denominator": 8,
+      "status": "fail"
+    },
+    {
+      "gate": "confirmatory",
+      "rate": null,
+      "numerator": 0,
+      "denominator": 0,
+      "status": "unavailable"
+    },
+    {
+      "gate": "structural",
+      "rate": 0,
+      "numerator": 0,
+      "denominator": 8,
+      "status": "fail"
+    },
+    {
+      "gate": "languagePreservation",
+      "rate": null,
+      "numerator": 0,
+      "denominator": 0,
+      "status": "unavailable"
+    },
+    {
+      "gate": "deterministicSafety",
+      "rate": null,
+      "numerator": 0,
+      "denominator": 0,
+      "status": "unavailable"
+    },
+    {
+      "gate": "evidenceCoverage",
+      "rate": 0,
+      "numerator": 0,
+      "denominator": 8,
+      "status": "fail"
+    },
+    {
+      "gate": "forbiddenAdditions",
+      "rate": null,
+      "numerator": 0,
+      "denominator": 0,
+      "status": "unavailable"
+    },
+    {
+      "gate": "interpreterLeakage",
+      "rate": null,
+      "numerator": 0,
+      "denominator": 0,
+      "status": "unavailable"
+    },
+    {
+      "gate": "scopeExpansion",
+      "rate": null,
+      "numerator": 0,
+      "denominator": 0,
+      "status": "unavailable"
+    },
+    {
+      "gate": "methodMandate",
+      "rate": null,
+      "numerator": 0,
+      "denominator": 0,
+      "status": "unavailable"
+    },
+    {
+      "gate": "materialIntentAlteration",
+      "rate": null,
+      "numerator": 0,
+      "denominator": 0,
+      "status": "unavailable"
+    },
+    {
+      "gate": "informalClearer",
+      "rate": null,
+      "numerator": 0,
+      "denominator": 0,
+      "status": "unavailable"
+    },
+    {
+      "gate": "informalLessClear",
+      "rate": null,
+      "numerator": 0,
+      "denominator": 0,
+      "status": "unavailable"
+    },
+    {
+      "gate": "ambiguityHandling",
+      "rate": null,
+      "numerator": 0,
+      "denominator": 0,
+      "status": "unavailable"
+    },
+    {
+      "gate": "smokeAmbiguityExact",
+      "rate": null,
+      "numerator": 0,
+      "denominator": 0,
+      "status": "unavailable"
+    },
+    {
+      "gate": "escalation",
+      "rate": null,
+      "numerator": 0,
+      "denominator": 0,
+      "status": "unavailable"
+    }
+  ],
+  "humanReview": {
+    "language": "tr",
+    "smokeReviewedCount": 8,
+    "confirmatoryFlaggedReviewed": 0,
+    "confirmatoryFlaggedTotal": 0,
+    "confirmatoryUnflaggedSampled": 0,
+    "confirmatoryUnflaggedReclassified": 0,
+    "confirmatoryExpandedToAll": false,
+    "approvalStatus": "pending"
+  },
+  "decision": "stop",
+  "limitations": [
+    "Sekiz smoke vakasının tamamı INTENT_SCHEMA_INVALID ile byte-koruyan fail-open oldu; değerlendirici çağrısı ve anlamsal hüküm üretilmedi.",
+    "Türkçe insan incelemesi sekiz yapısal sonucu kapsadı; dört İngilizce vakada çevrilecek anlamsal kanıt oluşmadı.",
+    "Bir ek izole aday teşhis çağrısı ortak şema uyumsuzluğunu doğruladı; ham teşhis verisi inceleme sonrasında silindi.",
+    "Dış sandbox kanıtı sanitize edilmiş özet ve politika hash'i ile sınırlıdır."
+  ]
+}
