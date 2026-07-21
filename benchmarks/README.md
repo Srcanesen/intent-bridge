@@ -138,3 +138,5 @@ The production change was reverted: the required invariant threshold still faile
 ## Provider-leakage diagnostic v1
 
 A separate frozen protocol [`provider-leakage-diagnostic-v1`](provider-leakage-diagnostic-v1/README.md) targets interpreter-metadata leakage detection for the fixed product commit `766ed0e`. It reuses the PT-v1 corpus without copying it, adds a strict offline-verifiable manifest, and enforces a fully Turkish human-review workflow. PR/CI validation is offline and makes no live calls; separately approved execution permits live candidate/evaluator calls only through the externally enforced sandbox and bounded loopback gateways.
+
+Yeni dondurulmuş [`source-grounded-evidence-v1`](source-grounded-evidence-v1/README.md) protokolü, kaynak temelli kanıt sözleşmesini ve Türkçe gözetim akışını çevrimdışı olarak doğrular.

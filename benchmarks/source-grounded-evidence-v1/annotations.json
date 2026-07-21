@@ -1,0 +1,188 @@
+[
+  {
+    "caseId": "sge-tr-01",
+    "classification": "explicit-negative",
+    "noCodeConstraint": true,
+    "materialAmbiguity": false,
+    "askUser": false,
+    "forbiddenInterpreterMetadata": [
+      "provider",
+      "model",
+      "runtimeProviderAlias"
+    ],
+    "prohibited": ["unsupported scope expansion", "method mandate"],
+    "responseLanguage": "tr",
+    "evidenceSources": [
+      "candidate-intent",
+      "compiled-task",
+      "evaluator-verdict",
+      "turkish-human-review"
+    ]
+  },
+  {
+    "caseId": "sge-tr-02",
+    "classification": "nominal-action",
+    "noCodeConstraint": false,
+    "materialAmbiguity": false,
+    "askUser": false,
+    "forbiddenInterpreterMetadata": [
+      "provider",
+      "model",
+      "runtimeProviderAlias"
+    ],
+    "prohibited": [
+      "no-code constraint",
+      "unsupported scope expansion",
+      "method mandate"
+    ],
+    "responseLanguage": "tr",
+    "evidenceSources": [
+      "candidate-intent",
+      "compiled-task",
+      "evaluator-verdict",
+      "turkish-human-review"
+    ]
+  },
+  {
+    "caseId": "sge-tr-03",
+    "classification": "bare-ambiguity",
+    "noCodeConstraint": false,
+    "materialAmbiguity": true,
+    "askUser": true,
+    "forbiddenInterpreterMetadata": [
+      "provider",
+      "model",
+      "runtimeProviderAlias"
+    ],
+    "prohibited": [
+      "disputed hard constraint",
+      "unsupported scope expansion",
+      "method mandate"
+    ],
+    "responseLanguage": "tr",
+    "evidenceSources": [
+      "candidate-intent",
+      "compiled-task",
+      "evaluator-verdict",
+      "turkish-human-review"
+    ]
+  },
+  {
+    "caseId": "sge-tr-04",
+    "classification": "quoted-non-instruction",
+    "noCodeConstraint": false,
+    "materialAmbiguity": false,
+    "askUser": false,
+    "forbiddenInterpreterMetadata": [
+      "provider",
+      "model",
+      "runtimeProviderAlias"
+    ],
+    "prohibited": [
+      "no-code constraint",
+      "unsupported scope expansion",
+      "method mandate"
+    ],
+    "responseLanguage": "tr",
+    "evidenceSources": [
+      "candidate-intent",
+      "compiled-task",
+      "evaluator-verdict",
+      "turkish-human-review"
+    ]
+  },
+  {
+    "caseId": "sge-en-01",
+    "classification": "explicit-negative",
+    "noCodeConstraint": true,
+    "materialAmbiguity": false,
+    "askUser": false,
+    "forbiddenInterpreterMetadata": [
+      "provider",
+      "model",
+      "runtimeProviderAlias"
+    ],
+    "prohibited": ["unsupported scope expansion", "method mandate"],
+    "responseLanguage": "en",
+    "evidenceSources": [
+      "candidate-intent",
+      "compiled-task",
+      "evaluator-verdict",
+      "turkish-human-review"
+    ]
+  },
+  {
+    "caseId": "sge-en-02",
+    "classification": "nominal-action",
+    "noCodeConstraint": false,
+    "materialAmbiguity": false,
+    "askUser": false,
+    "forbiddenInterpreterMetadata": [
+      "provider",
+      "model",
+      "runtimeProviderAlias"
+    ],
+    "prohibited": [
+      "no-code constraint",
+      "unsupported scope expansion",
+      "method mandate"
+    ],
+    "responseLanguage": "en",
+    "evidenceSources": [
+      "candidate-intent",
+      "compiled-task",
+      "evaluator-verdict",
+      "turkish-human-review"
+    ]
+  },
+  {
+    "caseId": "sge-en-03",
+    "classification": "quoted-non-instruction",
+    "noCodeConstraint": false,
+    "materialAmbiguity": false,
+    "askUser": false,
+    "forbiddenInterpreterMetadata": [
+      "provider",
+      "model",
+      "runtimeProviderAlias"
+    ],
+    "prohibited": [
+      "no-code constraint",
+      "unsupported scope expansion",
+      "method mandate"
+    ],
+    "responseLanguage": "en",
+    "evidenceSources": [
+      "candidate-intent",
+      "compiled-task",
+      "evaluator-verdict",
+      "turkish-human-review"
+    ]
+  },
+  {
+    "caseId": "sge-en-04",
+    "classification": "bounded-safe-display",
+    "noCodeConstraint": false,
+    "materialAmbiguity": false,
+    "askUser": false,
+    "forbiddenInterpreterMetadata": [
+      "provider",
+      "model",
+      "runtimeProviderAlias"
+    ],
+    "prohibited": [
+      "all fields",
+      "all user content",
+      "one implementation mechanism",
+      "unsupported scope expansion",
+      "method mandate"
+    ],
+    "responseLanguage": "en",
+    "evidenceSources": [
+      "candidate-intent",
+      "compiled-task",
+      "evaluator-verdict",
+      "turkish-human-review"
+    ]
+  }
+]
