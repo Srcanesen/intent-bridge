@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "id": "en-informal-23",
+  "title": "Fix race condition",
+  "language": "en",
+  "messageType": "initial",
+  "input": "sometimes when two users update the same record simultaneously, one update gets lost. we need some optimistic locking or a version check.",
+  "expected": {
+    "requiredGoalConcepts": ["Fix race condition"],
+    "requiredConstraints": [],
+    "forbiddenAdditions": [
+      "Do not add unrelated behavior changes while addressing “Fix race condition”."
+    ],
+    "responseLanguage": "en",
+    "clarificationRecommended": true
+  },
+  "tags": []
+}

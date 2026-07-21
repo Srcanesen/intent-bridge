@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "id": "tr-informal-01",
+  "title": "Giriş hatasını düzelt",
+  "language": "tr",
+  "messageType": "initial",
+  "input": "giriş yapmaya çalışınca sayfa hiçbir şey yapmıyor, butona basıyorum ama bir yere gitmiyor. api çağrısında bi sorun var galiba.",
+  "expected": {
+    "requiredGoalConcepts": ["Giriş hatasını düzelt"],
+    "requiredConstraints": [],
+    "forbiddenAdditions": [
+      "“Giriş hatasını düzelt” için sosyal giriş veya şifre sıfırlama akışları ekleme."
+    ],
+    "responseLanguage": "tr",
+    "clarificationRecommended": true
+  },
+  "tags": []
+}

@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "id": "en-informal-01",
+  "title": "Fix login bug",
+  "language": "en",
+  "messageType": "initial",
+  "input": "hey, the login button just spins forever after i enter my password. can you check what's going on and fix it? i think it hangs on the api call.",
+  "expected": {
+    "requiredGoalConcepts": ["Fix login bug"],
+    "requiredConstraints": [],
+    "forbiddenAdditions": [
+      "Do not add social-login or password-reset flows while addressing “Fix login bug”."
+    ],
+    "responseLanguage": "en",
+    "clarificationRecommended": true
+  },
+  "tags": []
+}

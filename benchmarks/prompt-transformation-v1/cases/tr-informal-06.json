@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "id": "tr-informal-06",
+  "title": "Form doğrulama ekle",
+  "language": "tr",
+  "messageType": "initial",
+  "input": "kayıt formu boş alanlarla gönderilebiliyor. email adresi formatını kontrol et, şifre en az 8 karakter olsun. hata mesajlarını göster.",
+  "expected": {
+    "requiredGoalConcepts": ["Form doğrulama ekle"],
+    "requiredConstraints": [
+      "email adresi formatını kontrol et, şifre en az 8 karakter olsun."
+    ],
+    "forbiddenAdditions": [
+      "“Form doğrulama ekle” için yeni hesap alanları veya sunucu tarafı akışlar ekleme."
+    ],
+    "responseLanguage": "tr",
+    "clarificationRecommended": true
+  },
+  "tags": []
+}

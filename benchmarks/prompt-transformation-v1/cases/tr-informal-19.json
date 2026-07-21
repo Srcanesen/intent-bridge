@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "id": "tr-informal-19",
+  "title": "Bellek sızıntısını düzelt",
+  "language": "tr",
+  "messageType": "initial",
+  "input": "uygulamanın bellek kullanımı sürekli artıyor. event listener'lar temizlenmiyor galiba. component lifecycle'ı kontrol eder misin?",
+  "expected": {
+    "requiredGoalConcepts": ["Bellek sızıntısını düzelt"],
+    "requiredConstraints": [],
+    "forbiddenAdditions": [
+      "“Bellek sızıntısını düzelt” için kanıt olmadan önbellek veya altyapı değişiklikleri ekleme."
+    ],
+    "responseLanguage": "tr",
+    "clarificationRecommended": true
+  },
+  "tags": []
+}

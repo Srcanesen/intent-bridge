@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "id": "tr-clear-03",
+  "title": "Form alanı ve doğrulama ekle",
+  "language": "tr",
+  "messageType": "initial",
+  "input": "profil formuna 'website' URL alanı ekle. http:// veya https:// ile başlamalı, maksimum 255 karakter. geçersiz girilince altında hata mesajı göster.",
+  "expected": {
+    "requiredGoalConcepts": ["Form alanı ve doğrulama ekle"],
+    "requiredConstraints": [
+      "profil formuna 'website' URL alanı ekle. http:// veya https:// ile başlamalı, maksimum 255 karakter. geçersiz girilince altında hata mesajı göster."
+    ],
+    "forbiddenAdditions": [
+      "“Form alanı ve doğrulama ekle” için yeni hesap alanları veya sunucu tarafı akışlar ekleme."
+    ],
+    "responseLanguage": "tr",
+    "clarificationRecommended": false
+  },
+  "tags": ["clear", "explicit-constraints"]
+}

@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "id": "en-ambiguity-03",
+  "title": "Fix the dashboard",
+  "language": "en",
+  "messageType": "initial",
+  "input": "the dashboard is broken. some widgets don't load and the layout is messed up. fix it please.",
+  "expected": {
+    "requiredGoalConcepts": ["Fix the dashboard"],
+    "requiredConstraints": [],
+    "forbiddenAdditions": [
+      "Do not add unrelated behavior changes while addressing “Fix the dashboard”."
+    ],
+    "responseLanguage": "en",
+    "clarificationRecommended": true
+  },
+  "tags": ["risky-assumptions", "vague"]
+}

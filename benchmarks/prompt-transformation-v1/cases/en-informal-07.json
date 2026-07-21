@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "id": "en-informal-07",
+  "title": "Fix pagination",
+  "language": "en",
+  "messageType": "initial",
+  "input": "the pagination on the search results page is broken. when i click next page it just shows the same results again. think the offset calculation is wrong.",
+  "expected": {
+    "requiredGoalConcepts": ["Fix pagination"],
+    "requiredConstraints": [],
+    "forbiddenAdditions": [
+      "Do not add new storage systems or background jobs while addressing “Fix pagination”."
+    ],
+    "responseLanguage": "en",
+    "clarificationRecommended": true
+  },
+  "tags": []
+}

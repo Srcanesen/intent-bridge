@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "id": "tr-ambiguity-06",
+  "title": "Bildirim ekle",
+  "language": "tr",
+  "messageType": "initial",
+  "input": "kullanıcılar bişey olunca haberdar olmak istiyor. bi bildirim sistemi ekleyelim.",
+  "expected": {
+    "requiredGoalConcepts": ["Bildirim ekle"],
+    "requiredConstraints": [],
+    "forbiddenAdditions": [
+      "“Bildirim ekle” için istenmeyen bildirim, faturalama veya paylaşım özellikleri ekleme."
+    ],
+    "responseLanguage": "tr",
+    "clarificationRecommended": true
+  },
+  "tags": ["risky-assumptions", "vague"]
+}

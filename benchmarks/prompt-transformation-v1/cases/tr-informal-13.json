@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "id": "tr-informal-13",
+  "title": "Sorgu optimizasyonu",
+  "language": "tr",
+  "messageType": "initial",
+  "input": "ana sayfadaki grafik sorgusu çok yavaş, 5 saniye sürüyor. bi index ekleyelim ya da join'i düzeltelim. aylık istatistikleri toplayan sorgu bu.",
+  "expected": {
+    "requiredGoalConcepts": ["Sorgu optimizasyonu"],
+    "requiredConstraints": [
+      "ana sayfadaki grafik sorgusu çok yavaş, 5 saniye sürüyor."
+    ],
+    "forbiddenAdditions": [
+      "“Sorgu optimizasyonu” için kanıt olmadan önbellek veya altyapı değişiklikleri ekleme."
+    ],
+    "responseLanguage": "tr",
+    "clarificationRecommended": true
+  },
+  "tags": []
+}

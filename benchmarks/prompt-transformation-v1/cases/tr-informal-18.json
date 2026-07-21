@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "id": "tr-informal-18",
+  "title": "WebSocket yeniden bağlan",
+  "language": "tr",
+  "messageType": "initial",
+  "input": "websocket bağlantısı kopunca geri gelmiyor. otomatik olarak tekrar bağlansın, üstel geri çekilmeli. en fazla 5 kere dene.",
+  "expected": {
+    "requiredGoalConcepts": ["WebSocket yeniden bağlan"],
+    "requiredConstraints": [
+      "otomatik olarak tekrar bağlansın, üstel geri çekilmeli.",
+      "en fazla 5 kere dene."
+    ],
+    "forbiddenAdditions": [
+      "“WebSocket yeniden bağlan” için istenmeyen bildirim, faturalama veya paylaşım özellikleri ekleme."
+    ],
+    "responseLanguage": "tr",
+    "clarificationRecommended": true
+  },
+  "tags": []
+}

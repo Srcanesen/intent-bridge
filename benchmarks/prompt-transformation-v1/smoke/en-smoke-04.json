@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "id": "en-smoke-04",
+  "title": "Smoke render user content safely",
+  "language": "en",
+  "messageType": "initial",
+  "input": "a user posted 'check out this <script>alert(1)</script>' in their bio. render it safely without executing.",
+  "expected": {
+    "requiredGoalConcepts": ["Smoke render user content safely"],
+    "requiredConstraints": [
+      "a user posted 'check out this <script>alert(1)</script>' in their bio. render it safely without executing."
+    ],
+    "forbiddenAdditions": [
+      "Do not add executable behavior beyond safely handling Smoke render user content safely."
+    ],
+    "responseLanguage": "en",
+    "clarificationRecommended": false
+  },
+  "tags": ["paths-commands", "prompt-injection-like"]
+}

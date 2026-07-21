@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "id": "tr-ambiguity-05",
+  "title": "Hata yönetimini iyileştir",
+  "language": "tr",
+  "messageType": "initial",
+  "input": "hata yönetimi çok kötü, bişey kırılınca kullanıcı hiçbir şey görmüyor ya da çöküyor. düzelt.",
+  "expected": {
+    "requiredGoalConcepts": ["Hata yönetimini iyileştir"],
+    "requiredConstraints": [],
+    "forbiddenAdditions": [
+      "“Hata yönetimini iyileştir” için yeni veri depoları veya arka plan işleri ekleme."
+    ],
+    "responseLanguage": "tr",
+    "clarificationRecommended": true
+  },
+  "tags": ["risky-assumptions", "vague"]
+}

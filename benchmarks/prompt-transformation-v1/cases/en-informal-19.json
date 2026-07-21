@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "id": "en-informal-19",
+  "title": "Fix memory leak",
+  "language": "en",
+  "messageType": "initial",
+  "input": "the app memory usage keeps growing over time. i think event listeners aren't being cleaned up on unmount. can you look at the component lifecycle?",
+  "expected": {
+    "requiredGoalConcepts": ["Fix memory leak"],
+    "requiredConstraints": [],
+    "forbiddenAdditions": [
+      "Do not add caches or infrastructure changes without evidence while addressing “Fix memory leak”."
+    ],
+    "responseLanguage": "en",
+    "clarificationRecommended": true
+  },
+  "tags": []
+}

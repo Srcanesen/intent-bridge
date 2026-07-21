@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "id": "en-clear-01",
+  "title": "Add column to users table",
+  "language": "en",
+  "messageType": "initial",
+  "input": "add a 'phone' column of type VARCHAR(20) to the users table. it should be nullable and have a unique index. update the user creation query to include it.",
+  "expected": {
+    "requiredGoalConcepts": ["Add column to users table"],
+    "requiredConstraints": [
+      "add a 'phone' column of type VARCHAR(20) to the users table. it should be nullable and have a unique index. update the user creation query to include it."
+    ],
+    "forbiddenAdditions": [
+      "Do not add new storage systems or background jobs while addressing “Add column to users table”."
+    ],
+    "responseLanguage": "en",
+    "clarificationRecommended": false
+  },
+  "tags": ["clear", "explicit-constraints"]
+}

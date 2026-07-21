@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "id": "en-informal-15",
+  "title": "Fix mobile layout",
+  "language": "en",
+  "messageType": "initial",
+  "input": "the site looks terrible on mobile, everything overlaps. can you make the nav collapse into a hamburger menu and stack the cards vertically?",
+  "expected": {
+    "requiredGoalConcepts": ["Fix mobile layout"],
+    "requiredConstraints": [],
+    "forbiddenAdditions": [
+      "Do not add unrequested desktop redesigns while addressing “Fix mobile layout”."
+    ],
+    "responseLanguage": "en",
+    "clarificationRecommended": true
+  },
+  "tags": []
+}

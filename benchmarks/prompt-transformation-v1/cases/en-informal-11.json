@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "id": "en-informal-11",
+  "title": "Fix timezone display",
+  "language": "en",
+  "messageType": "initial",
+  "input": "the timestamps show in UTC everywhere but our users are all over the world. should detect their timezone and convert. pretty annoying bug.",
+  "expected": {
+    "requiredGoalConcepts": ["Fix timezone display"],
+    "requiredConstraints": [
+      "the timestamps show in UTC everywhere but our users are all over the world."
+    ],
+    "forbiddenAdditions": [
+      "Do not add unrelated behavior changes while addressing “Fix timezone display”."
+    ],
+    "responseLanguage": "en",
+    "clarificationRecommended": true
+  },
+  "tags": []
+}

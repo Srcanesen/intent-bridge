@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "id": "en-informal-02",
+  "title": "Add dark mode toggle",
+  "language": "en",
+  "messageType": "initial",
+  "input": "can we add a dark mode switch somewhere in the header? nothing fancy, just a toggle that flips the theme. users have been asking for it.",
+  "expected": {
+    "requiredGoalConcepts": ["Add dark mode toggle"],
+    "requiredConstraints": [
+      "nothing fancy, just a toggle that flips the theme."
+    ],
+    "forbiddenAdditions": [
+      "Do not add unrelated page redesigns while addressing “Add dark mode toggle”."
+    ],
+    "responseLanguage": "en",
+    "clarificationRecommended": true
+  },
+  "tags": []
+}

@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "id": "tr-informal-09",
+  "title": "Hata mesajlarını düzelt",
+  "language": "tr",
+  "messageType": "initial",
+  "input": "hata mesajları çok teknik, kullanıcılar korkuyor. 'bir şeyler yanlış gitti' gibi daha insani mesajlar yazalım. stack trace'i gizle.",
+  "expected": {
+    "requiredGoalConcepts": ["Hata mesajlarını düzelt"],
+    "requiredConstraints": ["stack trace'i gizle."],
+    "forbiddenAdditions": [
+      "“Hata mesajlarını düzelt” için ilgisiz sayfa tasarımları ekleme."
+    ],
+    "responseLanguage": "tr",
+    "clarificationRecommended": true
+  },
+  "tags": []
+}

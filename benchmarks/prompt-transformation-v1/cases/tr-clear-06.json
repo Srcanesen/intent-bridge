@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "id": "tr-clear-06",
+  "title": "İstek loglama middleware'i ekle",
+  "language": "tr",
+  "messageType": "initial",
+  "input": "her isteği method, yol, durum kodu ve milisaniye cinsinden süre ile loglayan bir Express middleware'i ekle. ISO zaman damgası ve console.log kullan. /health endpoint'ini loglama.",
+  "expected": {
+    "requiredGoalConcepts": ["İstek loglama middleware'i ekle"],
+    "requiredConstraints": [
+      "her isteği method, yol, durum kodu ve milisaniye cinsinden süre ile loglayan bir Express middleware'i ekle. ISO zaman damgası ve console.log kullan. /health endpoint'ini loglama."
+    ],
+    "forbiddenAdditions": [
+      "“İstek loglama middleware'i ekle” için yeni veri depoları veya arka plan işleri ekleme."
+    ],
+    "responseLanguage": "tr",
+    "clarificationRecommended": false
+  },
+  "tags": ["clear", "explicit-constraints"]
+}

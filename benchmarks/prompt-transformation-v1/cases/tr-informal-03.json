@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "id": "tr-informal-03",
+  "title": "Tabloyu tarihe göre sırala",
+  "language": "tr",
+  "messageType": "initial",
+  "input": "siparişler tablosu karışık geliyor, en yeni siparişler en üstte olacak şekilde sıralayabilir misin? varsayılan olarak tarihe göre azalan sırala.",
+  "expected": {
+    "requiredGoalConcepts": ["Tabloyu tarihe göre sırala"],
+    "requiredConstraints": [
+      "siparişler tablosu karışık geliyor, en yeni siparişler en üstte olacak şekilde sıralayabilir misin?",
+      "varsayılan olarak tarihe göre azalan sırala."
+    ],
+    "forbiddenAdditions": [
+      "“Tabloyu tarihe göre sırala” için ilgisiz sayfa tasarımları ekleme."
+    ],
+    "responseLanguage": "tr",
+    "clarificationRecommended": true
+  },
+  "tags": []
+}

@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "id": "tr-clear-05",
+  "title": "Kullanıcıları alfabetik sırala",
+  "language": "tr",
+  "messageType": "initial",
+  "input": "admin sayfasındaki kullanıcı listesini önce soyadına göre artan, sonra adına göre artan sırala. sıralama sunucu tarafında yapılsın.",
+  "expected": {
+    "requiredGoalConcepts": ["Kullanıcıları alfabetik sırala"],
+    "requiredConstraints": [
+      "admin sayfasındaki kullanıcı listesini önce soyadına göre artan, sonra adına göre artan sırala. sıralama sunucu tarafında yapılsın."
+    ],
+    "forbiddenAdditions": [
+      "“Kullanıcıları alfabetik sırala” için yeni veri depoları veya arka plan işleri ekleme."
+    ],
+    "responseLanguage": "tr",
+    "clarificationRecommended": false
+  },
+  "tags": ["clear", "explicit-constraints"]
+}

@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "id": "tr-informal-04",
+  "title": "Rate limit ekle",
+  "language": "tr",
+  "messageType": "initial",
+  "input": "bir kullanıcı api'yi dövüyor, dakikada binlerce istek atıyor. rate limit koyalım, IP başına dakikada 100 istek olsun.",
+  "expected": {
+    "requiredGoalConcepts": ["Rate limit ekle"],
+    "requiredConstraints": [
+      "bir kullanıcı api'yi dövüyor, dakikada binlerce istek atıyor.",
+      "rate limit koyalım, IP başına dakikada 100 istek olsun."
+    ],
+    "forbiddenAdditions": [
+      "“Rate limit ekle” için yeni veri depoları veya arka plan işleri ekleme."
+    ],
+    "responseLanguage": "tr",
+    "clarificationRecommended": true
+  },
+  "tags": []
+}

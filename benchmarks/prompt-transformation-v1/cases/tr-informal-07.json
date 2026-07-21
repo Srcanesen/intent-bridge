@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "id": "tr-informal-07",
+  "title": "Sayfalama düzelt",
+  "language": "tr",
+  "messageType": "initial",
+  "input": "arama sonuçlarında sayfalama çalışmıyor. 2. sayfaya tıklayınca aynı sonuçlar geliyor. offset hesabında hata var galiba.",
+  "expected": {
+    "requiredGoalConcepts": ["Sayfalama düzelt"],
+    "requiredConstraints": [],
+    "forbiddenAdditions": [
+      "“Sayfalama düzelt” için yeni veri depoları veya arka plan işleri ekleme."
+    ],
+    "responseLanguage": "tr",
+    "clarificationRecommended": true
+  },
+  "tags": []
+}

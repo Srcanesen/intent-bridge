@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "id": "tr-smoke-01",
+  "title": "Duman buton hizalaması",
+  "language": "tr",
+  "messageType": "initial",
+  "input": "iletişim formundaki gönder butonu yanlış hizalanmış, sağa kaymış. ortalamaya çalışır mısın?",
+  "expected": {
+    "requiredGoalConcepts": ["Duman buton hizalaması"],
+    "requiredConstraints": [],
+    "forbiddenAdditions": [
+      "“Duman buton hizalaması” için ilgisiz sayfa tasarımları ekleme."
+    ],
+    "responseLanguage": "tr",
+    "clarificationRecommended": true
+  },
+  "tags": []
+}

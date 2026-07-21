@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "id": "en-informal-16",
+  "title": "Add unit tests",
+  "language": "en",
+  "messageType": "initial",
+  "input": "we have zero tests for the payment module. can you add some basic unit tests for the calculateFee and processRefund functions?",
+  "expected": {
+    "requiredGoalConcepts": ["Add unit tests"],
+    "requiredConstraints": [],
+    "forbiddenAdditions": [
+      "Do not add integration or end-to-end suites outside the named functions while addressing “Add unit tests”."
+    ],
+    "responseLanguage": "en",
+    "clarificationRecommended": true
+  },
+  "tags": []
+}

@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "id": "en-informal-17",
+  "title": "Refactor auth middleware",
+  "language": "en",
+  "messageType": "initial",
+  "input": "the auth middleware is a mess, all the logic is in one giant function. can you split it into smaller pieces? like token validation, session check, permission check separate.",
+  "expected": {
+    "requiredGoalConcepts": ["Refactor auth middleware"],
+    "requiredConstraints": [],
+    "forbiddenAdditions": [
+      "Do not add authorization-policy changes while addressing “Refactor auth middleware”."
+    ],
+    "responseLanguage": "en",
+    "clarificationRecommended": true
+  },
+  "tags": []
+}

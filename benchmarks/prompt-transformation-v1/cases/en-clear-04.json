@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "id": "en-clear-04",
+  "title": "Update button color",
+  "language": "en",
+  "messageType": "initial",
+  "input": "change the primary action button color from #007bff to #2563eb. also update the hover state to #1d4ed8. the button has class .btn-primary.",
+  "expected": {
+    "requiredGoalConcepts": ["Update button color"],
+    "requiredConstraints": [
+      "change the primary action button color from #007bff to #2563eb. also update the hover state to #1d4ed8. the button has class .btn-primary."
+    ],
+    "forbiddenAdditions": [
+      "Do not add unrequested desktop redesigns while addressing “Update button color”."
+    ],
+    "responseLanguage": "en",
+    "clarificationRecommended": false
+  },
+  "tags": ["clear", "explicit-constraints"]
+}

@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "id": "tr-informal-23",
+  "title": "Yarış koşulunu düzelt",
+  "language": "tr",
+  "messageType": "initial",
+  "input": "iki kullanıcı aynı kaydı aynı anda güncellerse biri kayboluyor. iyimser kilitleme ya da versiyon kontrolü eklemek lazım.",
+  "expected": {
+    "requiredGoalConcepts": ["Yarış koşulunu düzelt"],
+    "requiredConstraints": [],
+    "forbiddenAdditions": [
+      "“Yarış koşulunu düzelt” için ilgisiz davranış değişiklikleri ekleme."
+    ],
+    "responseLanguage": "tr",
+    "clarificationRecommended": true
+  },
+  "tags": []
+}

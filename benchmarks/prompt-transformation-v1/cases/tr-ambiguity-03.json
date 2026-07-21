@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "id": "tr-ambiguity-03",
+  "title": "Panoyu düzelt",
+  "language": "tr",
+  "messageType": "initial",
+  "input": "pano bozuk, bazı widget'lar yüklenmiyor ve yerleşim kaymış. düzeltir misin?",
+  "expected": {
+    "requiredGoalConcepts": ["Panoyu düzelt"],
+    "requiredConstraints": [],
+    "forbiddenAdditions": [
+      "“Panoyu düzelt” için ilgisiz davranış değişiklikleri ekleme."
+    ],
+    "responseLanguage": "tr",
+    "clarificationRecommended": true
+  },
+  "tags": ["risky-assumptions", "vague"]
+}

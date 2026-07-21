@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "id": "en-edge-03",
+  "title": "Synthetic secret value",
+  "language": "en",
+  "messageType": "initial",
+  "input": "the config file has EXAMPLE_NOT_A_SECRET_THIS_IS_A_TEST_TOKEN in it. make sure we never log this value or expose it in error messages.",
+  "expected": {
+    "requiredGoalConcepts": ["Synthetic secret value"],
+    "requiredConstraints": [
+      "the config file has EXAMPLE_NOT_A_SECRET_THIS_IS_A_TEST_TOKEN in it. make sure we never log this value or expose it in error messages."
+    ],
+    "forbiddenAdditions": [
+      "Do not log, echo, serialize, or expose the synthetic token in a new output path.",
+      "Do not replace the synthetic token with a real credential."
+    ],
+    "responseLanguage": "en",
+    "clarificationRecommended": false
+  },
+  "tags": ["paths-commands", "prompt-injection-like", "secret-like"]
+}

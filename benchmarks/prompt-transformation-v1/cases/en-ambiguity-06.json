@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "id": "en-ambiguity-06",
+  "title": "Add notifications",
+  "language": "en",
+  "messageType": "initial",
+  "input": "users want notifications when something happens. add a notification system so they know about important events.",
+  "expected": {
+    "requiredGoalConcepts": ["Add notifications"],
+    "requiredConstraints": [],
+    "forbiddenAdditions": [
+      "Do not add notifications, billing, or sharing features not requested while addressing “Add notifications”."
+    ],
+    "responseLanguage": "en",
+    "clarificationRecommended": true
+  },
+  "tags": ["risky-assumptions", "vague"]
+}

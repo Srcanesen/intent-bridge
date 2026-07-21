@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "id": "tr-clear-02",
+  "title": "Durum endpoint'i oluştur",
+  "language": "tr",
+  "messageType": "initial",
+  "input": "GET /api/v1/durum adresine yanıt olarak JSON formatında { durum: 'tamam', versiyon: '1.0.0', calisma_suresi: <saniye> } döndüren bir uç noktası oluştur. kimlik doğrulama gerektirmesin.",
+  "expected": {
+    "requiredGoalConcepts": ["Durum endpoint'i oluştur"],
+    "requiredConstraints": [
+      "GET /api/v1/durum adresine yanıt olarak JSON formatında { durum: 'tamam', versiyon: '1.0.0', calisma_suresi: <saniye> } döndüren bir uç noktası oluştur. kimlik doğrulama gerektirmesin."
+    ],
+    "forbiddenAdditions": [
+      "“Durum endpoint'i oluştur” için istenmeyen kimlik doğrulama, sayfalama veya filtreleme ekleme."
+    ],
+    "responseLanguage": "tr",
+    "clarificationRecommended": false
+  },
+  "tags": ["clear", "explicit-constraints"]
+}

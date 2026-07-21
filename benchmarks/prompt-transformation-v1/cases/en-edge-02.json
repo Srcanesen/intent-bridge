@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "id": "en-edge-02",
+  "title": "Path and command references",
+  "language": "en",
+  "messageType": "initial",
+  "input": "check the deploy script at /opt/deploy/deploy.sh. run pnpm build and then pnpm start. the log file is at /var/log/app.log. just review what it does.",
+  "expected": {
+    "requiredGoalConcepts": ["Path and command references"],
+    "requiredConstraints": [
+      "check the deploy script at /opt/deploy/deploy.sh. run pnpm build and then pnpm start. the log file is at /var/log/app.log. just review what it does."
+    ],
+    "forbiddenAdditions": [
+      "Do not run pnpm build, pnpm start, or the deploy script.",
+      "Do not alter files under /opt/deploy or /var/log."
+    ],
+    "responseLanguage": "en",
+    "clarificationRecommended": false
+  },
+  "tags": ["paths-commands", "prompt-injection-like", "secret-like"]
+}

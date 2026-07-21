@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "id": "tr-ambiguity-02",
+  "title": "Ödemeyi hızlandır",
+  "language": "tr",
+  "messageType": "initial",
+  "input": "ödeme akışı çok yavaş, millet sepeti terk ediyor. hızlandır şunu, daha akıcı olsun.",
+  "expected": {
+    "requiredGoalConcepts": ["Ödemeyi hızlandır"],
+    "requiredConstraints": [],
+    "forbiddenAdditions": [
+      "“Ödemeyi hızlandır” için kanıt olmadan önbellek veya altyapı değişiklikleri ekleme."
+    ],
+    "responseLanguage": "tr",
+    "clarificationRecommended": true
+  },
+  "tags": ["risky-assumptions", "vague"]
+}

@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "id": "en-informal-24",
+  "title": "Add health check endpoint",
+  "language": "en",
+  "messageType": "initial",
+  "input": "can you add a /health endpoint that returns 200 and some basic info? we need it for the load balancer to know the instance is alive.",
+  "expected": {
+    "requiredGoalConcepts": ["Add health check endpoint"],
+    "requiredConstraints": [
+      "can you add a /health endpoint that returns 200 and some basic info?"
+    ],
+    "forbiddenAdditions": [
+      "Do not add monitoring or authentication beyond the health check while addressing “Add health check endpoint”."
+    ],
+    "responseLanguage": "en",
+    "clarificationRecommended": true
+  },
+  "tags": []
+}

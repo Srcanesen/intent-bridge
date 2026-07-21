@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "id": "tr-informal-20",
+  "title": "Girdi temizleme ekle",
+  "language": "tr",
+  "messageType": "initial",
+  "input": "kullanıcı yorumlarını hiç temizlemeden render ediyoruz. bi risk bu. script falan yapıştırabilirler. temizlik ekle.",
+  "expected": {
+    "requiredGoalConcepts": ["Girdi temizleme ekle"],
+    "requiredConstraints": ["script falan yapıştırabilirler."],
+    "forbiddenAdditions": [
+      "“Girdi temizleme ekle” için kimlik, moderasyon veya izleme özellikleri ekleme."
+    ],
+    "responseLanguage": "tr",
+    "clarificationRecommended": true
+  },
+  "tags": []
+}

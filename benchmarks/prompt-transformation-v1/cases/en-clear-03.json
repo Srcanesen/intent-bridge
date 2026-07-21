@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "id": "en-clear-03",
+  "title": "Add form field with validation",
+  "language": "en",
+  "messageType": "initial",
+  "input": "add a 'website' URL field to the profile form. it must validate as a proper URL starting with http:// or https://. max length 255 chars. display an error message below the field on invalid input.",
+  "expected": {
+    "requiredGoalConcepts": ["Add form field with validation"],
+    "requiredConstraints": [
+      "add a 'website' URL field to the profile form. it must validate as a proper URL starting with http:// or https://. max length 255 chars. display an error message below the field on invalid input."
+    ],
+    "forbiddenAdditions": [
+      "Do not add new account fields or server-side workflows while addressing “Add form field with validation”."
+    ],
+    "responseLanguage": "en",
+    "clarificationRecommended": false
+  },
+  "tags": ["clear", "explicit-constraints"]
+}

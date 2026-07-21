@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "id": "en-ambiguity-01",
+  "title": "Add user profile page",
+  "language": "en",
+  "messageType": "initial",
+  "input": "we need a user profile page. users should be able to see and edit their info there. make it look nice.",
+  "expected": {
+    "requiredGoalConcepts": ["Add user profile page"],
+    "requiredConstraints": [],
+    "forbiddenAdditions": [
+      "Do not add notifications, billing, or sharing features not requested while addressing “Add user profile page”."
+    ],
+    "responseLanguage": "en",
+    "clarificationRecommended": true
+  },
+  "tags": ["risky-assumptions", "vague"]
+}

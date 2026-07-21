@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "id": "en-informal-06",
+  "title": "Add form validation",
+  "language": "en",
+  "messageType": "initial",
+  "input": "the signup form lets people submit empty fields. can you add some basic validation? check that email looks like an email and password is at least 8 chars.",
+  "expected": {
+    "requiredGoalConcepts": ["Add form validation"],
+    "requiredConstraints": [
+      "check that email looks like an email and password is at least 8 chars."
+    ],
+    "forbiddenAdditions": [
+      "Do not add new account fields or server-side workflows while addressing “Add form validation”."
+    ],
+    "responseLanguage": "en",
+    "clarificationRecommended": true
+  },
+  "tags": []
+}

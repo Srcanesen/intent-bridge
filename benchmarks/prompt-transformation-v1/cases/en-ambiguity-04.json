@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "id": "en-ambiguity-04",
+  "title": "Update API security",
+  "language": "en",
+  "messageType": "initial",
+  "input": "our API security needs improvement. can you make it more secure? i heard we should use JWTs or something.",
+  "expected": {
+    "requiredGoalConcepts": ["Update API security"],
+    "requiredConstraints": [],
+    "forbiddenAdditions": [
+      "Do not add identity, moderation, or tracking features while addressing “Update API security”."
+    ],
+    "responseLanguage": "en",
+    "clarificationRecommended": true
+  },
+  "tags": ["risky-assumptions", "vague"]
+}

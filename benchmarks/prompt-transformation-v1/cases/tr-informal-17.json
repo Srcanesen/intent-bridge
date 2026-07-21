@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "id": "tr-informal-17",
+  "title": "Auth middleware'i düzenle",
+  "language": "tr",
+  "messageType": "initial",
+  "input": "auth middleware'i çok karmaşık, her şey tek fonksiyonda. token doğrulama, session kontrol, yetki kontrolü ayrı fonksiyonlar olsun.",
+  "expected": {
+    "requiredGoalConcepts": ["Auth middleware'i düzenle"],
+    "requiredConstraints": [],
+    "forbiddenAdditions": [
+      "“Auth middleware'i düzenle” için yetkilendirme politikası değişiklikleri ekleme."
+    ],
+    "responseLanguage": "tr",
+    "clarificationRecommended": true
+  },
+  "tags": []
+}

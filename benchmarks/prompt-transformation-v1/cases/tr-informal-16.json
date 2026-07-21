@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "id": "tr-informal-16",
+  "title": "Birim testleri ekle",
+  "language": "tr",
+  "messageType": "initial",
+  "input": "ödeme modülünde hiç test yok. calculateFee ve processRefund fonksiyonlarına basit birim testleri yazar mısın?",
+  "expected": {
+    "requiredGoalConcepts": ["Birim testleri ekle"],
+    "requiredConstraints": [],
+    "forbiddenAdditions": [
+      "“Birim testleri ekle” için adı geçen fonksiyonlar dışındaki entegrasyon veya uçtan uca testler ekleme."
+    ],
+    "responseLanguage": "tr",
+    "clarificationRecommended": true
+  },
+  "tags": []
+}

@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "id": "tr-informal-22",
+  "title": "Klavye kısayolları ekle",
+  "language": "tr",
+  "messageType": "initial",
+  "input": "güç kullanıcılar klavye kısayolu istiyor. g sonra d tuşu dashboard'a gitsin, g sonra a ayarlara. basit bir handler ekle.",
+  "expected": {
+    "requiredGoalConcepts": ["Klavye kısayolları ekle"],
+    "requiredConstraints": [
+      "g sonra d tuşu dashboard'a gitsin, g sonra a ayarlara."
+    ],
+    "forbiddenAdditions": [
+      "“Klavye kısayolları ekle” için adı geçen tuş dizileri dışındaki kısayollar ekleme."
+    ],
+    "responseLanguage": "tr",
+    "clarificationRecommended": true
+  },
+  "tags": []
+}

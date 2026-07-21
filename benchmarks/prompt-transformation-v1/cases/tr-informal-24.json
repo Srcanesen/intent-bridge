@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "id": "tr-informal-24",
+  "title": "Sağlık kontrolü ucu ekle",
+  "language": "tr",
+  "messageType": "initial",
+  "input": "load balancer için /health endpoint'i lazım. 200 dönsün, uygulamanın ayakta olduğunu belirtsin. basit bi şey yeter.",
+  "expected": {
+    "requiredGoalConcepts": ["Sağlık kontrolü ucu ekle"],
+    "requiredConstraints": [
+      "load balancer için /health endpoint'i lazım.",
+      "200 dönsün, uygulamanın ayakta olduğunu belirtsin."
+    ],
+    "forbiddenAdditions": [
+      "“Sağlık kontrolü ucu ekle” için health check dışındaki izleme veya kimlik doğrulama ekleme."
+    ],
+    "responseLanguage": "tr",
+    "clarificationRecommended": true
+  },
+  "tags": []
+}

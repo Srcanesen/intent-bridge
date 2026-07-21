@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "id": "tr-ambiguity-04",
+  "title": "API güvenliğini güncelle",
+  "language": "tr",
+  "messageType": "initial",
+  "input": "API güvenliğimiz zayıf, iyileştirmek lazım. JWT falan kullanılıyormuş, ona geçelim.",
+  "expected": {
+    "requiredGoalConcepts": ["API güvenliğini güncelle"],
+    "requiredConstraints": [],
+    "forbiddenAdditions": [
+      "“API güvenliğini güncelle” için kimlik, moderasyon veya izleme özellikleri ekleme."
+    ],
+    "responseLanguage": "tr",
+    "clarificationRecommended": true
+  },
+  "tags": ["risky-assumptions", "vague"]
+}
