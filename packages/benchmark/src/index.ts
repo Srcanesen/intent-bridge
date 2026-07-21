@@ -10,3 +10,4 @@ export * from "./report.js";
 export * from "./runner.js";
 export * from "./trace-export.js";
 export * from "./provider-leakage-diagnostic-v1.js";
+export * from "./source-grounded-evidence-v1.js";

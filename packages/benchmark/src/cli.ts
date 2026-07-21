@@ -26,6 +26,12 @@ import {
   parseProviderLeakageAggregateResultV1,
   sha256FileBytes,
 } from "./provider-leakage-diagnostic-v1.js";
+import {
+  parseSourceGroundedEvidenceAggregateResultV1,
+  parseSourceGroundedEvidenceManifestV1,
+  SOURCE_GROUNDED_EVIDENCE_MANIFEST_SHA256,
+  validateSourceGroundedEvidenceCorpus,
+} from "./source-grounded-evidence-v1.js";
 import { summarizePtV1 } from "./pt-v1-summarizer.js";
 
 const help = `benchmark validate-fixtures [--cases dir]
@@ -38,6 +44,8 @@ benchmark pt-v1 audit [--cases dir] [--smoke dir] [--manifest path] [--annotatio
 benchmark pt-v1 summarize <report.json> <manifest.json> <annotations.json> [--out file]
 benchmark plv validate-manifest [--manifest path]       Validate the frozen PLV manifest and print its exact-byte SHA-256
 benchmark plv validate-aggregate <result.json>          Validate a sanitized PLV aggregate against the frozen protocol
+benchmark sge validate-manifest [--manifest path]        Validate the frozen SGE manifest and print its exact-byte SHA-256
+benchmark sge validate-aggregate <result.json>           Validate a sanitized SGE aggregate against the frozen protocol
 `;
 const value = (args: string[], key: string, fallback?: string) => {
   const index = args.indexOf(key);
@@ -228,6 +236,41 @@ export async function main(input = process.argv.slice(2)) {
         concurrency,
         results,
       }),
+    );
+    return;
+  }
+  if (command === "sge" && args[1] === "validate-manifest") {
+    const manifestPath = value(
+      args,
+      "--manifest",
+      "benchmarks/source-grounded-evidence-v1/manifest.json",
+    );
+    if (!manifestPath) throw new Error("BENCHMARK_ARGUMENTS_INVALID");
+    const manifestBytes = await readFile(manifestPath);
+    const manifest = parseSourceGroundedEvidenceManifestV1(
+      JSON.parse(manifestBytes.toString("utf8")) as unknown,
+    );
+    validateSourceGroundedEvidenceCorpus(
+      await readJson("benchmarks/source-grounded-evidence-v1/cases.json"),
+      await readJson("benchmarks/source-grounded-evidence-v1/annotations.json"),
+    );
+    const manifestSha = sha256FileBytes(manifestBytes);
+    if (manifestSha !== SOURCE_GROUNDED_EVIDENCE_MANIFEST_SHA256)
+      throw new Error("SGE_MANIFEST_SHA256_MISMATCH");
+    console.log(
+      `SGE manifest valid: ${manifest.benchmarkId} (${manifest.subjectCommit.slice(0, 7)}; file SHA-256 ${manifestSha})`,
+    );
+    return;
+  }
+  if (command === "sge" && args[1] === "validate-aggregate") {
+    const resultPath = args[2];
+    if (!resultPath || resultPath.startsWith("--"))
+      throw new Error("BENCHMARK_ARGUMENTS_INVALID");
+    const result = parseSourceGroundedEvidenceAggregateResultV1(
+      await readJson(resultPath),
+    );
+    console.log(
+      `SGE aggregate valid: ${String(result.benchmarkId)} (${String(result.subjectCommit).slice(0, 7)})`,
     );
     return;
   }

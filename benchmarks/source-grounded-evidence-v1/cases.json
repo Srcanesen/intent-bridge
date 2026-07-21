@@ -1,0 +1,130 @@
+[
+  {
+    "version": 1,
+    "id": "sge-tr-01",
+    "title": "TR-01",
+    "language": "tr",
+    "messageType": "normal",
+    "input": "Bu fonksiyonun ne yaptığını açıkla ama kod yazma!",
+    "expected": {
+      "requiredGoalConcepts": ["fonksiyonun ne yaptığını açıkla"],
+      "requiredConstraints": ["kod yazma"],
+      "forbiddenAdditions": ["yorumlayıcı sağlayıcı metaverisi"],
+      "responseLanguage": "tr",
+      "clarificationRecommended": false
+    },
+    "tags": ["source-grounded", "tr"]
+  },
+  {
+    "version": 1,
+    "id": "sge-tr-02",
+    "title": "TR-02",
+    "language": "tr",
+    "messageType": "normal",
+    "input": "kod yazma aracına otomatik tamamlama ekle",
+    "expected": {
+      "requiredGoalConcepts": ["otomatik tamamlama"],
+      "requiredConstraints": [],
+      "forbiddenAdditions": ["kod yazmama kısıtlaması"],
+      "responseLanguage": "tr",
+      "clarificationRecommended": false
+    },
+    "tags": ["source-grounded", "tr"]
+  },
+  {
+    "version": 1,
+    "id": "sge-tr-03",
+    "title": "TR-03",
+    "language": "tr",
+    "messageType": "normal",
+    "input": "kod yazma",
+    "expected": {
+      "requiredGoalConcepts": ["kod yazma"],
+      "requiredConstraints": [],
+      "forbiddenAdditions": ["uydurulmuş kısıtlama"],
+      "responseLanguage": "tr",
+      "clarificationRecommended": true
+    },
+    "tags": ["source-grounded", "tr"]
+  },
+  {
+    "version": 1,
+    "id": "sge-tr-04",
+    "title": "TR-04",
+    "language": "tr",
+    "messageType": "normal",
+    "input": "butonda \"kod yazma\" metni görünsün",
+    "expected": {
+      "requiredGoalConcepts": ["butonda metin görünsün"],
+      "requiredConstraints": [],
+      "forbiddenAdditions": ["kod yazmama kısıtlaması"],
+      "responseLanguage": "tr",
+      "clarificationRecommended": false
+    },
+    "tags": ["source-grounded", "tr"]
+  },
+  {
+    "version": 1,
+    "id": "sge-en-01",
+    "title": "EN-01",
+    "language": "en",
+    "messageType": "normal",
+    "input": "Explain what this function does, but don't write code.",
+    "expected": {
+      "requiredGoalConcepts": ["Explain what this function does"],
+      "requiredConstraints": ["don't write code"],
+      "forbiddenAdditions": ["interpreter provider metadata"],
+      "responseLanguage": "en",
+      "clarificationRecommended": false
+    },
+    "tags": ["source-grounded", "en"]
+  },
+  {
+    "version": 1,
+    "id": "sge-en-02",
+    "title": "EN-02",
+    "language": "en",
+    "messageType": "normal",
+    "input": "add autocomplete to the code-writing tool",
+    "expected": {
+      "requiredGoalConcepts": ["add autocomplete"],
+      "requiredConstraints": [],
+      "forbiddenAdditions": ["no-code constraint"],
+      "responseLanguage": "en",
+      "clarificationRecommended": false
+    },
+    "tags": ["source-grounded", "en"]
+  },
+  {
+    "version": 1,
+    "id": "sge-en-03",
+    "title": "EN-03",
+    "language": "en",
+    "messageType": "normal",
+    "input": "show the text \"do not write code\" in the warning banner",
+    "expected": {
+      "requiredGoalConcepts": ["show the text in the warning banner"],
+      "requiredConstraints": [],
+      "forbiddenAdditions": ["no-code constraint"],
+      "responseLanguage": "en",
+      "clarificationRecommended": false
+    },
+    "tags": ["source-grounded", "en"]
+  },
+  {
+    "version": 1,
+    "id": "sge-en-04",
+    "title": "EN-04",
+    "language": "en",
+    "messageType": "normal",
+    "input": "a user put '<script>alert(1)</script>' in one profile field. show it safely without running it.",
+    "expected": {
+      "requiredGoalConcepts": ["show one profile field safely"],
+      "requiredConstraints": ["without running it"],
+      "forbiddenAdditions": ["all fields", "one implementation mechanism"],
+      "responseLanguage": "en",
+      "clarificationRecommended": false
+    },
+    "tags": ["source-grounded", "en"]
+  }
+]
