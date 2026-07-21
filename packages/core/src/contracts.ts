@@ -80,6 +80,7 @@ export interface ProviderProfileV1 {
 
 export interface ProviderInterpretationResult {
   intent: import("./intent.js").IntentDocument;
+  evidence?: import("./intent-evidence.js").IntentEvidenceV1;
   usage?: {
     inputTokens?: number;
     outputTokens?: number;
@@ -111,6 +112,7 @@ export interface HarnessCompiler<TIntent> {
     originalText: string;
     attachmentSummary: { imageCount: number };
     assessment?: import("./quality-policy.js").TransformationAssessment;
+    evidence?: import("./intent-evidence.js").IntentEvidenceV1;
   }): CompiledTask;
 }
 

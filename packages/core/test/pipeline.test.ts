@@ -8,6 +8,7 @@ import {
   InterpretationPipeline,
   type IntentDocumentV1,
   type IntentProvider,
+  type ProviderInterpretationResult,
   type TraceSink,
   calculateQualitySignals,
   estimateCostUsd,
@@ -39,10 +40,14 @@ const options = {
   promptVersion: "v1",
 };
 
-const provider = (intent = validIntent()): IntentProvider => ({
+const provider = (
+  intent = validIntent(),
+  evidence?: ProviderInterpretationResult["evidence"],
+): IntentProvider => ({
   id: "test",
   interpret: vi.fn().mockResolvedValue({
     intent,
+    ...(evidence === undefined ? {} : { evidence }),
     rawResponseHash: "hash",
     latencyMs: 12,
   }),
@@ -128,6 +133,104 @@ describe("InterpretationPipeline", () => {
       outcome: "accept",
       reasons: [],
       observedConfidence: 0.9,
+    });
+  });
+
+  it("validates evidence, passes it only to the compiler, and omits it from trace and latest state", async () => {
+    const evidence: NonNullable<ProviderInterpretationResult["evidence"]> = {
+      version: 1,
+      items: [
+        {
+          path: "/goal",
+          source: "project_summary",
+          quote: "PROJECT_QUOTE_ONLY",
+        },
+        {
+          path: "/tasks/0/objective",
+          source: "project_summary",
+          quote: "PROJECT_QUOTE_ONLY",
+        },
+      ],
+    };
+    const testCompiler = compiler();
+    const traceSink: TraceSink = {
+      append: vi.fn().mockResolvedValue(undefined),
+    };
+    const pipeline = new InterpretationPipeline(
+      provider(validIntent(), evidence),
+      testCompiler,
+      traceSink,
+    );
+
+    await expect(
+      pipeline.run(
+        input({
+          name: "demo",
+          summary: "PROJECT_QUOTE_ONLY",
+          instructionExcerpts: [],
+        }),
+        options,
+      ),
+    ).resolves.toMatchObject({ status: "transformed" });
+    expect(testCompiler.compile).toHaveBeenCalledWith(
+      expect.objectContaining({ evidence }),
+    );
+    expect(JSON.stringify(pipeline.getLatest())).not.toContain("evidence");
+    expect(JSON.stringify(pipeline.getLatest())).not.toContain(
+      "PROJECT_QUOTE_ONLY",
+    );
+    const trace = vi.mocked(traceSink.append).mock.calls[0]?.[0];
+    expect(JSON.stringify(trace)).not.toContain("evidence");
+    expect(JSON.stringify(trace)).not.toContain("PROJECT_QUOTE_ONLY");
+  });
+
+  it("fails open byte-identically on invalid evidence without compiling or retrying", async () => {
+    const invalidEvidence = {
+      version: 1,
+      items: [
+        { path: "/goal", source: "user_original", quote: "not in source" },
+        {
+          path: "/tasks/0/objective",
+          source: "user_original",
+          quote: "Fix the profile layout.",
+        },
+      ],
+    } as ProviderInterpretationResult["evidence"];
+    const testProvider = provider(validIntent(), invalidEvidence);
+    const testCompiler = compiler();
+    const originalText = "Fix the profile layout.\r\nKeep these bytes: 🚀";
+    const result = await new InterpretationPipeline(
+      testProvider,
+      testCompiler,
+    ).run(
+      { ...input(), originalText },
+      {
+        ...options,
+        retryPolicy: { maxRetries: 2, baseDelayMs: 1, totalBudgetMs: 1_000 },
+      },
+    );
+
+    expect(result).toEqual({
+      status: "fail_open",
+      originalText,
+      errorCode: "INTENT_SCHEMA_INVALID",
+      traceId: "trace-1",
+    });
+    expect(testProvider.interpret).toHaveBeenCalledTimes(1);
+    expect(testCompiler.compile).not.toHaveBeenCalled();
+  });
+
+  it("keeps legacy compiler input unchanged when evidence is absent", async () => {
+    const testCompiler = compiler();
+    await new InterpretationPipeline(provider(), testCompiler).run(
+      input(),
+      options,
+    );
+    expect(testCompiler.compile).toHaveBeenCalledWith({
+      intent: expect.any(Object),
+      originalText: "Fix the profile layout.",
+      attachmentSummary: { imageCount: 1 },
+      assessment: expect.any(Object),
     });
   });
 

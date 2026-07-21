@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest";
 import {
   PiCompilerV1,
   type IntentDocumentV1,
+  type IntentEvidenceV1,
   type TransformationAssessment,
 } from "../src/index.js";
 import { compilerFixtures, largeIntent } from "./fixtures/compiler.js";
@@ -102,6 +103,96 @@ describe("PiCompilerV1", () => {
     expect(first).toEqual(compiler.compile(input));
     expect(first.text).toContain("`task-1`");
     expect(first.text).toContain("`task-20`");
+  });
+
+  it("separates user and project constraints when validated evidence is supplied", () => {
+    const fixture = compilerFixtures.find(
+      (candidate) => candidate.name === "multiple-tasks",
+    )!;
+    const evidence: IntentEvidenceV1 = {
+      version: 1,
+      items: [
+        { path: "/goal", source: "user_original", quote: "Update" },
+        {
+          path: "/tasks/0/objective",
+          source: "user_original",
+          quote: "API",
+        },
+        {
+          path: "/tasks/0/scope/0",
+          source: "project_summary",
+          quote: "api",
+        },
+        {
+          path: "/tasks/0/constraints/0",
+          source: "user_original",
+          quote: "response shape",
+        },
+        {
+          path: "/tasks/0/successCriteria/0",
+          source: "project_instruction",
+          quote: "API test",
+          instructionIndex: 0,
+        },
+        {
+          path: "/tasks/1/objective",
+          source: "project_summary",
+          quote: "client",
+        },
+        {
+          path: "/tasks/1/scope/0",
+          source: "project_instruction",
+          quote: "client.ts",
+          instructionIndex: 0,
+        },
+        {
+          path: "/tasks/1/constraints/0",
+          source: "project_instruction",
+          quote: "API response shape",
+          instructionIndex: 0,
+        },
+        {
+          path: "/tasks/1/successCriteria/0",
+          source: "user_original",
+          quote: "client test",
+        },
+        {
+          path: "/globalConstraints/0",
+          source: "project_summary",
+          quote: "authentication",
+        },
+      ],
+    };
+    const text = compiler.compile({
+      intent: {
+        ...fixture.intent,
+        assumptions: [{ text: "Use REST.", confidence: "low" }],
+      },
+      originalText: fixture.originalText,
+      attachmentSummary: { imageCount: 0 },
+      evidence,
+    }).text;
+    const userSection = text.slice(
+      text.indexOf("## User-stated constraints"),
+      text.indexOf("## Project-context constraints"),
+    );
+    const projectSection = text.slice(
+      text.indexOf("## Project-context constraints"),
+      text.indexOf("## Success criteria"),
+    );
+
+    expect(userSection).toContain("### Task `api`\n- Keep the response shape.");
+    expect(userSection).not.toContain("Do not change authentication.");
+    expect(userSection).not.toContain("Use the API response shape.");
+    expect(projectSection).toContain(
+      "### Global\n- Do not change authentication.",
+    );
+    expect(projectSection).toContain(
+      "### Task `client`\n- Use the API response shape.",
+    );
+    expect(text).toContain(
+      "## Assumptions — not requirements\n- [low] Use REST.",
+    );
   });
 
   it("bump compiler version to pi-v2 while keeping trace readers compatible", () => {

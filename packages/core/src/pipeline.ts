@@ -15,6 +15,7 @@ import type {
 import { BridgeError, type BridgeErrorCode } from "./errors.js";
 import type { IntentDocument } from "./intent.js";
 import { parseIntentDocument } from "./intent.js";
+import { parseIntentEvidence } from "./intent-evidence.js";
 import { calculateQualitySignals } from "./quality.js";
 import {
   DEFAULT_QUALITY_CONFIG,
@@ -269,6 +270,13 @@ export class InterpretationPipeline {
           expectedMessageType: input.messageType,
         }).intent,
       );
+      const evidence =
+        providerResult.evidence === undefined
+          ? undefined
+          : parseIntentEvidence(providerResult.evidence, intent, {
+              originalText: input.originalText,
+              project: input.project,
+            });
       guardNoCodeLeak(intent, input);
       const qualityConfig = options.quality ?? DEFAULT_QUALITY_CONFIG;
       const assessment = assessQuality(intent, qualityConfig);
@@ -279,6 +287,7 @@ export class InterpretationPipeline {
           originalText: input.originalText,
           attachmentSummary: input.attachmentSummary,
           assessment,
+          ...(evidence === undefined ? {} : { evidence }),
         });
       } catch (cause) {
         throw new BridgeError({

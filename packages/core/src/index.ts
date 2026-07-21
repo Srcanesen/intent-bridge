@@ -3,6 +3,7 @@ export * from "./context.js";
 export * from "./contracts.js";
 export * from "./errors.js";
 export * from "./intent.js";
+export * from "./intent-evidence.js";
 export * from "./pi-compiler.js";
 export * from "./pipeline.js";
 export * from "./privacy.js";
