@@ -7399,7 +7399,15 @@ var PendingTaskQueue = class {
       this.quarantined = true;
       return sequence;
     }
-    if (this.tombstones.some((tombstone) => tombstone.fingerprint === entry.fingerprint)) {
+    const collisions = this.entries.filter((candidate) => candidate.fingerprint === entry.fingerprint);
+    if (collisions.length > 0) {
+      for (const collision of collisions) {
+        delete collision.compiledContent;
+        collision.status = "skipped";
+      }
+      entry.status = "skipped";
+      this.emit("fingerprint_collision", entry);
+    } else if (this.tombstones.some((tombstone) => tombstone.fingerprint === entry.fingerprint)) {
       entry.status = "skipped";
     }
     this.entries.push(entry);
