@@ -1,0 +1,105 @@
+{
+  "version": 1,
+  "kind": "prompt-transformation-v1-smoke-evidence",
+  "subject": {
+    "release": "v1.1.0",
+    "commit": "962a431292dae8d082abf5442329939207e38c48",
+    "productDiffFromRelease": "clean"
+  },
+  "candidate": {
+    "provider": "opencode-go-gateway",
+    "model": "deepseek-v4-flash"
+  },
+  "evaluator": {
+    "provider": "openai-codex",
+    "model": "gpt-5.6-sol",
+    "reasoning": "medium",
+    "promptVersion": "pi-benchmark-evaluator-v3"
+  },
+  "run": {
+    "startedAt": "2026-07-21T15:52:07.286Z",
+    "completedAt": "2026-07-21T15:54:13.324Z",
+    "concurrency": 1,
+    "schemaVersion": "2",
+    "compilerVersion": "pi-v2",
+    "runnerVersion": "benchmark-v2",
+    "sourceReportSha256": "4da1e1e5bef5952e147e43e4971214ebae3c02c117244739b13bba3c330a9a7a"
+  },
+  "corpus": {
+    "smokeManifestSha256": "e82b418efdab66212a9fc0e9a9e7810c4ec495e653274d92e80b73fb4e3cdda6",
+    "total": 8,
+    "caseIdSequenceSha256": "8b64eec3f9d78b0c8132b37065571f499b0231fd7b1bb823796a97fb71e6941e",
+    "sourceContentSha256": "a257bffce38b4170a3b24490ad5264ebd9acde0051a21aae2e277482e83a82e9"
+  },
+  "isolation": {
+    "policy": "macOS sandbox-exec",
+    "policySha256": "4e5650d9640674803169aa868dca9030f26cb56d4ab5866cf5d81610ce429121",
+    "networkMode": "deny-except-two-loopback-inference-gateways",
+    "sourceRepoWritable": false,
+    "homeMounted": false,
+    "credentialsMounted": false,
+    "dockerSocketMounted": false,
+    "policySmokePassed": true
+  },
+  "requests": {
+    "candidateInferenceCalls": 8,
+    "candidateHttp200": 8,
+    "evaluatorCalls": 8,
+    "evaluatorSucceeded": 8,
+    "evaluatorFailed": 0,
+    "approvedTotalCallCap": 176,
+    "providerMeteredCostUsd": 0,
+    "approvedProviderMeteredCostCapUsd": 1
+  },
+  "aggregates": {
+    "attempted": 8,
+    "transformed": 8,
+    "failOpen": 0,
+    "schemaValidRate": {
+      "value": 1,
+      "denominator": 8
+    },
+    "structuralPassRate": {
+      "value": 1,
+      "denominator": 8
+    },
+    "languagePreservationRate": {
+      "value": 1,
+      "denominator": 8
+    },
+    "deterministicSafetyPassRate": {
+      "value": 1,
+      "denominator": 2
+    },
+    "forbiddenAdditionFailureRate": {
+      "value": 0,
+      "denominator": 8
+    },
+    "evaluatorCoverageRate": {
+      "value": 1,
+      "denominator": 8
+    },
+    "evaluatorMaterialIntentAlterationRate": {
+      "value": 0.125,
+      "denominator": 8
+    },
+    "evaluatorClearerOrEqualRate": {
+      "value": 1,
+      "denominator": 8
+    }
+  },
+  "decision": {
+    "status": "stop",
+    "reasonCode": "SMOKE_MATERIAL_INTENT_ALTERATION",
+    "hardGate": "zero material intent alterations in smoke",
+    "observedFailures": 1,
+    "denominator": 8,
+    "confirmatoryRunExecuted": false
+  },
+  "limitations": [
+    "This smoke screen is a protocol gate, not a confirmatory product-effect estimate.",
+    "Semantic alteration is an independent model-evaluator verdict, not human review.",
+    "The aggregate evidence intentionally contains no prompts, candidate content, case identifiers, credentials, or provider error bodies.",
+    "The confirmatory 80-case corpus was not executed because the pre-registered hard gate failed."
+  ]
+}

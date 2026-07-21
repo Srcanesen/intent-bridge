@@ -167,7 +167,7 @@ If PR 18 requires a product behavior change to make the benchmark pass, stop. Pr
 - Seed: `42`
 - Subject commit: `962a431292dae8d082abf5442329939207e38c48`
 
-Hash is computed as SHA-256 of canonical, sorted case JSON (sorted keys, sorted by ID) concatenated with the README rubric; only the two published hash values are normalized to avoid self-reference. Validator rejects any other drift.
+Hash is computed as SHA-256 of canonical, sorted case JSON—including nested expectations—plus canonical, sorted gold annotations and the README rubric; only the two published hash values are normalized to avoid self-reference. Validator rejects any other drift.
 
 ### Distribution
 
@@ -196,3 +196,7 @@ node packages/benchmark/dist/cli.js pt-v1 summarize <report.json> <manifest.json
 ```
 
 The `validate` command checks case distribution, hash integrity, duplicate inputs/titles, credential safety, annotation coverage, and manifest consistency. The `summarize` command produces a sanitized aggregate report with Wilson intervals and gate statuses. Raw prompts, intents, and compiled tasks never appear in summarizer output.
+
+## Execution status
+
+The approved externally sandboxed run stopped after the separate eight-case smoke screen because the independent evaluator marked one transformation as materially intent-altering. The smoke alteration rate was `1/8` (`12.5%`), while structure, language, deterministic safety, forbidden additions, evaluator coverage, and clearer-or-equal checks passed. Per the pre-registered stop rule, the 80-case confirmatory corpus was not executed. Sanitized aggregate evidence is committed at [`../reports/2026-07-21-prompt-transformation-v1-smoke.json`](../reports/2026-07-21-prompt-transformation-v1-smoke.json).
