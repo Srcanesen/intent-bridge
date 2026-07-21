@@ -1,7 +1,11 @@
 {
-  "name": "@intent-bridge/pi-extension",
+  "name": "@srcanesen/intent-bridge",
   "private": false,
-  "version": "1.0.0",
+  "version": "1.1.0",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
   "license": "Apache-2.0",
   "description": "Fail-open multilingual intent transformation for Pi.",
   "repository": {

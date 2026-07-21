@@ -1,4 +1,4 @@
-# @intent-bridge/pi-extension
+# @srcanesen/intent-bridge
 
 Apache-2.0 Pi extension package for Intent Bridge. It bundles the private core and OpenAI-compatible provider into `dist/index.js`; Pi itself is the only runtime peer.
 
@@ -11,13 +11,13 @@ CI verifies Pi `0.80.10` regularly. Its scheduled latest-Pi check is observation
 
 ## Install
 
-Install the public GitHub release:
+For v1.1.0, install through Pi:
 
 ```bash
-pi install git:github.com/Srcanesen/intent-bridge@v1.0.0
+pi install npm:@srcanesen/intent-bridge@1.1.0
 ```
 
-The npm package is not published. For a local checkout, build first and load the package directory:
+For a local checkout, build first and load the package directory:
 
 ```bash
 corepack pnpm build

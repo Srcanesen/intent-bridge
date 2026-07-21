@@ -175,8 +175,8 @@ try {
       license: manifest.license,
     },
     {
-      name: "@intent-bridge/pi-extension",
-      version: "1.0.0",
+      name: "@srcanesen/intent-bridge",
+      version: "1.1.0",
       license: "Apache-2.0",
     },
   );
@@ -208,7 +208,7 @@ try {
     { cwd: consumer },
   );
   await smoke(
-    join(consumer, "node_modules/@intent-bridge/pi-extension/dist/index.js"),
+    join(consumer, "node_modules/@srcanesen/intent-bridge/dist/index.js"),
     consumer,
     "tarball",
   );
