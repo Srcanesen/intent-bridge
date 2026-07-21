@@ -8,7 +8,7 @@
   A fail-open Pi extension that turns natural-language software requests into structured, implementation-ready context without replacing the user's original message.
 </p>
 
-> **Status:** `v1.0.0` is the first public GitHub release. The npm package is not published.
+> **Status:** `v1.1.0` is prepared for public npm release.
 
 ## What it does
 
@@ -57,10 +57,10 @@ CI verifies the pinned Pi `0.80.10` host regularly. A scheduled latest-Pi check 
 
 ## Local quick start
 
-Install the tagged GitHub release through Pi:
+Install through Pi:
 
 ```bash
-pi install git:github.com/Srcanesen/intent-bridge@v1.0.0
+pi install npm:@srcanesen/intent-bridge@1.1.0
 ```
 
 Or use a local checkout:
