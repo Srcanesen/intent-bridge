@@ -223,6 +223,26 @@ describe("PiNativeProvider", () => {
     expect(completeSimple).toHaveBeenCalledTimes(1);
   });
 
+  it("marks interpreter instructions as not user constraints in the prompt", async () => {
+    const completeSimple = vi.fn().mockResolvedValue({
+      stopReason: "toolUse",
+      content: [
+        {
+          type: "toolCall",
+          name: "emit_intent",
+          arguments: { intentJson: JSON.stringify(intent) },
+        },
+      ],
+    });
+    await createPiProvider({ completeSimple }, model).interpret(request, {});
+    const systemPrompt = completeSimple.mock.calls[0]?.[1]?.systemPrompt;
+    expect(systemPrompt).toMatch(
+      /interpreter.*instruction[\s\S]*?never user (goal|scope|constraint)/i,
+    );
+    expect(systemPrompt).toContain("outputRequirements");
+    expect(systemPrompt).toContain("Do not write implementation code");
+  });
+
   it("keeps completeSimpleFor as an adapter-backed benchmark compatibility export", async () => {
     const completeSimple = vi.fn().mockResolvedValue({ content: [] });
     const call = completeSimpleFor({ runtime: { completeSimple } });
