@@ -157,6 +157,15 @@ describe("benchmark contracts", () => {
         },
       }).evaluator?.promptVersion,
     ).toBe("pi-benchmark-evaluator-v3");
+    expect(
+      parseBenchmarkReportV2({
+        ...report,
+        evaluator: {
+          ...input.evaluator,
+          promptVersion: "pi-benchmark-evaluator-v4",
+        },
+      }).evaluator?.promptVersion,
+    ).toBe("pi-benchmark-evaluator-v4");
     const reviewed = {
       ...report,
       ownerReview: {

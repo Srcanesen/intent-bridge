@@ -571,7 +571,8 @@ export type BenchmarkThresholdsV2 = Record<
 export type BenchmarkEvaluatorPromptVersion =
   | "pi-benchmark-evaluator-v1"
   | "pi-benchmark-evaluator-v2"
-  | "pi-benchmark-evaluator-v3";
+  | "pi-benchmark-evaluator-v3"
+  | "pi-benchmark-evaluator-v4";
 /** Bounded Pi ModelThinkingLevel values supported by the benchmark evaluator. */
 export type BenchmarkEvaluatorReasoningV1 =
   | "off"
@@ -813,6 +814,7 @@ export function parseBenchmarkReportV2(value: unknown): BenchmarkReportV2 {
           "pi-benchmark-evaluator-v1",
           "pi-benchmark-evaluator-v2",
           "pi-benchmark-evaluator-v3",
+          "pi-benchmark-evaluator-v4",
         ] as const),
         ...(evaluator.reasoning === undefined
           ? {}
