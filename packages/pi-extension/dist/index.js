@@ -7350,33 +7350,46 @@ import { CONFIG_DIR_NAME as CONFIG_DIR_NAME2 } from "@earendil-works/pi-coding-a
 import { createHash as createHash4 } from "node:crypto";
 var DEFAULT_PENDING_TASK_TTL_MS = 5 * 60 * 1e3;
 var DEFAULT_PENDING_TASK_CAPACITY = 20;
+var DEFAULT_PENDING_TASK_TOMBSTONE_TTL_MS = 5 * 60 * 1e3;
+var DEFAULT_PENDING_TASK_TOMBSTONE_CAPACITY = 20;
 function fingerprint(prompt, imageCount) {
   return createHash4("sha256").update(JSON.stringify([prompt, imageCount])).digest("hex");
 }
 var PendingTaskQueue = class {
   entries = [];
+  tombstones = [];
   sequence = 0;
   quarantined = false;
+  tombstoneOverflowUntil = 0;
   now;
   ttlMs;
   capacity;
+  tombstoneTtlMs;
+  tombstoneCapacity;
   diagnostic;
   constructor(options = {}) {
     this.now = options.now ?? Date.now;
     this.ttlMs = options.ttlMs ?? DEFAULT_PENDING_TASK_TTL_MS;
     this.capacity = options.capacity ?? DEFAULT_PENDING_TASK_CAPACITY;
+    this.tombstoneTtlMs = options.tombstoneTtlMs ?? DEFAULT_PENDING_TASK_TOMBSTONE_TTL_MS;
+    this.tombstoneCapacity = options.tombstoneCapacity ?? DEFAULT_PENDING_TASK_TOMBSTONE_CAPACITY;
     this.diagnostic = options.diagnostic ?? (() => void 0);
   }
   reserve(prompt, imageCount, traceId) {
     const sequence = ++this.sequence;
+    const now = this.now();
     const entry = {
       sequence,
       traceId,
       fingerprint: fingerprint(prompt, imageCount),
-      expiresAt: this.now() + this.ttlMs,
+      expiresAt: now + this.ttlMs,
       status: "reserved"
     };
-    if (this.quarantined) {
+    this.expire(now);
+    if (this.quarantined || this.tombstoneOverflowUntil > now) {
+      if (!this.quarantined) {
+        this.tombstoneOverflowUntil = Math.max(this.tombstoneOverflowUntil, entry.expiresAt + this.tombstoneTtlMs);
+      }
       this.emit("capacity_eviction", entry);
       return sequence;
     }
@@ -7386,11 +7399,16 @@ var PendingTaskQueue = class {
       this.quarantined = true;
       return sequence;
     }
+    if (this.tombstones.some((tombstone) => tombstone.fingerprint === entry.fingerprint)) {
+      entry.status = "skipped";
+    }
     this.entries.push(entry);
     return sequence;
   }
   markReady(sequence, compiledContent) {
-    if (this.quarantined)
+    const now = this.now();
+    this.expire(now);
+    if (this.quarantined || this.tombstoneOverflowUntil > now)
       return false;
     const entry = this.entries.find((candidate) => candidate.sequence === sequence);
     if (!entry || entry.status !== "reserved")
@@ -7400,6 +7418,7 @@ var PendingTaskQueue = class {
     return true;
   }
   skip(sequence) {
+    this.expire(this.now());
     const entry = this.entries.find((candidate) => candidate.sequence === sequence);
     if (!entry)
       return false;
@@ -7408,6 +7427,7 @@ var PendingTaskQueue = class {
     return true;
   }
   cancel(sequence) {
+    this.expire(this.now());
     const index = this.entries.findIndex((entry) => entry.sequence === sequence);
     if (index < 0)
       return false;
@@ -7416,8 +7436,14 @@ var PendingTaskQueue = class {
   }
   consumeForAgentStart(prompt, imageCount, now) {
     const expected = fingerprint(prompt, imageCount);
-    if (this.quarantined) {
+    this.expire(now);
+    if (this.quarantined || this.tombstoneOverflowUntil > now) {
       this.emitMiss(expected);
+      return null;
+    }
+    const tombstone = this.tombstones.findIndex((entry2) => entry2.fingerprint === expected);
+    if (tombstone >= 0) {
+      this.tombstones.splice(tombstone, 1);
       return null;
     }
     const index = this.entries.findIndex((entry2) => entry2.fingerprint === expected);
@@ -7428,10 +7454,6 @@ var PendingTaskQueue = class {
     const [entry] = this.entries.splice(index, 1);
     if (!entry)
       return null;
-    if (entry.expiresAt <= now) {
-      this.emit("expired", entry);
-      return null;
-    }
     if (entry.status === "skipped")
       return null;
     if (entry.status !== "ready" || entry.compiledContent === void 0) {
@@ -7444,7 +7466,34 @@ var PendingTaskQueue = class {
     for (const entry of this.entries)
       this.emit("session_reset", entry);
     this.entries.length = 0;
+    this.tombstones.length = 0;
     this.quarantined = false;
+    this.tombstoneOverflowUntil = 0;
+  }
+  expire(now) {
+    for (let index = this.tombstones.length - 1; index >= 0; index--) {
+      const tombstone = this.tombstones[index];
+      if (tombstone && tombstone.expiresAt <= now) {
+        this.tombstones.splice(index, 1);
+      }
+    }
+    for (let index = this.entries.length - 1; index >= 0; index--) {
+      const entry = this.entries[index];
+      if (!entry || entry.expiresAt > now)
+        continue;
+      if (this.tombstones.length >= this.tombstoneCapacity) {
+        this.emit("capacity_eviction", entry);
+        this.tombstoneOverflowUntil = Math.max(now + this.tombstoneTtlMs, ...this.entries.map((candidate) => candidate.expiresAt + this.tombstoneTtlMs), ...this.tombstones.map((tombstone) => tombstone.expiresAt));
+        this.entries.length = 0;
+        return;
+      }
+      this.entries.splice(index, 1);
+      this.emit("expired", entry);
+      this.tombstones.unshift({
+        fingerprint: entry.fingerprint,
+        expiresAt: now + this.tombstoneTtlMs
+      });
+    }
   }
   emit(reason, entry) {
     this.diagnostic({
