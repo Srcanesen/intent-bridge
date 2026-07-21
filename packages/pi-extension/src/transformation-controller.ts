@@ -1,4 +1,10 @@
 import {
+  CONFIG_DIR_NAME,
+  type ExtensionAPI,
+  type ExtensionContext,
+  type InputEvent,
+} from "@earendil-works/pi-coding-agent";
+import {
   type BridgeTraceV1,
   collectProjectContext,
   InterpretationPipeline,
@@ -6,12 +12,6 @@ import {
   PiCompilerV1,
   type TraceSink,
 } from "@intent-bridge/core";
-import {
-  CONFIG_DIR_NAME,
-  type ExtensionAPI,
-  type ExtensionContext,
-  type InputEvent,
-} from "@earendil-works/pi-coding-agent";
 
 import { PendingTaskQueue } from "./pending-task-queue.js";
 import { formatTransformation, PREVIEW_CHOICES } from "./preview.js";
@@ -359,12 +359,15 @@ export function createTransformationController(
         providerProfile: latestMetadata.providerProfileId,
         model: latestMetadata.model,
       };
-      let saved = true;
+      // Observed durable write — not best-effort like normal trace appends
+      let persisted = false;
       try {
-        await append(trace, config.logging);
+        await traceWriter.append(trace, config.logging);
+        persisted = config.logging.mode !== "off";
       } catch {
-        saved = false;
+        // trace writer failed — persisted stays false
       }
+      // Session metadata — independent best-effort, must not downgrade durable status
       try {
         pi.appendEntry("intent-bridge.rating", {
           traceId: latest.traceId,
@@ -375,10 +378,10 @@ export function createTransformationController(
           mode: latestMetadata.mode,
         });
       } catch {
-        saved = false;
+        // noop — session metadata rejection must not affect persisted status
       }
       rating = value;
-      return saved;
+      return persisted;
     },
   };
 }
