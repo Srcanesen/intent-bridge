@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Pi-native intent provider v5 now emits direct canonical nested `intent` and `evidence` tool arguments, preventing stale JSON-in-string tool payloads.
+
 ## 1.1.0 — 2026-07-21
 
 ### Added

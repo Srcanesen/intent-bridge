@@ -1,6 +1,8 @@
 import { createHash } from "node:crypto";
 
 import {
+  IntentDocumentV2JsonSchema,
+  IntentEvidenceV1Schema,
   InterpretationPipeline,
   PiCompilerV1,
   type BridgeInput,
@@ -83,8 +85,8 @@ describe("PiNativeProvider", () => {
           type: "toolCall",
           name: "emit_intent",
           arguments: {
-            intentJson: JSON.stringify(intent),
-            evidenceJson: JSON.stringify(evidenceFor("SENTINEL_REQUEST")),
+            intent,
+            evidence: evidenceFor("SENTINEL_REQUEST"),
           },
         },
       ],
@@ -134,7 +136,7 @@ describe("PiNativeProvider", () => {
     ]) {
       expect(user).not.toContain(metadata);
     }
-    expect(system).toContain("interpreterPromptVersion: pi-native-v4");
+    expect(system).toContain("interpreterPromptVersion: pi-native-v5");
     expect(system).toContain("exact substring");
     expect(system).toContain("Evidence proves attribution only");
     expect(system).toContain("material ask_user ambiguity");
@@ -143,8 +145,24 @@ describe("PiNativeProvider", () => {
     expect(`${system}\n${user}`).not.toContain(
       "Do not write implementation code",
     );
-    const intentJson = JSON.stringify(intent);
-    const evidenceJson = JSON.stringify(evidenceFor("SENTINEL_REQUEST"));
+    expect(outbound?.tools).toEqual([
+      {
+        name: "emit_intent",
+        description:
+          "Emit exactly one IntentDocument v2 and IntentEvidenceV1 pair.",
+        parameters: {
+          type: "object",
+          additionalProperties: false,
+          required: ["intent", "evidence"],
+          properties: {
+            intent: IntentDocumentV2JsonSchema,
+            evidence: IntentEvidenceV1Schema,
+          },
+        },
+      },
+    ]);
+    expect(JSON.stringify(outbound?.tools)).not.toContain("intentJson");
+    expect(JSON.stringify(outbound?.tools)).not.toContain("evidenceJson");
     expect(result).toMatchObject({
       intent,
       evidence: evidenceFor("SENTINEL_REQUEST"),
@@ -153,7 +171,7 @@ describe("PiNativeProvider", () => {
     });
     expect(result.rawResponseHash).toBe(
       createHash("sha256")
-        .update(JSON.stringify({ intentJson, evidenceJson }))
+        .update(JSON.stringify(envelopeFor("SENTINEL_REQUEST")))
         .digest("hex"),
     );
     expect(JSON.stringify(result)).not.toContain("SENTINEL_THINKING");
@@ -197,75 +215,112 @@ describe("PiNativeProvider", () => {
   });
 
   it.each([
-    { stopReason: "length", content: [] },
-    { stopReason: "error", content: [] },
-    { stopReason: "aborted", content: [] },
     {
-      stopReason: "toolUse",
-      content: [
-        {
-          type: "toolCall",
-          name: "emit_intent",
-          arguments: { intentJson: "{}", evidenceJson: "{}" },
-        },
-        { type: "toolCall", name: "other", arguments: {} },
-      ],
+      name: "legacy string arguments",
+      arguments: { intentJson: "{}", evidenceJson: "{}" },
     },
+    { name: "missing arguments", arguments: { intent } },
     {
+      name: "extra arguments",
+      arguments: {
+        intent,
+        evidence: evidenceFor("SENTINEL_REQUEST"),
+        unknown: true,
+      },
+    },
+  ])("rejects $name", async ({ arguments: args }) => {
+    const completeSimple = vi.fn().mockResolvedValue({
       stopReason: "toolUse",
+      content: [{ type: "toolCall", name: "emit_intent", arguments: args }],
+    });
+    await expect(
+      createPiProvider({ completeSimple }, model).interpret(request, {}),
+    ).rejects.toMatchObject({ code: "PROVIDER_INVALID_JSON" });
+  });
+
+  it.each([
+    {
+      name: "wrong tool",
       content: [
         {
           type: "toolCall",
           name: "other",
-          arguments: {
-            intentJson: JSON.stringify(intent),
-            evidenceJson: JSON.stringify(evidenceFor("SENTINEL_REQUEST")),
+          arguments: envelopeFor("SENTINEL_REQUEST"),
+        },
+        { type: "text", text: JSON.stringify(envelopeFor("SENTINEL_REQUEST")) },
+      ],
+    },
+    {
+      name: "multiple calls",
+      content: [
+        {
+          type: "toolCall",
+          name: "emit_intent",
+          arguments: envelopeFor("SENTINEL_REQUEST"),
+        },
+        { type: "toolCall", name: "other", arguments: {} },
+      ],
+    },
+  ])("rejects $name", async ({ content }) => {
+    const completeSimple = vi
+      .fn()
+      .mockResolvedValue({ stopReason: "toolUse", content });
+    await expect(
+      createPiProvider({ completeSimple }, model).interpret(request, {}),
+    ).rejects.toMatchObject({ code: "PROVIDER_INVALID_JSON" });
+  });
+
+  it.each([
+    {
+      name: "a stale intent object",
+      intent: { schemaVersion: "1", goal: "Stale" },
+      evidence: evidenceFor("SENTINEL_REQUEST"),
+    },
+    {
+      name: "an invalid evidence quote",
+      intent,
+      evidence: evidenceFor("not in source"),
+    },
+    {
+      name: "an invalid evidence path",
+      intent,
+      evidence: {
+        version: 1,
+        items: [
+          {
+            path: "/unknown",
+            source: "user_original",
+            quote: "SENTINEL_REQUEST",
           },
-        },
-      ],
+        ],
+      },
     },
-    {
+  ])("fails closed for $name", async ({ intent: directIntent, evidence }) => {
+    const completeSimple = vi.fn().mockResolvedValue({
       stopReason: "toolUse",
       content: [
         {
           type: "toolCall",
           name: "emit_intent",
-          arguments: { intentJson: "", evidenceJson: "{}" },
+          arguments: { intent: directIntent, evidence },
         },
       ],
-    },
-    {
-      stopReason: "toolUse",
-      content: [
-        {
-          type: "toolCall",
-          name: "emit_intent",
-          arguments: { intentJson: JSON.stringify(intent) },
-        },
-      ],
-    },
-    {
-      stopReason: "toolUse",
-      content: [
-        {
-          type: "toolCall",
-          name: "emit_intent",
-          arguments: {
-            intentJson: JSON.stringify(intent),
-            evidenceJson: JSON.stringify(evidenceFor("SENTINEL_REQUEST")),
-            unknown: true,
-          },
-        },
-      ],
-    },
-  ])("fails safely for invalid native output", async (response) => {
+    });
+    await expect(
+      createPiProvider({ completeSimple }, model).interpret(request, {}),
+    ).rejects.toMatchObject({ code: "INTENT_SCHEMA_INVALID" });
+  });
+
+  it.each([
+    { stopReason: "length", content: [] },
+    { stopReason: "error", content: [] },
+    { stopReason: "aborted", content: [] },
+  ])("fails safely for terminal native output", async (response) => {
     const completeSimple = vi.fn().mockResolvedValue(response);
     await expect(
       createPiProvider({ completeSimple }, model).interpret(request, {}),
     ).rejects.toMatchObject({
-      code: expect.stringMatching(
-        /PROVIDER_(UNREACHABLE|INVALID_JSON|RESPONSE_TOO_LARGE)/,
-      ),
+      code: expect.stringMatching(/PROVIDER_(UNREACHABLE|RESPONSE_TOO_LARGE)/),
     });
   });
 
@@ -337,8 +392,8 @@ describe("PiNativeProvider", () => {
           type: "toolCall",
           name: "emit_intent",
           arguments: {
-            intentJson: JSON.stringify(intent),
-            evidenceJson: JSON.stringify(evidenceFor("SENTINEL_REQUEST")),
+            intent,
+            evidence: evidenceFor("SENTINEL_REQUEST"),
           },
         },
       ],
