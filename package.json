@@ -30,12 +30,13 @@
     "benchmark:pi-local": "corepack pnpm build && node packages/pi-extension/scripts/benchmark-local-latency.mjs",
     "benchmark:pi-corpus": "corepack pnpm build && node packages/pi-extension/scripts/benchmark-native-corpus.mjs",
     "benchmark:implementation-outcome": "node packages/pi-extension/scripts/benchmark-implementation-outcome.mjs",
+    "benchmark:validate:offline": "corepack pnpm build && node packages/benchmark/dist/cli.js validate-fixtures --cases benchmarks/cases && node packages/pi-extension/scripts/benchmark-implementation-outcome.mjs validate --cases benchmarks/implementation-outcome/cases.json",
     "build:extension": "tsc --build --force tsconfig.json && node scripts/bundle-extension.mjs",
     "build": "corepack pnpm build:extension",
     "release:pack": "corepack pnpm build && node scripts/release-smoke.mjs --pack",
     "release:smoke": "corepack pnpm build && node scripts/release-smoke.mjs",
     "scan:secrets": "node scripts/scan-secrets.mjs",
-    "check": "corepack pnpm format:check && corepack pnpm lint && corepack pnpm typecheck && corepack pnpm test && corepack pnpm build"
+    "check": "corepack pnpm format:check && corepack pnpm lint && corepack pnpm typecheck && corepack pnpm test && corepack pnpm benchmark:validate:offline"
   },
   "devDependencies": {
     "@biomejs/biome": "2.3.15",
