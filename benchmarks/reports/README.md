@@ -14,11 +14,16 @@ human owner review; the limitations are recorded below.
 | `2026-07-20-mimo-v2.5-sol-medium-v2.json` | `pi:opencode-go:mimo-v2.5` | `mimo-v2.5` | rejected comparison profile (Report V2) |
 | `2026-07-20-deepseek-vs-mimo-sol-medium-v2.json` | — | — | sanitized side-by-side comparison |
 | `2026-07-21-prompt-transformation-v1-smoke.json` | `pi:opencode-go-gateway:deepseek-v4-flash` | `deepseek-v4-flash` | pre-registered TR/EN smoke stop evidence |
-| `2026-07-21-source-grounded-evidence-v1-smoke.json` | `pi:opencode-go-gateway:deepseek-v4-flash` | `deepseek-v4-flash` | kaynak kanıtı smoke stop kanıtı |
+| `2026-07-21-source-grounded-evidence-v1-smoke.json` | `pi:opencode-go-gateway:deepseek-v4-flash` | `deepseek-v4-flash` | kaynak kanıtı v1 smoke stop kanıtı |
+| `2026-07-21-source-grounded-evidence-v2-smoke.json` | `pi:opencode-go-gateway:deepseek-v4-flash` | `deepseek-v4-flash` | kaynak kanıtı v2 smoke stop kanıtı |
 
-All five files are sanitized evidence artifacts. Their SHA-256 was
+All six files are sanitized evidence artifacts. Their SHA-256 was
 verified when they were prepared, and their committed file mode is
 `0644`.
+
+## Kaynağa dayalı kanıt v2 smoke kararı
+
+Pi-native v5 doğrudan araç şemasıyla dondurulmuş sekiz vaka dış sandbox içinde yürütüldü. Sonuç `6× INTENT_SCHEMA_INVALID`, `2× PROVIDER_UNREACHABLE` ve `0` değerlendirici çağrısıdır; 80 vakalık doğrulayıcı aşama başlatılmadı. Bir ek izole teşhis çağrısı, intent zarfının artık kanonik olduğunu fakat modelin dinamik kanıt yolunu ve tam kapsamı üretemediğini gösterdi. Ham `0600` paketler Türkçe inceleme sonrasında silindi. Aggregate dosyasının hazırlanırken doğrulanan SHA-256 değeri `2cb1ff755c72fc5f3124b39d5b96896160a7157a97aa2471995fb4fb7aab8ca3`dür.
 
 ## Kaynağa dayalı kanıt v1 smoke kararı
 

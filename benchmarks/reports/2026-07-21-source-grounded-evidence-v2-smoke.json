@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "benchmarkId": "source-grounded-evidence-v2",
+  "subjectRelease": "v1.2.0-rc",
+  "subjectCommit": "acb8f60e5f2a0e6297c0f1bc01853b0b5ee12294",
+  "manifestSha256": "39e430d284e06b729de5d3aac23c754d86434613a9a2c61792e224674fb788ae",
+  "sourceReportV2Sha256s": [
+    "0b15026461ce0405a4d0564ceec1b829c3c5dc3eb32066ce87853fa5412c979c"
+  ],
+  "prompts": {
+    "pi": "pi-native-v5",
+    "openaiCompatible": "openai-compatible-v4"
+  },
+  "candidate": {
+    "provider": "opencode-go",
+    "runtimeProviderAlias": "opencode-go-gateway",
+    "model": "deepseek-v4-flash"
+  },
+  "evaluator": null,
+  "corpus": {
+    "confirmatorySha256": "d25bb4bf705923dcfc698279ade9ebf0fac07dc9783f87467940f5c0502c3d55",
+    "smokeCasesSha256": "f0ef68b6fb49eb7641af1d088ecc79e68905ed70589aef671804b5772ce8eba6",
+    "smokeAnnotationsSha256": "ae6466edeec01c65b638f4d1379b9449a867b703c94b7132d384dde0273126f9"
+  },
+  "sandboxPolicyHash": "2c37a9a4be63809ac3daa5f929ad9f07157ba1f266d35f50323297bac4d84b26",
+  "calls": {
+    "total": 9,
+    "candidate": 9,
+    "evaluator": 0
+  },
+  "cost": {
+    "providerMeteredUsd": 0
+  },
+  "gates": [
+    { "gate": "smoke", "rate": 0, "numerator": 0, "denominator": 8, "status": "fail" },
+    { "gate": "confirmatory", "rate": null, "numerator": 0, "denominator": 0, "status": "unavailable" },
+    { "gate": "structural", "rate": 0, "numerator": 0, "denominator": 8, "status": "fail" },
+    { "gate": "languagePreservation", "rate": null, "numerator": 0, "denominator": 0, "status": "unavailable" },
+    { "gate": "deterministicSafety", "rate": null, "numerator": 0, "denominator": 0, "status": "unavailable" },
+    { "gate": "evidenceCoverage", "rate": 0, "numerator": 0, "denominator": 8, "status": "fail" },
+    { "gate": "forbiddenAdditions", "rate": null, "numerator": 0, "denominator": 0, "status": "unavailable" },
+    { "gate": "interpreterLeakage", "rate": null, "numerator": 0, "denominator": 0, "status": "unavailable" },
+    { "gate": "scopeExpansion", "rate": null, "numerator": 0, "denominator": 0, "status": "unavailable" },
+    { "gate": "methodMandate", "rate": null, "numerator": 0, "denominator": 0, "status": "unavailable" },
+    { "gate": "materialIntentAlteration", "rate": null, "numerator": 0, "denominator": 0, "status": "unavailable" },
+    { "gate": "informalClearer", "rate": null, "numerator": 0, "denominator": 0, "status": "unavailable" },
+    { "gate": "informalLessClear", "rate": null, "numerator": 0, "denominator": 0, "status": "unavailable" },
+    { "gate": "ambiguityHandling", "rate": null, "numerator": 0, "denominator": 0, "status": "unavailable" },
+    { "gate": "smokeAmbiguityExact", "rate": null, "numerator": 0, "denominator": 0, "status": "unavailable" },
+    { "gate": "escalation", "rate": null, "numerator": 0, "denominator": 0, "status": "unavailable" }
+  ],
+  "humanReview": {
+    "language": "tr",
+    "smokeReviewedCount": 8,
+    "confirmatoryFlaggedReviewed": 0,
+    "confirmatoryFlaggedTotal": 0,
+    "confirmatoryUnflaggedSampled": 0,
+    "confirmatoryUnflaggedReclassified": 0,
+    "confirmatoryExpandedToAll": false,
+    "approvalStatus": "pending"
+  },
+  "decision": "stop",
+  "limitations": [
+    "Sekiz smoke vakasının tamamı byte-koruyan fail-open oldu: altı INTENT_SCHEMA_INVALID ve iki PROVIDER_UNREACHABLE; değerlendirici çağrısı ve anlamsal hüküm üretilmedi.",
+    "Türkçe insan incelemesi sekiz yapısal sonucu kapsadı; dört İngilizce vakada çevrilecek anlamsal kanıt oluşmadı.",
+    "Bir ek izole aday teşhis çağrısı, v5 zarfının doğru fakat dinamik kanıt yolu ve kapsamının geçersiz olduğunu doğruladı; ham teşhis verisi silindi.",
+    "Dış sandbox kanıtı sanitize edilmiş özet ve politika hash'i ile sınırlıdır."
+  ]
+}
