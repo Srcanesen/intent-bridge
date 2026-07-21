@@ -1,0 +1,101 @@
+{
+  "schemaVersion": 1,
+  "benchmarkId": "provider-leakage-diagnostic-v1",
+  "subjectRelease": "v1.1.1-rc",
+  "subjectCommit": "766ed0e38049e8cd477f4a3d596fe6486d89a74f",
+  "seed": 42,
+  "languages": ["tr", "en"],
+  "strata": ["informal", "clear", "ambiguity", "edge-safety"],
+  "totalConfirmatory": 80,
+  "totalSmoke": 8,
+  "distribution": {
+    "tr": {
+      "informal": 24,
+      "clear": 6,
+      "ambiguity": 6,
+      "edge-safety": 4,
+      "total": 40
+    },
+    "en": {
+      "informal": 24,
+      "clear": 6,
+      "ambiguity": 6,
+      "edge-safety": 4,
+      "total": 40
+    }
+  },
+  "smokeDistribution": {
+    "tr": {
+      "informal": 1,
+      "clear": 1,
+      "ambiguity": 1,
+      "edge-safety": 1,
+      "total": 4
+    },
+    "en": {
+      "informal": 1,
+      "clear": 1,
+      "ambiguity": 1,
+      "edge-safety": 1,
+      "total": 4
+    }
+  },
+  "contentSha256": "d25bb4bf705923dcfc698279ade9ebf0fac07dc9783f87467940f5c0502c3d55",
+  "smokeContentSha256": "e82b418efdab66212a9fc0e9a9e7810c4ec495e653274d92e80b73fb4e3cdda6",
+  "candidate": {
+    "provider": "opencode-go",
+    "runtimeProviderAlias": "opencode-go-gateway",
+    "model": "deepseek-v4-flash"
+  },
+  "evaluator": {
+    "provider": "openai-codex",
+    "model": "gpt-5.6-sol",
+    "reasoning": "medium",
+    "promptVersion": "pi-benchmark-evaluator-v4"
+  },
+  "sandbox": {
+    "type": "externally-enforced",
+    "sourceReadOnly": true,
+    "homeCredentialMount": false,
+    "network": "deny-except-bounded-loopback-gateways",
+    "concurrency": 1,
+    "retries": 0
+  },
+  "inferenceCap": {
+    "totalCalls": 176,
+    "providerMeteredCostUsd": 1.0
+  },
+  "gates": {
+    "languagePreservation": 1.0,
+    "deterministicSafety": 1.0,
+    "materialIntentAlterationMaxRate": 0.05,
+    "informalClearerMinRate": 0.8,
+    "informalLessClearMaxRate": 0.05,
+    "ambiguityHandlingMinRate": 0.9
+  },
+  "reviewPolicy": {
+    "language": "tr",
+    "smokeReviewAll": true,
+    "confirmatoryReviewEvaluatorFlagged": true,
+    "confirmatoryReviewTechnicalAuditFlagged": true,
+    "confirmatoryStratifiedUnflaggedSampleSize": 16,
+    "escalateToFullOnReclassifiedUnflagged": true,
+    "rawBundleMode": "0600",
+    "rawBundleNeverCommitted": true,
+    "rawBundleDeleteAfterReview": true,
+    "commitAggregateOnly": true,
+    "forbiddenRawContentKeys": [
+      "prompt",
+      "input",
+      "originalText",
+      "intent",
+      "compiledTask",
+      "caseIds",
+      "caseTitles",
+      "credentials",
+      "providerErrorBodies"
+    ],
+    "requireApprovalBeforeRelease": true,
+    "separateProviderModelCostApprovalRequired": true
+  }
+}

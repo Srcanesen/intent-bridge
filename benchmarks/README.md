@@ -134,3 +134,7 @@ A bounded follow-up replaced the string-wrapped `intentJson` tool argument with 
 | opencode / deepseek-v4-flash-free | 5/8 → 7/8 | 0/8 → 0/8 | 14699 → 16410 | 17692 → 22257 |
 
 The production change was reverted: the required invariant threshold still failed, and DeepSeek latency regressed. The experiment also exposed a separate evaluation issue: required annotations are multi-word English phrases matched as exact substrings, although only 3/57 goal phrases and 11/86 constraint phrases occur literally in the multilingual inputs. Changing that quality contract requires a separate owner-approved evaluation-design decision; it must not be weakened merely to make this optimization pass.
+
+## Provider-leakage diagnostic v1
+
+A separate frozen protocol [`provider-leakage-diagnostic-v1`](provider-leakage-diagnostic-v1/README.md) targets interpreter-metadata leakage detection for the fixed product commit `766ed0e`. It reuses the PT-v1 corpus without copying it, adds a strict offline-verifiable manifest, and enforces a fully Turkish human-review workflow. PR/CI validation is offline and makes no live calls; separately approved execution permits live candidate/evaluator calls only through the externally enforced sandbox and bounded loopback gateways.

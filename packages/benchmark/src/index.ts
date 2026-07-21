@@ -9,3 +9,4 @@ export * from "./implementation-outcome/index.js";
 export * from "./report.js";
 export * from "./runner.js";
 export * from "./trace-export.js";
+export * from "./provider-leakage-diagnostic-v1.js";
