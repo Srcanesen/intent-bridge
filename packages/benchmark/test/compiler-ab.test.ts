@@ -13,7 +13,12 @@ import {
   type CompilerAbCaseResult,
   type CompilerAbModeResult,
 } from "../src/index.js";
-import { makeCase, makeIntent, providerWith } from "./helpers.js";
+import { evidenceFor, makeCase, makeIntent, providerWith } from "./helpers.js";
+
+const providerResult = () => {
+  const intent = makeIntent();
+  return { intent, evidence: evidenceFor(intent) };
+};
 
 const sampleIntent = makeIntent();
 const sampleCompiledTrue = new PiCompilerV1({
@@ -471,7 +476,7 @@ describe("compiler-ab runner one provider call two compiles", () => {
     const provider = providerWith(async () => {
       interpretCount++;
       return {
-        intent: makeIntent(),
+        ...providerResult(),
         usage: { inputTokens: 10, outputTokens: 20, totalTokens: 30 },
         rawResponseHash: "0000",
         latencyMs: 100,
@@ -500,7 +505,7 @@ describe("compiler-ab runner one provider call two compiles", () => {
     const provider = providerWith(async () => {
       interpretCount++;
       return {
-        intent: makeIntent(),
+        ...providerResult(),
         usage: { inputTokens: 5, outputTokens: 10, totalTokens: 15 },
         rawResponseHash: "0000",
         latencyMs: 50,
@@ -537,7 +542,7 @@ describe("compiler-ab runner one provider call two compiles", () => {
 
   it("has no evaluator when not configured", async () => {
     const provider = providerWith(async () => ({
-      intent: makeIntent(),
+      ...providerResult(),
       usage: { inputTokens: 5, outputTokens: 10, totalTokens: 15 },
       rawResponseHash: "0000",
       latencyMs: 50,
@@ -572,7 +577,7 @@ describe("compiler-ab context plumbing", () => {
       contextDir: dir,
       provider: providerWith(async (request) => {
         providerContext = request.projectContext;
-        return { intent: makeIntent(), latencyMs: 1 };
+        return { ...providerResult(), latencyMs: 1 };
       }),
       evaluator: {
         async evaluate(input) {
@@ -592,7 +597,7 @@ describe("compiler-ab evaluator integration", () => {
   it("calls evaluator exactly twice per transformed case (once per mode)", async () => {
     let evalCount = 0;
     const provider = providerWith(async () => ({
-      intent: makeIntent(),
+      ...providerResult(),
       usage: { inputTokens: 5, outputTokens: 10, totalTokens: 15 },
       rawResponseHash: "0000",
       latencyMs: 50,
@@ -622,7 +627,7 @@ describe("compiler-ab evaluator integration", () => {
 
   it("marks evaluator error as unavailable not zero/pass", async () => {
     const provider = providerWith(async () => ({
-      intent: makeIntent(),
+      ...providerResult(),
       usage: { inputTokens: 5, outputTokens: 10, totalTokens: 15 },
       rawResponseHash: "0000",
       latencyMs: 50,

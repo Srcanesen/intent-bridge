@@ -6,6 +6,7 @@ import {
   DEFAULT_QUALITY_CONFIG,
   type HarnessCompiler,
   InterpretationPipeline,
+  type IntentDocument,
   type IntentDocumentV1,
   type IntentProvider,
   type ProviderInterpretationResult,
@@ -40,6 +41,26 @@ const options = {
   promptVersion: "v1",
 };
 
+const evidenceFor = (
+  intent: IntentDocument,
+  quote = ".",
+  source: "user_original" | "project_summary" = "user_original",
+): ProviderInterpretationResult["evidence"] => {
+  const paths = ["/goal"];
+  for (const [taskIndex, task] of intent.tasks.entries()) {
+    paths.push(`/tasks/${taskIndex}/objective`);
+    for (const field of ["scope", "constraints", "successCriteria"] as const)
+      for (const index of task[field].keys())
+        paths.push(`/tasks/${taskIndex}/${field}/${index}`);
+  }
+  for (const index of intent.globalConstraints.keys())
+    paths.push(`/globalConstraints/${index}`);
+  return {
+    version: 1,
+    items: paths.map((path) => ({ path, source, quote })),
+  };
+};
+
 const provider = (
   intent = validIntent(),
   evidence?: ProviderInterpretationResult["evidence"],
@@ -47,7 +68,8 @@ const provider = (
   id: "test",
   interpret: vi.fn().mockResolvedValue({
     intent,
-    ...(evidence === undefined ? {} : { evidence }),
+    evidence:
+      evidence ?? evidenceFor("tasks" in intent ? intent : validIntent()),
     rawResponseHash: "hash",
     latencyMs: 12,
   }),
@@ -137,21 +159,11 @@ describe("InterpretationPipeline", () => {
   });
 
   it("validates evidence, passes it only to the compiler, and omits it from trace and latest state", async () => {
-    const evidence: NonNullable<ProviderInterpretationResult["evidence"]> = {
-      version: 1,
-      items: [
-        {
-          path: "/goal",
-          source: "project_summary",
-          quote: "PROJECT_QUOTE_ONLY",
-        },
-        {
-          path: "/tasks/0/objective",
-          source: "project_summary",
-          quote: "PROJECT_QUOTE_ONLY",
-        },
-      ],
-    };
+    const evidence = evidenceFor(
+      validIntent(),
+      "PROJECT_QUOTE_ONLY",
+      "project_summary",
+    );
     const testCompiler = compiler();
     const traceSink: TraceSink = {
       append: vi.fn().mockResolvedValue(undefined),
@@ -220,18 +232,30 @@ describe("InterpretationPipeline", () => {
     expect(testCompiler.compile).not.toHaveBeenCalled();
   });
 
-  it("keeps legacy compiler input unchanged when evidence is absent", async () => {
+  it("fails open byte-identically when runtime provider evidence is missing", async () => {
     const testCompiler = compiler();
-    await new InterpretationPipeline(provider(), testCompiler).run(
-      input(),
-      options,
-    );
-    expect(testCompiler.compile).toHaveBeenCalledWith({
-      intent: expect.any(Object),
-      originalText: "Fix the profile layout.",
-      attachmentSummary: { imageCount: 1 },
-      assessment: expect.any(Object),
+    const testProvider: IntentProvider = {
+      id: "missing-evidence",
+      interpret: vi.fn().mockResolvedValue({
+        intent: validIntent(),
+        rawResponseHash: "hash",
+        latencyMs: 1,
+      } as unknown as ProviderInterpretationResult),
+      testConnection: vi.fn(),
+    };
+    const originalText = "Fix the profile layout.\r\nKeep these bytes: 🚀";
+    await expect(
+      new InterpretationPipeline(testProvider, testCompiler).run(
+        { ...input(), originalText },
+        options,
+      ),
+    ).resolves.toEqual({
+      status: "fail_open",
+      originalText,
+      errorCode: "INTENT_SCHEMA_INVALID",
+      traceId: "trace-1",
     });
+    expect(testCompiler.compile).not.toHaveBeenCalled();
   });
 
   it("exposes privacy-safe assessment metadata in trace and latest transformation without changing delivery", async () => {
@@ -478,6 +502,7 @@ describe("InterpretationPipeline", () => {
       )
       .mockResolvedValueOnce({
         intent: validIntent(),
+        evidence: evidenceFor(validIntent()),
         rawResponseHash: "hash",
         latencyMs: 12,
       });
@@ -627,6 +652,7 @@ describe("InterpretationPipeline", () => {
               queueMicrotask(() =>
                 resolve({
                   intent: validIntent(),
+                  evidence: evidenceFor(validIntent()),
                   rawResponseHash: "hash",
                   latencyMs: 1,
                 }),
@@ -707,93 +733,53 @@ describe("InterpretationPipeline", () => {
     expect(testProvider.interpret).toHaveBeenCalledTimes(1);
   });
 
-  it("rejects leaked no-code constraint when source does not request it", async () => {
-    const leakedIntent: IntentDocumentV1 = {
-      ...validIntent(),
-      globalConstraints: [
-        "No implementation code to be written in this response",
-      ],
-    };
+  it.each([
+    "kod yazma!",
+    "kod yazma aracı",
+  ])("does not infer executable semantics from source keywords: %s", async (originalText) => {
     const testCompiler = compiler();
-    const pipeline = new InterpretationPipeline(
-      provider(leakedIntent),
-      testCompiler,
-    );
-
-    await expect(pipeline.run(input(), options)).resolves.toEqual({
-      status: "fail_open",
-      originalText: "Fix the profile layout.",
-      errorCode: "INTENT_SCHEMA_INVALID",
-      traceId: "trace-1",
-    });
-    expect(testCompiler.compile).not.toHaveBeenCalled();
-  });
-
-  it("allows leaked no-code constraint when user explicitly requests no code in English", async () => {
-    const leakedIntent: IntentDocumentV1 = {
-      ...validIntent(),
-      globalConstraints: ["Do not write implementation code"],
-    };
-    const testCompiler = compiler();
-    const pipeline = new InterpretationPipeline(
-      provider(leakedIntent),
-      testCompiler,
-    );
-
-    const enInput: BridgeInput = {
-      ...input(),
-      originalText: "Explain how this works, no code needed.",
-    };
-    await expect(pipeline.run(enInput, options)).resolves.toMatchObject({
-      status: "transformed",
-    });
+    const interpreted = validIntent();
+    await expect(
+      new InterpretationPipeline(
+        provider(interpreted, evidenceFor(interpreted, originalText)),
+        testCompiler,
+      ).run({ ...input(), originalText }, options),
+    ).resolves.toMatchObject({ status: "transformed" });
     expect(testCompiler.compile).toHaveBeenCalledTimes(1);
   });
 
-  it("allows leaked no-code constraint when user explicitly requests no code in Turkish", async () => {
-    const leakedIntent: IntentDocumentV1 = {
+  it("accepts provider-signaled material ambiguity without inventing the disputed constraint", async () => {
+    const ambiguousIntent: IntentDocumentV1 = {
       ...validIntent(),
-      globalConstraints: ["Do not write implementation code"],
-    };
-    const testCompiler = compiler();
-    const pipeline = new InterpretationPipeline(
-      provider(leakedIntent),
-      testCompiler,
-    );
-
-    const trInput: BridgeInput = {
-      ...input(),
-      originalText: "Sadece açıklama yap, kod yazma.",
-    };
-    await expect(pipeline.run(trInput, options)).resolves.toMatchObject({
-      status: "transformed",
-    });
-    expect(testCompiler.compile).toHaveBeenCalledTimes(1);
-  });
-
-  it("checks task constraints for leaked no-code too", async () => {
-    const leakedIntent: IntentDocumentV1 = {
-      ...validIntent(),
-      tasks: [
+      ambiguities: [
         {
-          ...(validIntent().tasks[0] as IntentDocumentV1["tasks"][number]),
-          constraints: ["Do not write implementation code"],
+          description: "The source span has multiple material readings.",
+          material: true,
+          preferredResolution: "ask_user",
         },
       ],
+      clarification: { recommended: true, reason: "Ask for clarification." },
     };
+    const originalText = "kod yazma aracı";
     const testCompiler = compiler();
-    const pipeline = new InterpretationPipeline(
-      provider(leakedIntent),
-      testCompiler,
-    );
-
-    await expect(pipeline.run(input(), options)).resolves.toEqual({
-      status: "fail_open",
-      originalText: "Fix the profile layout.",
-      errorCode: "INTENT_SCHEMA_INVALID",
-      traceId: "trace-1",
+    await expect(
+      new InterpretationPipeline(
+        provider(ambiguousIntent, evidenceFor(ambiguousIntent, originalText)),
+        testCompiler,
+      ).run({ ...input(), originalText }, options),
+    ).resolves.toMatchObject({
+      status: "transformed",
+      intent: {
+        globalConstraints: [],
+        ambiguities: [
+          expect.objectContaining({
+            material: true,
+            preferredResolution: "ask_user",
+          }),
+        ],
+      },
     });
-    expect(testCompiler.compile).not.toHaveBeenCalled();
+    expect(testCompiler.compile).toHaveBeenCalledTimes(1);
   });
 
   it("defensively rejects an invalid provider intent without compiling or retrying", async () => {

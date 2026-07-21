@@ -43,6 +43,19 @@ const intent = {
   confidence: 1,
   clarification: { recommended: false },
 };
+const evidenceFor = (quote: string) => ({
+  version: 1 as const,
+  items: ["/goal", "/tasks/0/objective"].map((path) => ({
+    path,
+    source: "user_original" as const,
+    quote,
+  })),
+});
+const envelopeFor = (quote: string) => ({
+  intent,
+  evidence: evidenceFor(quote),
+});
+
 const request = {
   schemaVersion: "2" as const,
   originalText: "SENTINEL_REQUEST",
@@ -69,7 +82,10 @@ describe("PiNativeProvider", () => {
         {
           type: "toolCall",
           name: "emit_intent",
-          arguments: { intentJson: JSON.stringify(intent) },
+          arguments: {
+            intentJson: JSON.stringify(intent),
+            evidenceJson: JSON.stringify(evidenceFor("SENTINEL_REQUEST")),
+          },
         },
       ],
     });
@@ -118,18 +134,27 @@ describe("PiNativeProvider", () => {
     ]) {
       expect(user).not.toContain(metadata);
     }
-    expect(system).toContain("interpreterPromptVersion: pi-native-v3");
+    expect(system).toContain("interpreterPromptVersion: pi-native-v4");
+    expect(system).toContain("exact substring");
+    expect(system).toContain("Evidence proves attribution only");
+    expect(system).toContain("material ask_user ambiguity");
     expect(system).not.toContain("outputRequirements");
     expect(system).not.toContain("implementationCodeForbidden");
     expect(`${system}\n${user}`).not.toContain(
       "Do not write implementation code",
     );
+    const intentJson = JSON.stringify(intent);
+    const evidenceJson = JSON.stringify(evidenceFor("SENTINEL_REQUEST"));
     expect(result).toMatchObject({
+      intent,
+      evidence: evidenceFor("SENTINEL_REQUEST"),
       requestId: "response-1",
       usage: { inputTokens: 2, outputTokens: 3, totalTokens: 5 },
     });
     expect(result.rawResponseHash).toBe(
-      createHash("sha256").update(JSON.stringify(intent)).digest("hex"),
+      createHash("sha256")
+        .update(JSON.stringify({ intentJson, evidenceJson }))
+        .digest("hex"),
     );
     expect(JSON.stringify(result)).not.toContain("SENTINEL_THINKING");
     expect(JSON.stringify(result)).not.toContain("SENTINEL_EXPLANATORY_TEXT");
@@ -153,7 +178,10 @@ describe("PiNativeProvider", () => {
     const completeSimple = vi.fn().mockResolvedValue({
       stopReason: "stop",
       content: [
-        { type: "text", text: `\`\`\`json\n${JSON.stringify(intent)}\n\`\`\`` },
+        {
+          type: "text",
+          text: `\`\`\`json\n${JSON.stringify(envelopeFor("SENTINEL_REQUEST"))}\n\`\`\``,
+        },
       ],
     });
     await expect(
@@ -161,7 +189,10 @@ describe("PiNativeProvider", () => {
         request,
         {},
       ),
-    ).resolves.toMatchObject({ intent });
+    ).resolves.toMatchObject({
+      intent,
+      evidence: evidenceFor("SENTINEL_REQUEST"),
+    });
     expect(completeSimple).toHaveBeenCalledTimes(1);
   });
 
@@ -175,7 +206,7 @@ describe("PiNativeProvider", () => {
         {
           type: "toolCall",
           name: "emit_intent",
-          arguments: { intentJson: "{}" },
+          arguments: { intentJson: "{}", evidenceJson: "{}" },
         },
         { type: "toolCall", name: "other", arguments: {} },
       ],
@@ -186,6 +217,29 @@ describe("PiNativeProvider", () => {
         {
           type: "toolCall",
           name: "other",
+          arguments: {
+            intentJson: JSON.stringify(intent),
+            evidenceJson: JSON.stringify(evidenceFor("SENTINEL_REQUEST")),
+          },
+        },
+      ],
+    },
+    {
+      stopReason: "toolUse",
+      content: [
+        {
+          type: "toolCall",
+          name: "emit_intent",
+          arguments: { intentJson: "", evidenceJson: "{}" },
+        },
+      ],
+    },
+    {
+      stopReason: "toolUse",
+      content: [
+        {
+          type: "toolCall",
+          name: "emit_intent",
           arguments: { intentJson: JSON.stringify(intent) },
         },
       ],
@@ -196,7 +250,11 @@ describe("PiNativeProvider", () => {
         {
           type: "toolCall",
           name: "emit_intent",
-          arguments: { intentJson: "" },
+          arguments: {
+            intentJson: JSON.stringify(intent),
+            evidenceJson: JSON.stringify(evidenceFor("SENTINEL_REQUEST")),
+            unknown: true,
+          },
         },
       ],
     },
@@ -207,6 +265,31 @@ describe("PiNativeProvider", () => {
     ).rejects.toMatchObject({
       code: expect.stringMatching(
         /PROVIDER_(UNREACHABLE|INVALID_JSON|RESPONSE_TOO_LARGE)/,
+      ),
+    });
+  });
+
+  it.each([
+    JSON.stringify(intent),
+    JSON.stringify({
+      intent,
+      evidence: evidenceFor("not in source"),
+    }),
+    JSON.stringify({
+      intent,
+      evidence: evidenceFor("SENTINEL_REQUEST"),
+      unknown: true,
+    }),
+  ])("rejects bare or invalid text envelopes", async (text) => {
+    const completeSimple = vi.fn().mockResolvedValue({
+      stopReason: "stop",
+      content: [{ type: "text", text }],
+    });
+    await expect(
+      createPiProvider({ completeSimple }, model).interpret(request, {}),
+    ).rejects.toMatchObject({
+      code: expect.stringMatching(
+        /PROVIDER_INVALID_JSON|INTENT_SCHEMA_INVALID/,
       ),
     });
   });
@@ -253,7 +336,10 @@ describe("PiNativeProvider", () => {
         {
           type: "toolCall",
           name: "emit_intent",
-          arguments: { intentJson: JSON.stringify(intent) },
+          arguments: {
+            intentJson: JSON.stringify(intent),
+            evidenceJson: JSON.stringify(evidenceFor("SENTINEL_REQUEST")),
+          },
         },
       ],
     });
@@ -302,7 +388,14 @@ describe("PiNativeProvider", () => {
     });
     completeSimple.mockResolvedValueOnce({
       stopReason: "stop",
-      content: [{ type: "text", text: JSON.stringify(intent) }],
+      content: [
+        {
+          type: "text",
+          text: JSON.stringify(
+            envelopeFor("Return a minimal valid intent document"),
+          ),
+        },
+      ],
     });
     await provider.testConnection({});
     expect(completeSimple).toHaveBeenCalledTimes(2);

@@ -65,6 +65,26 @@ export const makeIntent = (
   clarification: { recommended: false },
   ...overrides,
 });
+export const evidenceFor = (intent: IntentDocumentV1, quote = ".") => {
+  const paths = ["/goal"];
+  for (const [taskIndex, task] of intent.tasks.entries()) {
+    paths.push(`/tasks/${taskIndex}/objective`);
+    for (const field of ["scope", "constraints", "successCriteria"] as const)
+      for (const index of task[field].keys())
+        paths.push(`/tasks/${taskIndex}/${field}/${index}`);
+  }
+  for (const index of intent.globalConstraints.keys())
+    paths.push(`/globalConstraints/${index}`);
+  return {
+    version: 1 as const,
+    items: paths.map((path) => ({
+      path,
+      source: "user_original" as const,
+      quote,
+    })),
+  };
+};
+
 export const providerWith = (
   interpret: IntentProvider["interpret"],
 ): IntentProvider => ({
