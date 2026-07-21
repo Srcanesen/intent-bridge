@@ -7,7 +7,10 @@ import {
 } from "@intent-bridge/core";
 import { describe, expect, it, vi } from "vitest";
 
-import { createPiProvider } from "../src/pi-native-provider.js";
+import {
+  completeSimpleFor,
+  createPiProvider,
+} from "../src/pi-native-provider.js";
 import type { PiModel } from "../src/pi-model-provider.js";
 
 const model: PiModel = {
@@ -94,6 +97,7 @@ describe("PiNativeProvider", () => {
         cacheRetention: "none",
         maxTokens: 4096,
         timeoutMs: 30000,
+        signal: expect.any(AbortSignal),
       }),
     );
     expect(completeSimple.mock.calls[0]?.[2]).not.toHaveProperty("temperature");
@@ -106,6 +110,20 @@ describe("PiNativeProvider", () => {
     );
     expect(JSON.stringify(result)).not.toContain("SENTINEL_THINKING");
     expect(JSON.stringify(result)).not.toContain("SENTINEL_EXPLANATORY_TEXT");
+  });
+
+  it("reports only the selected capability source", () => {
+    const capabilityDiagnostic = vi.fn();
+    createPiProvider({ completeSimple: vi.fn() }, model, {
+      capabilityDiagnostic,
+    });
+    expect(capabilityDiagnostic).toHaveBeenCalledOnce();
+    expect(capabilityDiagnostic).toHaveBeenCalledWith({
+      capabilitySource: "public_delegate",
+    });
+    expect(JSON.stringify(capabilityDiagnostic.mock.calls)).not.toContain(
+      "SENTINEL_REQUEST",
+    );
   });
 
   it("uses the Pi 0.80.10 runtime compatibility shim and fenced text fallback", async () => {
@@ -202,6 +220,25 @@ describe("PiNativeProvider", () => {
       errorCode: "PROVIDER_RESPONSE_TOO_LARGE",
       traceId: "length",
     });
+    expect(completeSimple).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps completeSimpleFor as an adapter-backed benchmark compatibility export", async () => {
+    const completeSimple = vi.fn().mockResolvedValue({ content: [] });
+    const call = completeSimpleFor({ runtime: { completeSimple } });
+    await call(
+      model,
+      { systemPrompt: "", messages: [], tools: [] },
+      {
+        signal: new AbortController().signal,
+        reasoning: "off",
+        maxTokens: 1,
+        timeoutMs: 1,
+        maxRetries: 0,
+        maxRetryDelayMs: 0,
+        cacheRetention: "none",
+      },
+    );
     expect(completeSimple).toHaveBeenCalledTimes(1);
   });
 

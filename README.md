@@ -50,8 +50,10 @@ Intent Bridge does not translate this request into an English user experience. P
 
 - Node.js `>=22.23.1`
 - Corepack with pnpm `11.15.0`
-- Pi `0.80.10` or a compatible host API
+- Pi `0.80.10` exactly (the supported and tested host version)
 - At least one Pi model that is available, supports text input, has finite limits, and can run with thinking disabled
+
+CI verifies the pinned Pi `0.80.10` host regularly. A scheduled latest-Pi check is observational and non-blocking; it does not expand supported versions.
 
 ## Local quick start
 

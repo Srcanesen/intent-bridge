@@ -4,8 +4,10 @@ Apache-2.0 Pi extension package for Intent Bridge. It bundles the private core a
 
 ## Compatibility
 
-- Pi `0.80.10` or compatible host API
+- Pi `0.80.10` exactly (the supported and tested host version)
 - Node `>=22.23.1`
+
+CI verifies Pi `0.80.10` regularly. Its scheduled latest-Pi check is observational and non-blocking, not a support declaration.
 
 ## Install
 

@@ -13,6 +13,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import { createIntentBridgeExtension } from "../src/index.js";
 import type { PiModelRegistry } from "../src/pi-model-provider.js";
+import type { PiNativeProviderOptions } from "../src/pi-native-provider.js";
 
 const config = (patch: Partial<BridgeConfigV1> = {}): BridgeConfigV1 => ({
   version: 1,
@@ -91,7 +92,11 @@ function setup(
       manifest: { entries: unknown[] };
     }>;
     createProvider?: () => IntentProvider;
-    createPiProvider?: () => IntentProvider;
+    createPiProvider?: (
+      registry: PiModelRegistry,
+      model: { id: string; provider: string },
+      options?: PiNativeProviderOptions,
+    ) => IntentProvider;
     updateConfig?: ReturnType<typeof vi.fn>;
     environment?: NodeJS.ProcessEnv;
     select?: (title: string, choices: string[]) => Promise<string | undefined>;
@@ -1151,6 +1156,54 @@ describe("Intent Bridge Pi extension", () => {
     expect(persisted).not.toContain("SENTINEL_PI_KEY");
     expect(persisted).not.toContain("OpenAI-Organization");
     expect(persisted).not.toContain("never");
+  });
+
+  it("records bounded Pi host capability metadata without prompt content", async () => {
+    const home = await mkdtemp(join(tmpdir(), "bridge-"));
+    await writeFile(
+      join(home, "pi-model-selection.json"),
+      JSON.stringify({ version: 1, provider: "pi", model: "model" }),
+    );
+    const provider = {
+      id: "pi:pi",
+      interpret: vi.fn().mockResolvedValue({
+        intent: intent(),
+        rawResponseHash: "hash",
+        latencyMs: 1,
+      }),
+      testConnection: vi.fn(),
+    } as unknown as IntentProvider;
+    const test = setup({
+      config: config({ activeProfile: "", profiles: {} }),
+      environment: { INTENT_BRIDGE_HOME: home },
+      modelRegistry: {
+        refresh: vi.fn(),
+        getAvailable: vi.fn(() => []),
+        find: vi.fn(() => ({
+          id: "model",
+          name: "Model",
+          provider: "pi",
+          input: ["text"],
+          contextWindow: 1,
+          maxTokens: 1,
+        })),
+      },
+      createPiProvider: (_registry, _model, options) => {
+        options?.capabilityDiagnostic?.({
+          capabilitySource: "runtime_fallback",
+        });
+        return provider;
+      },
+    });
+    await test.handlers.input(input({ text: "SENTINEL_PROMPT" }), test.ctx);
+    await test.handlers.input(input({ text: "second prompt" }), test.ctx);
+    const diagnostics = test.pi.appendEntry.mock.calls.filter(
+      ([type]) => type === "intent-bridge.pi-host",
+    );
+    expect(diagnostics).toEqual([
+      ["intent-bridge.pi-host", { capabilitySource: "runtime_fallback" }],
+    ]);
+    expect(JSON.stringify(diagnostics)).not.toContain("SENTINEL_PROMPT");
   });
 
   it("selects an exact provider/model pair through /bridge model", async () => {

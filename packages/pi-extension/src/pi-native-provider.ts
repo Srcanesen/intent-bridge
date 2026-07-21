@@ -11,6 +11,13 @@ import {
   type ProviderInterpretationResult,
 } from "@intent-bridge/core";
 
+import {
+  resolvePiHostAdapter,
+  type CompleteSimple,
+  type PiHostCapabilitySource,
+  type PiNativeContent,
+  type PiNativeResponse,
+} from "./pi-host-adapter.js";
 import type { PiModel } from "./pi-model-provider.js";
 
 export const PI_NATIVE_PROMPT_VERSION = "pi-native-v1";
@@ -23,56 +30,9 @@ type ReasoningLevel =
   | "high"
   | "xhigh"
   | "max";
-type NativeContent =
-  | { type: "text"; text: string }
-  | { type: "thinking"; thinking: string }
-  | { type: "toolCall"; name: string; arguments: Record<string, unknown> };
-type NativeResponse = {
-  content?: readonly NativeContent[];
-  usage?: { input?: unknown; output?: unknown; totalTokens?: unknown };
-  responseId?: unknown;
-  stopReason?: unknown;
-};
-type NativeContext = {
-  systemPrompt: string;
-  messages: unknown[];
-  tools: unknown[];
-};
-type NativeOptions = {
-  signal: AbortSignal;
-  reasoning: ReasoningLevel;
-  maxTokens: number;
-  timeoutMs: number;
-  maxRetries: number;
-  maxRetryDelayMs: number;
-  cacheRetention: "none";
-};
-type CompleteSimple = (
-  model: PiModel,
-  context: NativeContext,
-  options: NativeOptions,
-) => Promise<NativeResponse>;
-type PiRuntimeRegistry = {
-  completeSimple?: unknown;
-  runtime?: { completeSimple?: unknown };
-};
-
-/**
- * Pi 0.80.10 exposes only runtime.completeSimple; prefer a future public delegate.
- * Remove the runtime branch when Pi makes registry.completeSimple public and required.
- */
-export function completeSimpleFor(registry: PiRuntimeRegistry): CompleteSimple {
-  if (typeof registry.completeSimple === "function")
-    return registry.completeSimple.bind(registry) as CompleteSimple;
-  if (typeof registry.runtime?.completeSimple === "function")
-    return registry.runtime.completeSimple.bind(
-      registry.runtime,
-    ) as CompleteSimple;
-  throw new BridgeError({
-    code: "CONFIG_INVALID",
-    safeMessage: "The Pi model runtime is unavailable.",
-    retryable: false,
-  });
+/** Compatibility export for benchmark tooling. */
+export function completeSimpleFor(registry: unknown): CompleteSimple {
+  return resolvePiHostAdapter(registry).completeSimple;
 }
 
 const SYSTEM_INSTRUCTION = `You are an intent interpreter for an AI coding harness.
@@ -140,13 +100,13 @@ function number(value: unknown): number | undefined {
     ? value
     : undefined;
 }
-function output(response: NativeResponse): string {
+function output(response: PiNativeResponse): string {
   if (String(response.stopReason) === "length") throw responseTooLarge();
   if (["error", "aborted"].includes(String(response.stopReason)))
     throw unreachable();
   const content = response.content ?? [];
   const calls = content.filter(
-    (block): block is Extract<NativeContent, { type: "toolCall" }> =>
+    (block): block is Extract<PiNativeContent, { type: "toolCall" }> =>
       block.type === "toolCall",
   );
   if (calls.length > 0) {
@@ -160,7 +120,7 @@ function output(response: NativeResponse): string {
   }
   const text = content
     .filter(
-      (block): block is Extract<NativeContent, { type: "text" }> =>
+      (block): block is Extract<PiNativeContent, { type: "text" }> =>
         block.type === "text",
     )
     .map((block) => block.text)
@@ -174,6 +134,9 @@ export interface PiNativeProviderOptions {
   /** Benchmark-only override. Production construction always uses off. */
   reasoning?: ReasoningLevel;
   now?: () => number;
+  capabilityDiagnostic?: (metadata: {
+    capabilitySource: PiHostCapabilitySource;
+  }) => void;
 }
 
 export class PiNativeProvider implements IntentProvider {
@@ -184,13 +147,17 @@ export class PiNativeProvider implements IntentProvider {
   readonly #now: () => number;
 
   constructor(
-    registry: PiRuntimeRegistry,
+    registry: unknown,
     model: PiModel,
     options: PiNativeProviderOptions = {},
   ) {
     this.id = `pi:${model.provider}`;
     this.#model = model;
-    this.#completeSimple = completeSimpleFor(registry);
+    const adapter = resolvePiHostAdapter(registry);
+    this.#completeSimple = adapter.completeSimple;
+    options.capabilityDiagnostic?.({
+      capabilitySource: adapter.capabilitySource,
+    });
     this.#reasoning = options.reasoning ?? "off";
     this.#now = options.now ?? Date.now;
   }
@@ -210,7 +177,7 @@ export class PiNativeProvider implements IntentProvider {
     options.signal?.addEventListener("abort", abort, { once: true });
     if (options.signal?.aborted) abort();
     try {
-      let response: NativeResponse;
+      let response: PiNativeResponse;
       try {
         response = await this.#completeSimple(
           this.#model,
@@ -305,9 +272,13 @@ export class PiNativeProvider implements IntentProvider {
 }
 
 export function createPiProvider(
-  registry: PiRuntimeRegistry,
+  registry: unknown,
   model: PiModel,
-  reasoning?: ReasoningLevel,
+  options: ReasoningLevel | PiNativeProviderOptions = {},
 ): PiNativeProvider {
-  return new PiNativeProvider(registry, model, reasoning ? { reasoning } : {});
+  return new PiNativeProvider(
+    registry,
+    model,
+    typeof options === "string" ? { reasoning: options } : options,
+  );
 }

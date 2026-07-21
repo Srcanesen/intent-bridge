@@ -6952,18 +6952,36 @@ function resolvePiModel(registry, provider, id) {
 }
 
 import { createHash as createHash4 } from "node:crypto";
-var PI_NATIVE_PROMPT_VERSION = "pi-native-v1";
-function completeSimpleFor(registry) {
-  if (typeof registry.completeSimple === "function")
-    return registry.completeSimple.bind(registry);
-  if (typeof registry.runtime?.completeSimple === "function")
-    return registry.runtime.completeSimple.bind(registry.runtime);
+
+function unavailable2() {
   throw new BridgeError({
     code: "CONFIG_INVALID",
     safeMessage: "The Pi model runtime is unavailable.",
     retryable: false
   });
 }
+function resolvePiHostAdapter(registry) {
+  if (typeof registry !== "object" || registry === null)
+    unavailable2();
+  const host = registry;
+  if (typeof host.completeSimple === "function")
+    return {
+      capabilitySource: "public_delegate",
+      completeSimple: host.completeSimple.bind(host)
+    };
+  const runtime = host.runtime;
+  if (typeof runtime !== "object" || runtime === null)
+    unavailable2();
+  const completeSimple = runtime.completeSimple;
+  if (typeof completeSimple !== "function")
+    unavailable2();
+  return {
+    capabilitySource: "runtime_fallback",
+    completeSimple: completeSimple.bind(runtime)
+  };
+}
+
+var PI_NATIVE_PROMPT_VERSION = "pi-native-v1";
 var SYSTEM_INSTRUCTION2 = `You are an intent interpreter for an AI coding harness.
 
 Understand the user's software-development request. Preserve its meaning and boundaries.
@@ -7047,7 +7065,11 @@ var PiNativeProvider = class {
   constructor(registry, model, options = {}) {
     this.id = `pi:${model.provider}`;
     this.#model = model;
-    this.#completeSimple = completeSimpleFor(registry);
+    const adapter = resolvePiHostAdapter(registry);
+    this.#completeSimple = adapter.completeSimple;
+    options.capabilityDiagnostic?.({
+      capabilitySource: adapter.capabilitySource
+    });
     this.#reasoning = options.reasoning ?? "off";
     this.#now = options.now ?? Date.now;
   }
@@ -7142,8 +7164,8 @@ var PiNativeProvider = class {
     };
   }
 };
-function createPiProvider(registry, model, reasoning) {
-  return new PiNativeProvider(registry, model, reasoning ? { reasoning } : {});
+function createPiProvider(registry, model, options = {}) {
+  return new PiNativeProvider(registry, model, typeof options === "string" ? { reasoning: options } : options);
 }
 
 var usage = "Usage: /bridge on|off|model [provider/model-id|model-id]|auto|preview [off]|status|test|last|rate good|bad|logs|privacy";
@@ -7213,6 +7235,16 @@ function createIntentBridgeExtension(pi, dependencies = {}) {
   }));
   const createPiNativeProvider = dependencies.createPiProvider ?? createPiProvider;
   const createTraceWriter = dependencies.createTraceWriter ?? ((path) => new JsonlTraceWriter(path, now));
+  let runtimeFallbackReported = false;
+  const capabilityDiagnostic = (metadata) => {
+    if (metadata.capabilitySource !== "runtime_fallback" || runtimeFallbackReported)
+      return;
+    runtimeFallbackReported = true;
+    try {
+      pi.appendEntry("intent-bridge.pi-host", metadata);
+    } catch {
+    }
+  };
   const updateConfig = dependencies.updateConfig ?? updateBridgeConfigLayerAtomic;
   const state = { lastStatus: "none" };
   const pendingTasks = new PendingTaskQueue({
@@ -7303,7 +7335,7 @@ function createIntentBridgeExtension(pi, dependencies = {}) {
         configDirName: CONFIG_DIR_NAME
       });
       const buffered = new BufferedTraceSink();
-      const pipeline = new InterpretationPipeline(model ? createPiNativeProvider(ctx.modelRegistry, model) : createProvider(requireProfile(profile2)), new PiCompilerV1(), buffered, now);
+      const pipeline = new InterpretationPipeline(model ? createPiNativeProvider(ctx.modelRegistry, model, { capabilityDiagnostic }) : createProvider(requireProfile(profile2)), new PiCompilerV1(), buffered, now);
       const result = await pipeline.run({
         traceId,
         receivedAt: timestamp,
@@ -7526,7 +7558,7 @@ function createIntentBridgeExtension(pi, dependencies = {}) {
           const previous = await piSelection();
           try {
             const model = resolvePiModel(ctx.modelRegistry, choice.model.provider, choice.model.id);
-            await createPiNativeProvider(ctx.modelRegistry, model).testConnection({ ...ctx.signal ? { signal: ctx.signal } : {} });
+            await createPiNativeProvider(ctx.modelRegistry, model, { capabilityDiagnostic }).testConnection({ ...ctx.signal ? { signal: ctx.signal } : {} });
             await writePiModelSelectionAtomic(selectionPath, {
               version: 1,
               provider: choice.model.provider,
@@ -7684,7 +7716,7 @@ function createIntentBridgeExtension(pi, dependencies = {}) {
               safeMessage: "Missing profile.",
               retryable: false
             });
-          const health = await (model ? createPiNativeProvider(ctx.modelRegistry, model) : createProvider(requireProfile(profile2))).testConnection({
+          const health = await (model ? createPiNativeProvider(ctx.modelRegistry, model, { capabilityDiagnostic }) : createProvider(requireProfile(profile2))).testConnection({
             ...ctx.signal ? { signal: ctx.signal } : {}
           });
           notify(ctx, `Intent Bridge test: ok; model=${model?.id ?? requireProfile(profile2).model}; latency=${Math.max(0, health.latencyMs ?? Date.now() - started)}ms.`);

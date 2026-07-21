@@ -44,7 +44,10 @@ import {
   type PiModel,
   type PiModelRegistry,
 } from "./pi-model-provider.js";
-import { createPiProvider } from "./pi-native-provider.js";
+import {
+  createPiProvider,
+  type PiNativeProviderOptions,
+} from "./pi-native-provider.js";
 
 export interface BridgeDependencies {
   environment?: NodeJS.ProcessEnv;
@@ -60,6 +63,7 @@ export interface BridgeDependencies {
   createPiProvider?: (
     registry: PiModelRegistry,
     model: PiModel,
+    options?: PiNativeProviderOptions,
   ) => IntentProvider;
   createTraceWriter?: (logsDir: string) => JsonlTraceWriter;
   updateConfig?: typeof updateBridgeConfigLayerAtomic;
@@ -183,6 +187,20 @@ export function createIntentBridgeExtension(
   const createTraceWriter =
     dependencies.createTraceWriter ??
     ((path) => new JsonlTraceWriter(path, now));
+  let runtimeFallbackReported = false;
+  const capabilityDiagnostic: NonNullable<
+    PiNativeProviderOptions["capabilityDiagnostic"]
+  > = (metadata) => {
+    if (
+      metadata.capabilitySource !== "runtime_fallback" ||
+      runtimeFallbackReported
+    )
+      return;
+    runtimeFallbackReported = true;
+    try {
+      pi.appendEntry("intent-bridge.pi-host", metadata);
+    } catch {}
+  };
   const updateConfig =
     dependencies.updateConfig ?? updateBridgeConfigLayerAtomic;
   const state: BridgeState = { lastStatus: "none" };
@@ -302,6 +320,7 @@ export function createIntentBridgeExtension(
           ? createPiNativeProvider(
               ctx.modelRegistry as unknown as PiModelRegistry,
               model,
+              { capabilityDiagnostic },
             )
           : createProvider(requireProfile(profile)),
         new PiCompilerV1(),
@@ -587,6 +606,7 @@ export function createIntentBridgeExtension(
             await createPiNativeProvider(
               ctx.modelRegistry as unknown as PiModelRegistry,
               model,
+              { capabilityDiagnostic },
             ).testConnection({ ...(ctx.signal ? { signal: ctx.signal } : {}) });
             await writePiModelSelectionAtomic(selectionPath, {
               version: 1,
@@ -810,6 +830,7 @@ export function createIntentBridgeExtension(
             ? createPiNativeProvider(
                 ctx.modelRegistry as unknown as PiModelRegistry,
                 model,
+                { capabilityDiagnostic },
               )
             : createProvider(requireProfile(profile))
           ).testConnection({
