@@ -403,7 +403,15 @@ describe("pt-v1 summarizer", () => {
 
     const report = createReportV2({
       ...reportInput(results, "pt-v1-test"),
+      schemaVersion: "2",
+      compilerVersion: "pi-v2",
       corpus: createCorpusMetadata(cases),
+      evaluator: {
+        provider: "openai-codex",
+        model: "gpt-5.6-sol",
+        promptVersion: "pi-benchmark-evaluator-v3",
+        reasoning: "medium",
+      },
     });
 
     const manifest: PtV1Manifest = {
@@ -469,8 +477,24 @@ describe("pt-v1 summarizer", () => {
     const output = summarizePtV1({ report, manifest, annotations });
 
     // Sanitized output - no raw content
+    expect(output.version).toBe(1);
     expect(output.totalConfirmatoryCases).toBe(80);
     expect(output.subjectRelease).toBe("v1.1.0");
+    expect(output.sourceReportSha256).toMatch(/^[0-9a-f]{64}$/);
+    expect(output.sourceCorpus).toEqual(report.corpus);
+    expect(output.candidate).toEqual(report.profile);
+    expect(output.evaluator).toEqual(report.evaluator);
+    expect(output.run).toMatchObject({
+      schemaVersion: "2",
+      compilerVersion: "pi-v2",
+      runnerVersion: "benchmark-v2",
+      concurrency: report.concurrency,
+    });
+    expect(output.callCostMetadata).toMatchObject({
+      candidateCalls: 80,
+      evaluatorCalls: 80,
+      totalCalls: 160,
+    });
 
     // Gates present
     const gateNames = output.gates.map((g) => g.gate);
@@ -527,6 +551,8 @@ describe("pt-v1 summarizer", () => {
     const failureOutput = summarizePtV1({
       report: createReportV2({
         ...reportInput(failedResults, "pt-v1-test"),
+        schemaVersion: "2",
+        compilerVersion: "pi-v2",
         corpus: createCorpusMetadata(cases),
       }),
       manifest,
@@ -565,6 +591,8 @@ describe("pt-v1 summarizer", () => {
 
     const report = createReportV2({
       ...reportInput(results, "pt-v1-test"),
+      schemaVersion: "2",
+      compilerVersion: "pi-v2",
       corpus: createCorpusMetadata(cases),
     });
 
@@ -637,6 +665,8 @@ describe("pt-v1 summarizer", () => {
     });
     const report = createReportV2({
       ...reportInput([result], "pt-v1-test"),
+      schemaVersion: "2",
+      compilerVersion: "pi-v2",
       corpus: createCorpusMetadata(cases),
     });
     const manifest: PtV1Manifest = {
