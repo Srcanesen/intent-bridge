@@ -13,10 +13,15 @@ human owner review; the limitations are recorded below.
 | `2026-07-20-deepseek-v4-flash-sol-medium-v2.json` | `pi:opencode-go:deepseek-v4-flash` | `deepseek-v4-flash` | selected baseline (Report V2) |
 | `2026-07-20-mimo-v2.5-sol-medium-v2.json` | `pi:opencode-go:mimo-v2.5` | `mimo-v2.5` | rejected comparison profile (Report V2) |
 | `2026-07-20-deepseek-vs-mimo-sol-medium-v2.json` | — | — | sanitized side-by-side comparison |
+| `2026-07-21-prompt-transformation-v1-smoke.json` | `pi:opencode-go-gateway:deepseek-v4-flash` | `deepseek-v4-flash` | pre-registered TR/EN smoke stop evidence |
 
-All three files are sanitized evidence artifacts. Their SHA-256 was
+All four files are sanitized evidence artifacts. Their SHA-256 was
 verified when they were prepared, and their committed file mode is
 `0644`.
+
+## Prompt-transformation v1 smoke decision
+
+The pre-registered TR/EN prompt-transformation study stopped after its separate eight-case smoke screen. All eight cases transformed and were independently evaluated; structure, language, deterministic safety, forbidden-addition, evaluator coverage, and clearer-or-equal checks passed. The evaluator nevertheless marked one of eight transformations as materially intent-altering (`12.5%`), so the zero-alteration smoke hard gate failed and the 80-case confirmatory run was not executed. The committed artifact contains aggregate evidence and hashes only—no prompt, candidate output, case identifier, credential, or provider error body.
 
 ## Evaluator and candidate configuration
 
