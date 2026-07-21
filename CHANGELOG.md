@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- Deterministic core quality assessment with bounded review reasons, backward-compatible configuration defaults, and privacy-safe trace metadata.
+
 ## 1.0.0 — 2026-07-21
 
 First public GitHub release.

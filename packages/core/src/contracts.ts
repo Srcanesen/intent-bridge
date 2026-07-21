@@ -1,5 +1,7 @@
 export type BridgeMessageType = "initial" | "normal" | "steer" | "follow_up";
 
+export type { TransformationAssessment } from "./quality-policy.js";
+
 export interface ProjectContext {
   name?: string;
   summary?: string;
@@ -143,6 +145,7 @@ export interface BridgeTraceV1 {
   compilerVersion?: string;
   promptVersion?: string;
   quality?: QualitySignalsV1;
+  assessment?: import("./quality-policy.js").TransformationAssessment;
   userRating?: "good" | "bad";
   content?: FullTraceContentV1;
 }

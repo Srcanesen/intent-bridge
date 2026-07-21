@@ -29,6 +29,40 @@ var BridgeError = class extends Error {
   }
 };
 
+var QUALITY_POLICY_VERSION = "quality-policy-v1";
+var DEFAULT_QUALITY_CONFIG = {
+  enforcement: "observe",
+  reviewOnHighRisk: true,
+  reviewOnClarification: true,
+  reviewOnMaterialAskUser: true,
+  minConfidence: null,
+  noUiAction: "send_original"
+};
+var REASON_ORDER = [
+  "high_risk",
+  "clarification_recommended",
+  "material_ambiguity_requires_user",
+  "confidence_below_threshold"
+];
+var REASON_SET = new Set(REASON_ORDER);
+function assessQuality(intent, config) {
+  const reasons = [];
+  if (config.reviewOnHighRisk && intent.risk.level === "high")
+    reasons.push("high_risk");
+  if (config.reviewOnClarification && intent.clarification.recommended)
+    reasons.push("clarification_recommended");
+  if (config.reviewOnMaterialAskUser && intent.ambiguities.some((ambiguity2) => ambiguity2.material && ambiguity2.preferredResolution === "ask_user"))
+    reasons.push("material_ambiguity_requires_user");
+  if (config.minConfidence !== null && intent.confidence < config.minConfidence)
+    reasons.push("confidence_below_threshold");
+  return {
+    policyVersion: QUALITY_POLICY_VERSION,
+    outcome: reasons.length === 0 ? "accept" : "review",
+    reasons: reasons.slice(),
+    observedConfidence: intent.confidence
+  };
+}
+
 var DEFAULT_BRIDGE_CONFIG = {
   version: 1,
   enabled: false,
@@ -37,7 +71,7 @@ var DEFAULT_BRIDGE_CONFIG = {
   profiles: {},
   context: { enabled: true, maxCharacters: 12e3, maxFileCharacters: 6e3 },
   logging: { mode: "metadata", retentionDays: 30 },
-  quality: {},
+  quality: { ...DEFAULT_QUALITY_CONFIG },
   retry: { maxRetries: 1, baseDelayMs: 250, totalBudgetMs: 45e3 }
 };
 function invalid(message = "The bridge configuration is invalid.") {
@@ -88,6 +122,46 @@ function retry(value) {
     baseDelayMs: boundedPositive(policy.baseDelayMs, 1e4),
     totalBudgetMs: boundedPositive(policy.totalBudgetMs, 12e4)
   };
+}
+function qualityConfidence(value) {
+  if (value === null)
+    return null;
+  if (typeof value !== "number" || !Number.isFinite(value) || value < 0 || value > 1)
+    invalid();
+  return value;
+}
+function qualityConfig(value) {
+  const policy = object(value);
+  exact(policy, [
+    "enforcement",
+    "reviewOnHighRisk",
+    "reviewOnClarification",
+    "reviewOnMaterialAskUser",
+    "minConfidence",
+    "noUiAction"
+  ]);
+  const result = { ...DEFAULT_QUALITY_CONFIG };
+  if (policy.enforcement !== void 0) {
+    const enforcement = string(policy.enforcement);
+    if (enforcement !== "observe" && enforcement !== "review")
+      invalid();
+    result.enforcement = enforcement;
+  }
+  if (policy.reviewOnHighRisk !== void 0)
+    result.reviewOnHighRisk = bool(policy.reviewOnHighRisk);
+  if (policy.reviewOnClarification !== void 0)
+    result.reviewOnClarification = bool(policy.reviewOnClarification);
+  if (policy.reviewOnMaterialAskUser !== void 0)
+    result.reviewOnMaterialAskUser = bool(policy.reviewOnMaterialAskUser);
+  if (policy.minConfidence !== void 0)
+    result.minConfidence = qualityConfidence(policy.minConfidence);
+  if (policy.noUiAction !== void 0) {
+    const noUiAction = string(policy.noUiAction);
+    if (noUiAction !== "send_original")
+      invalid();
+    result.noUiAction = "send_original";
+  }
+  return result;
 }
 var secretPattern = /(?:sk-[A-Za-z0-9_-]{8,}|(?:api[_-]?key|token|secret)\s*[:=]\s*['"]?[^\s'"]{8,}|https?:\/\/[^/\s:@]+:[^@\s]+@)/i;
 function noInlineSecret(value) {
@@ -177,7 +251,15 @@ function parseBridgeConfig(value) {
   if (!["metadata", "full", "off"].includes(string(logging.mode)))
     invalid();
   const quality = object(c.quality);
-  exact(quality, []);
+  exact(quality, [
+    "enforcement",
+    "reviewOnHighRisk",
+    "reviewOnClarification",
+    "reviewOnMaterialAskUser",
+    "minConfidence",
+    "noUiAction"
+  ]);
+  const parsedQuality = qualityConfig(quality);
   const profiles = object(c.profiles);
   const parsedProfiles = Object.fromEntries(Object.entries(profiles).map(([id, p]) => {
     const parsed = profile(p);
@@ -200,7 +282,7 @@ function parseBridgeConfig(value) {
       mode: logging.mode,
       retentionDays: positive(logging.retentionDays)
     },
-    quality: {},
+    quality: parsedQuality,
     retry: c.retry === void 0 ? DEFAULT_BRIDGE_CONFIG.retry : retry(c.retry)
   };
   if (result.activeProfile && !result.profiles[result.activeProfile])
@@ -5900,20 +5982,23 @@ var InterpretationPipeline = class {
         });
       }
       const quality = calculateQualitySignals(intent, { compilerValid: true });
+      const assessment = assessQuality(intent, options.quality ?? DEFAULT_QUALITY_CONFIG);
       this.state.lastTransformation = {
         originalText: input.originalText,
         intent,
         compiledTask,
         quality,
+        assessment,
         traceId: input.traceId,
         timestamp,
         ...options.contextManifest === void 0 ? {} : { contextManifest: options.contextManifest }
       };
-      await this.appendTrace(this.successTrace(input, options, timestamp, providerResult, intent, compiledTask, quality), options.logging);
+      await this.appendTrace(this.successTrace(input, options, timestamp, providerResult, intent, compiledTask, quality, assessment), options.logging);
       return {
         status: "transformed",
         compiledTask: compiledTask.text,
         intent,
+        assessment,
         traceId: input.traceId
       };
     } catch (error) {
@@ -6012,7 +6097,7 @@ var InterpretationPipeline = class {
       ...options.promptVersion === void 0 ? {} : { promptVersion: options.promptVersion }
     };
   }
-  successTrace(input, options, timestamp, providerResult, intent, compiledTask, quality) {
+  successTrace(input, options, timestamp, providerResult, intent, compiledTask, quality, assessment) {
     const usage2 = providerResult.usage;
     const estimatedCostUsd = estimateCostUsd(usage2, options.pricing);
     return {
@@ -6030,6 +6115,7 @@ var InterpretationPipeline = class {
       ...estimatedCostUsd === void 0 ? {} : { estimatedCostUsd },
       compilerVersion: compiledTask.compilerVersion,
       quality,
+      assessment,
       content: {
         originalText: input.originalText,
         intent,

@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 
-import type { LoggingConfigV1 } from "./config.js";
+import type { LoggingConfigV1, QualityConfigV1 } from "./config.js";
 import type {
   BridgeInput,
   BridgeTraceV1,
@@ -16,12 +16,18 @@ import { BridgeError, type BridgeErrorCode } from "./errors.js";
 import type { IntentDocumentV1 } from "./intent.js";
 import { parseIntentDocumentV1 } from "./intent.js";
 import { calculateQualitySignals } from "./quality.js";
+import {
+  DEFAULT_QUALITY_CONFIG,
+  assessQuality,
+  type TransformationAssessment,
+} from "./quality-policy.js";
 
 export type PipelineResult =
   | {
       status: "transformed";
       compiledTask: string;
       intent: IntentDocumentV1;
+      assessment: TransformationAssessment;
       traceId: string;
     }
   | {
@@ -41,6 +47,7 @@ export interface TraceSink {
 export interface PipelineRunOptions {
   mode: "auto" | "preview" | "off";
   logging: LoggingConfigV1;
+  quality?: QualityConfigV1;
   providerProfileId: string;
   model: string;
   pricing?: { inputPerMillion?: number; outputPerMillion?: number };
@@ -57,6 +64,7 @@ export interface FullInMemoryTransformation {
   intent: IntentDocumentV1;
   compiledTask: CompiledTask;
   quality: QualitySignalsV1;
+  assessment: TransformationAssessment;
   traceId: string;
   timestamp: string;
   contextManifest?: unknown;
@@ -223,11 +231,16 @@ export class InterpretationPipeline {
         });
       }
       const quality = calculateQualitySignals(intent, { compilerValid: true });
+      const assessment = assessQuality(
+        intent,
+        options.quality ?? DEFAULT_QUALITY_CONFIG,
+      );
       this.state.lastTransformation = {
         originalText: input.originalText,
         intent,
         compiledTask,
         quality,
+        assessment,
         traceId: input.traceId,
         timestamp,
         ...(options.contextManifest === undefined
@@ -243,6 +256,7 @@ export class InterpretationPipeline {
           intent,
           compiledTask,
           quality,
+          assessment,
         ),
         options.logging,
       );
@@ -250,6 +264,7 @@ export class InterpretationPipeline {
         status: "transformed",
         compiledTask: compiledTask.text,
         intent,
+        assessment,
         traceId: input.traceId,
       };
     } catch (error) {
@@ -380,6 +395,7 @@ export class InterpretationPipeline {
     intent: IntentDocumentV1,
     compiledTask: CompiledTask,
     quality: QualitySignalsV1,
+    assessment: TransformationAssessment,
   ): BridgeTraceV1 {
     const usage = providerResult.usage;
     const estimatedCostUsd = estimateCostUsd(usage, options.pricing);
@@ -406,6 +422,7 @@ export class InterpretationPipeline {
       ...(estimatedCostUsd === undefined ? {} : { estimatedCostUsd }),
       compilerVersion: compiledTask.compilerVersion,
       quality,
+      assessment,
       content: {
         originalText: input.originalText,
         intent,

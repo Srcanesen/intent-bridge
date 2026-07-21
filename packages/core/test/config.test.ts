@@ -12,6 +12,7 @@ import { describe, expect, it } from "vitest";
 import {
   type BridgeError,
   DEFAULT_BRIDGE_CONFIG,
+  DEFAULT_QUALITY_CONFIG,
   applyEnvironmentOverrides,
   loadLayeredConfig,
   loadPiModelSelection,
@@ -383,5 +384,74 @@ describe("configuration", () => {
       globalPath: "/tmp/home/config.json",
       projectPath: "/repo/.pi/intent-bridge.json",
     });
+  });
+  it("applies defaults to empty and partial quality blocks and preserves patched quality through merge", () => {
+    expect(
+      parseBridgeConfig({ ...DEFAULT_BRIDGE_CONFIG, quality: {} }).quality,
+    ).toEqual(DEFAULT_QUALITY_CONFIG);
+    expect(mergeBridgeConfig({ quality: {} } as never).quality).toEqual(
+      DEFAULT_QUALITY_CONFIG,
+    );
+    expect(
+      mergeBridgeConfig({
+        quality: { enforcement: "review", minConfidence: 0.7 },
+      } as never).quality,
+    ).toEqual({
+      ...DEFAULT_QUALITY_CONFIG,
+      enforcement: "review",
+      minConfidence: 0.7,
+    });
+  });
+  it.each([
+    [{ ...DEFAULT_QUALITY_CONFIG, quality: { enforcement: "block" } }],
+    [
+      {
+        ...DEFAULT_BRIDGE_CONFIG,
+        quality: { ...DEFAULT_QUALITY_CONFIG, minConfidence: -0.1 },
+      },
+    ],
+    [
+      {
+        ...DEFAULT_BRIDGE_CONFIG,
+        quality: { ...DEFAULT_QUALITY_CONFIG, minConfidence: 1.5 },
+      },
+    ],
+    [
+      {
+        ...DEFAULT_BRIDGE_CONFIG,
+        quality: { ...DEFAULT_QUALITY_CONFIG, minConfidence: "0.5" },
+      },
+    ],
+    [
+      {
+        ...DEFAULT_BRIDGE_CONFIG,
+        quality: { ...DEFAULT_QUALITY_CONFIG, reviewOnHighRisk: "yes" },
+      },
+    ],
+    [
+      {
+        ...DEFAULT_BRIDGE_CONFIG,
+        quality: { ...DEFAULT_QUALITY_CONFIG, noUiAction: "open_settings" },
+      },
+    ],
+    [
+      {
+        ...DEFAULT_BRIDGE_CONFIG,
+        quality: { ...DEFAULT_QUALITY_CONFIG, unknown: true },
+      },
+    ],
+  ])("rejects invalid quality config: %j", (value) => {
+    expect(bridgeError(() => parseBridgeConfig(value)).code).toBe(
+      "CONFIG_INVALID",
+    );
+  });
+  it("accepts every legal value of minConfidence (0, 0.5, 1) and explicit null", () => {
+    for (const value of [0, 0.5, 1, null]) {
+      const parsed = parseBridgeConfig({
+        ...DEFAULT_BRIDGE_CONFIG,
+        quality: { ...DEFAULT_QUALITY_CONFIG, minConfidence: value },
+      });
+      expect(parsed.quality.minConfidence).toBe(value);
+    }
   });
 });

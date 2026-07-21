@@ -11,6 +11,11 @@ import { basename, dirname, join } from "node:path";
 
 import type { ProviderProfileV1, RetryPolicyV1 } from "./contracts.js";
 import { BridgeError } from "./errors.js";
+import {
+  DEFAULT_QUALITY_CONFIG,
+  type QualityConfigV1,
+  type QualityEnforcementMode,
+} from "./quality-policy.js";
 
 export interface PiModelSelectionV1 {
   version: 1;
@@ -27,7 +32,7 @@ export interface LoggingConfigV1 {
   mode: "metadata" | "full" | "off";
   retentionDays: number;
 }
-export type QualityConfigV1 = Record<never, never>;
+export type { QualityConfigV1 } from "./quality-policy.js";
 export interface BridgeConfigV1 {
   version: 1;
   enabled: boolean;
@@ -47,7 +52,7 @@ export type BridgeConfigLayer = {
   profiles?: Record<string, Partial<ProviderProfileV1>>;
   context?: Partial<ContextConfigV1>;
   logging?: Partial<LoggingConfigV1>;
-  quality?: QualityConfigV1;
+  quality?: Partial<QualityConfigV1>;
   retry?: Partial<RetryPolicyV1>;
 };
 export type BridgeConfigPatch = Pick<
@@ -63,7 +68,7 @@ export const DEFAULT_BRIDGE_CONFIG: BridgeConfigV1 = {
   profiles: {},
   context: { enabled: true, maxCharacters: 12000, maxFileCharacters: 6000 },
   logging: { mode: "metadata", retentionDays: 30 },
-  quality: {},
+  quality: { ...DEFAULT_QUALITY_CONFIG },
   retry: { maxRetries: 1, baseDelayMs: 250, totalBudgetMs: 45000 },
 };
 
@@ -118,6 +123,48 @@ function retry(value: unknown): RetryPolicyV1 {
     baseDelayMs: boundedPositive(policy.baseDelayMs, 10_000),
     totalBudgetMs: boundedPositive(policy.totalBudgetMs, 120_000),
   };
+}
+function qualityConfidence(value: unknown): number | null {
+  if (value === null) return null;
+  if (
+    typeof value !== "number" ||
+    !Number.isFinite(value) ||
+    value < 0 ||
+    value > 1
+  )
+    invalid();
+  return value;
+}
+function qualityConfig(value: unknown): QualityConfigV1 {
+  const policy = object(value);
+  exact(policy, [
+    "enforcement",
+    "reviewOnHighRisk",
+    "reviewOnClarification",
+    "reviewOnMaterialAskUser",
+    "minConfidence",
+    "noUiAction",
+  ]);
+  const result: QualityConfigV1 = { ...DEFAULT_QUALITY_CONFIG };
+  if (policy.enforcement !== undefined) {
+    const enforcement = string(policy.enforcement);
+    if (enforcement !== "observe" && enforcement !== "review") invalid();
+    result.enforcement = enforcement as QualityEnforcementMode;
+  }
+  if (policy.reviewOnHighRisk !== undefined)
+    result.reviewOnHighRisk = bool(policy.reviewOnHighRisk);
+  if (policy.reviewOnClarification !== undefined)
+    result.reviewOnClarification = bool(policy.reviewOnClarification);
+  if (policy.reviewOnMaterialAskUser !== undefined)
+    result.reviewOnMaterialAskUser = bool(policy.reviewOnMaterialAskUser);
+  if (policy.minConfidence !== undefined)
+    result.minConfidence = qualityConfidence(policy.minConfidence);
+  if (policy.noUiAction !== undefined) {
+    const noUiAction = string(policy.noUiAction);
+    if (noUiAction !== "send_original") invalid();
+    result.noUiAction = "send_original";
+  }
+  return result;
 }
 const secretPattern =
   /(?:sk-[A-Za-z0-9_-]{8,}|(?:api[_-]?key|token|secret)\s*[:=]\s*['"]?[^\s'"]{8,}|https?:\/\/[^/\s:@]+:[^@\s]+@)/i;
@@ -217,7 +264,15 @@ export function parseBridgeConfig(value: unknown): BridgeConfigV1 {
   exact(logging, ["mode", "retentionDays"]);
   if (!["metadata", "full", "off"].includes(string(logging.mode))) invalid();
   const quality = object(c.quality);
-  exact(quality, []);
+  exact(quality, [
+    "enforcement",
+    "reviewOnHighRisk",
+    "reviewOnClarification",
+    "reviewOnMaterialAskUser",
+    "minConfidence",
+    "noUiAction",
+  ]);
+  const parsedQuality = qualityConfig(quality);
   const profiles = object(c.profiles);
   const parsedProfiles = Object.fromEntries(
     Object.entries(profiles).map(([id, p]) => {
@@ -241,7 +296,7 @@ export function parseBridgeConfig(value: unknown): BridgeConfigV1 {
       mode: logging.mode as LoggingConfigV1["mode"],
       retentionDays: positive(logging.retentionDays),
     },
-    quality: {},
+    quality: parsedQuality,
     retry: c.retry === undefined ? DEFAULT_BRIDGE_CONFIG.retry : retry(c.retry),
   };
   if (result.activeProfile && !result.profiles[result.activeProfile]) invalid();

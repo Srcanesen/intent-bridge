@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 import {
   BridgeError,
   type BridgeInput,
+  DEFAULT_QUALITY_CONFIG,
   type HarnessCompiler,
   InterpretationPipeline,
   type IntentDocumentV1,
@@ -32,6 +33,7 @@ const input = (
 const options = {
   mode: "auto" as const,
   logging: { mode: "metadata" as const, retentionDays: 30 },
+  quality: { ...DEFAULT_QUALITY_CONFIG },
   providerProfileId: "test",
   model: "test-model",
   promptVersion: "v1",
@@ -72,6 +74,12 @@ describe("InterpretationPipeline", () => {
     await expect(pipeline.run(input(), options)).resolves.toMatchObject({
       status: "transformed",
       compiledTask: "compiled task",
+      assessment: {
+        policyVersion: "quality-policy-v1",
+        outcome: "accept",
+        reasons: [],
+        observedConfidence: 0.9,
+      },
       traceId: "trace-1",
     });
     expect(testProvider.interpret).toHaveBeenCalledTimes(1);
@@ -105,9 +113,88 @@ describe("InterpretationPipeline", () => {
         model: "test-model",
         status: "success",
         quality: expect.objectContaining({ compilerValid: true }),
+        assessment: {
+          policyVersion: "quality-policy-v1",
+          outcome: "accept",
+          reasons: [],
+          observedConfidence: 0.9,
+        },
       }),
       { mode: "metadata", retentionDays: 30 },
     );
+    const latest = pipeline.getLatest();
+    expect(latest?.assessment).toEqual({
+      policyVersion: "quality-policy-v1",
+      outcome: "accept",
+      reasons: [],
+      observedConfidence: 0.9,
+    });
+  });
+
+  it("exposes privacy-safe assessment metadata in trace and latest transformation without changing delivery", async () => {
+    const reviewIntent: IntentDocumentV1 = {
+      ...validIntent(),
+      risk: { level: "high", reasons: ["x"] },
+      clarification: { recommended: true, reason: "needs confirmation" },
+      ambiguities: [
+        {
+          description: "spec missing",
+          material: true,
+          preferredResolution: "ask_user",
+        },
+      ],
+      confidence: 0.1,
+    };
+    const pipeline = new InterpretationPipeline(
+      provider(reviewIntent),
+      compiler(),
+    );
+
+    await expect(
+      pipeline.run(input(), {
+        ...options,
+        quality: { ...DEFAULT_QUALITY_CONFIG, minConfidence: 0.5 },
+      }),
+    ).resolves.toMatchObject({
+      status: "transformed",
+      compiledTask: "compiled task",
+    });
+    const latest = pipeline.getLatest();
+    expect(latest?.assessment.reasons).toEqual([
+      "high_risk",
+      "clarification_recommended",
+      "material_ambiguity_requires_user",
+      "confidence_below_threshold",
+    ]);
+    expect(latest?.assessment.outcome).toBe("review");
+    expect(latest?.assessment.observedConfidence).toBe(0.1);
+    expect(latest?.assessment.policyVersion).toBe("quality-policy-v1");
+    const serialized = JSON.stringify(latest?.assessment);
+    expect(serialized).not.toContain("dangerous");
+    expect(serialized).not.toContain("needs confirmation");
+    expect(serialized).not.toContain("spec missing");
+  });
+
+  it.each([
+    "observe",
+    "review",
+  ] as const)("stays transformed and only carries the bounded assessment under %s enforcement", async (enforcement) => {
+    const reviewIntent: IntentDocumentV1 = {
+      ...validIntent(),
+      risk: { level: "high", reasons: ["x"] },
+    };
+    const pipeline = new InterpretationPipeline(
+      provider(reviewIntent),
+      compiler(),
+    );
+    const result = await pipeline.run(input(), {
+      ...options,
+      quality: { ...DEFAULT_QUALITY_CONFIG, enforcement },
+    });
+    expect(result).toMatchObject({ status: "transformed" });
+    const latest = pipeline.getLatest();
+    expect(latest?.assessment.outcome).toBe("review");
+    expect(latest?.assessment.reasons).toEqual(["high_risk"]);
   });
 
   it("keeps the source language when the provider changes it without an explicit response instruction", async () => {

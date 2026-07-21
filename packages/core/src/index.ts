@@ -7,4 +7,5 @@ export * from "./pi-compiler.js";
 export * from "./pipeline.js";
 export * from "./privacy.js";
 export * from "./quality.js";
+export * from "./quality-policy.js";
 export * from "./trace.js";
