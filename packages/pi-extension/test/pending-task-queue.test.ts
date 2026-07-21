@@ -32,24 +32,35 @@ describe("PendingTaskQueue", () => {
     expect(queue.consumeForAgentStart("prompt", 0, 100)).toBeNull();
   });
 
-  it("consumes duplicate occurrences FIFO", () => {
-    const { queue } = setup();
+  it("permanently rejects all active occurrences after a fingerprint collision", () => {
+    const { queue, diagnostics } = setup();
     const first = queue.reserve("same", 0, "trace-1");
     const second = queue.reserve("same", 0, "trace-2");
-    queue.markReady(first, "first");
-    queue.markReady(second, "second");
-    expect(queue.consumeForAgentStart("same", 0, 100)).toBe("first");
-    expect(queue.consumeForAgentStart("same", 0, 100)).toBe("second");
+
+    expect(queue.markReady(second, "second")).toBe(false);
+    expect(queue.markReady(first, "first")).toBe(false);
+    expect(queue.consumeForAgentStart("same", 0, 100)).toBeNull();
+    expect(queue.consumeForAgentStart("same", 0, 100)).toBeNull();
+    expect(diagnostics).toEqual([
+      {
+        reason: "fingerprint_collision",
+        fingerprint: expect.stringMatching(/^[a-f0-9]{64}$/),
+        sequence: second,
+        traceId: "trace-2",
+        status: "skipped",
+      },
+    ]);
+    expect(JSON.stringify(diagnostics)).not.toMatch(/same|first|second/);
   });
 
-  it("keeps a skipped duplicate occurrence as a no-injection outcome", () => {
+  it("keeps every skipped duplicate occurrence non-injectable", () => {
     const { queue } = setup();
     const first = queue.reserve("same", 0, "trace-1");
-    const second = queue.reserve("same", 0, "trace-2");
     expect(queue.skip(first)).toBe(true);
-    expect(queue.markReady(second, "second")).toBe(true);
+    const second = queue.reserve("same", 0, "trace-2");
+    expect(queue.markReady(second, "second")).toBe(false);
     expect(queue.consumeForAgentStart("same", 0, 100)).toBeNull();
-    expect(queue.consumeForAgentStart("same", 0, 100)).toBe("second");
+    expect(queue.consumeForAgentStart("same", 0, 100)).toBeNull();
   });
 
   it("keeps an expired occurrence and newer duplicate safe when the old event arrives first", () => {
@@ -141,17 +152,14 @@ describe("PendingTaskQueue", () => {
     expect(state.tombstones).toHaveLength(0);
   });
 
-  it("removes an unready duplicate on its one occurrence", () => {
-    const { queue, diagnostics } = setup();
+  it("keeps collided occurrences safe after either one is consumed", () => {
+    const { queue } = setup();
     const first = queue.reserve("same", 0, "trace-1");
     const second = queue.reserve("same", 0, "trace-2");
-    queue.markReady(second, "second");
     expect(queue.consumeForAgentStart("same", 0, 100)).toBeNull();
-    expect(queue.consumeForAgentStart("same", 0, 100)).toBe("second");
     expect(queue.markReady(first, "first")).toBe(false);
-    expect(diagnostics.map(({ reason }) => reason)).toEqual([
-      "correlation_miss",
-    ]);
+    expect(queue.markReady(second, "second")).toBe(false);
+    expect(queue.consumeForAgentStart("same", 0, 100)).toBeNull();
   });
 
   it("correlates different prompts independently", () => {
@@ -164,23 +172,23 @@ describe("PendingTaskQueue", () => {
     expect(queue.consumeForAgentStart("A", 0, 100)).toBe("compiled A");
   });
 
-  it("cancel physically removes only the handled occurrence", () => {
+  it("cancel does not rehabilitate a collided sibling", () => {
     const { queue } = setup();
     const first = queue.reserve("same", 0, "trace-1");
     const second = queue.reserve("same", 0, "trace-2");
     expect(queue.cancel(first)).toBe(true);
     expect(queue.markReady(first, "first")).toBe(false);
-    expect(queue.markReady(second, "second")).toBe(true);
-    expect(queue.consumeForAgentStart("same", 0, 100)).toBe("second");
+    expect(queue.markReady(second, "second")).toBe(false);
+    expect(queue.consumeForAgentStart("same", 0, 100)).toBeNull();
   });
 
   it("quarantines on capacity overflow until clear", () => {
     const { queue, diagnostics } = setup({ capacity: 2 });
-    const first = queue.reserve("same", 0, "trace-a");
-    const second = queue.reserve("same", 0, "trace-b");
+    const first = queue.reserve("first", 0, "trace-a");
+    const second = queue.reserve("second", 0, "trace-b");
     queue.markReady(first, "first");
     queue.markReady(second, "second");
-    const rejected = queue.reserve("same", 0, "trace-c");
+    const rejected = queue.reserve("third", 0, "trace-c");
     expect(diagnostics[0]).toMatchObject({
       reason: "capacity_eviction",
       sequence: first,
@@ -188,21 +196,21 @@ describe("PendingTaskQueue", () => {
       status: "ready",
     });
     expect(queue.markReady(rejected, "third")).toBe(false);
-    expect(queue.consumeForAgentStart("same", 0, 100)).toBeNull();
-    expect(queue.consumeForAgentStart("same", 0, 100)).toBeNull();
-    expect(queue.consumeForAgentStart("same", 0, 100)).toBeNull();
+    expect(queue.consumeForAgentStart("first", 0, 100)).toBeNull();
+    expect(queue.consumeForAgentStart("second", 0, 100)).toBeNull();
+    expect(queue.consumeForAgentStart("third", 0, 100)).toBeNull();
 
-    const quarantined = queue.reserve("same", 0, "trace-d");
+    const quarantined = queue.reserve("fourth", 0, "trace-d");
     expect(queue.markReady(quarantined, "fourth")).toBe(false);
-    expect(queue.consumeForAgentStart("same", 0, 100)).toBeNull();
+    expect(queue.consumeForAgentStart("fourth", 0, 100)).toBeNull();
     expect(
       diagnostics.filter(({ reason }) => reason === "capacity_eviction"),
     ).toHaveLength(2);
 
     queue.clear();
-    const recovered = queue.reserve("same", 0, "trace-e");
+    const recovered = queue.reserve("recovered", 0, "trace-e");
     expect(queue.markReady(recovered, "recovered")).toBe(true);
-    expect(queue.consumeForAgentStart("same", 0, 100)).toBe("recovered");
+    expect(queue.consumeForAgentStart("recovered", 0, 100)).toBe("recovered");
   });
 
   it("returns null on a miss, leaves unrelated entries, and emits bounded diagnostics", () => {

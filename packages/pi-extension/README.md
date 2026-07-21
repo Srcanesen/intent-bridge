@@ -34,4 +34,8 @@ Configure the `quality` block in the JSON config (global or trusted project laye
 
 The JSON `compiler` config is file-only (global or trusted project layer). `includeOriginalRequest` defaults to `true`; set it to `false` to omit the `## Original user request` heading and fenced body. Normal user input / Pi turn behavior is unchanged.
 
+## Correlation invariant
+
+Pi 0.80.10 provides no stable turn ID shared by input and agent-start events. If an active reservation has the same prompt-and-image-count fingerprint as a new reservation, every active occurrence with that fingerprint is permanently non-injectable: late provider completions are rejected and each matching agent-start receives the original turn with no hidden compiled context. Different fingerprints remain independent. Collision state uses the existing bounded pending/tombstone TTLs and capacities; diagnostics contain only `fingerprint_collision`, the hash, and bounded correlation metadata—never prompt or compiled content.
+
 See the repository README for provider setup, privacy, commands, and troubleshooting.

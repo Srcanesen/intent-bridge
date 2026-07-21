@@ -664,42 +664,62 @@ describe("Intent Bridge Pi extension", () => {
     ).toMatchObject({ message: { display: false } });
   });
 
-  it("preserves duplicate arrival order when B completes before A", async () => {
-    let releaseFirst: ((value: BridgeConfigV1) => void) | undefined;
-    const firstConfig = new Promise<BridgeConfigV1>((resolve) => {
-      releaseFirst = resolve;
-    });
-    let configCalls = 0;
+  it("fails open on identical fingerprints completed second-first", async () => {
+    const releases: Array<() => void> = [];
     let providerCalls = 0;
-    const providerFor = (label: string): IntentProvider => ({
-      id: label,
+    const provider: IntentProvider = {
+      id: "deferred",
       interpret: vi.fn().mockImplementation(async (request) => {
         const occurrence = intent(request.messageType);
-        occurrence.goal = `${label} occurrence`;
-        return { intent: occurrence, rawResponseHash: label, latencyMs: 1 };
+        occurrence.goal =
+          ++providerCalls === 1
+            ? "FIRST_COMPILED_SECRET"
+            : "SECOND_COMPILED_SECRET";
+        await new Promise<void>((resolve) => releases.push(resolve));
+        return { intent: occurrence, rawResponseHash: "hash", latencyMs: 1 };
       }),
       testConnection: vi.fn(),
-    });
-    const test = setup({
-      loadConfig: () =>
-        ++configCalls === 1 ? firstConfig : Promise.resolve(config()),
-      createProvider: () => providerFor(++providerCalls === 1 ? "B" : "A"),
-    });
-    const first = test.handlers.input(input({ text: "same" }), test.ctx);
-    await test.handlers.input(input({ text: "same" }), test.ctx);
-    releaseFirst?.(config());
-    await first;
+    };
+    let traceId = 0;
+    const test = setup({ provider, uuid: () => `trace-${++traceId}` });
+    const prompt = "IDENTICAL_PROMPT_SECRET";
+    const first = test.handlers.input(input({ text: prompt }), test.ctx);
+    await vi.waitFor(() => expect(provider.interpret).toHaveBeenCalledTimes(1));
+    const second = test.handlers.input(input({ text: prompt }), test.ctx);
+    await vi.waitFor(() => expect(provider.interpret).toHaveBeenCalledTimes(2));
+
+    releases[1]?.();
+    await expect(second).resolves.toEqual({ action: "continue" });
+    releases[0]?.();
+    await expect(first).resolves.toEqual({ action: "continue" });
 
     expect(
-      test.handlers.before_agent_start({ prompt: "same" }, test.ctx),
-    ).toMatchObject({
-      message: { content: expect.stringContaining("A occurrence") },
-    });
+      test.handlers.before_agent_start({ prompt }, test.ctx),
+    ).toBeUndefined();
     expect(
-      test.handlers.before_agent_start({ prompt: "same" }, test.ctx),
-    ).toMatchObject({
-      message: { content: expect.stringContaining("B occurrence") },
-    });
+      test.handlers.before_agent_start({ prompt }, test.ctx),
+    ).toBeUndefined();
+    const collision = vi
+      .mocked(test.pi.appendEntry)
+      .mock.calls.find(
+        ([type, payload]) =>
+          type === "intent-bridge.queue" &&
+          (payload as { reason?: string }).reason === "fingerprint_collision",
+      );
+    expect(collision).toEqual([
+      "intent-bridge.queue",
+      {
+        reason: "fingerprint_collision",
+        fingerprint: expect.stringMatching(/^[a-f0-9]{64}$/),
+        sequence: 2,
+        traceId: "trace-2",
+        status: "skipped",
+      },
+    ]);
+    expect(JSON.stringify(collision).length).toBeLessThan(300);
+    expect(JSON.stringify(collision)).not.toMatch(
+      /IDENTICAL_PROMPT_SECRET|FIRST_COMPILED_SECRET|SECOND_COMPILED_SECRET|\[INTENT BRIDGE TASK/,
+    );
   });
 
   it("correlates pending tasks with image count at reserve and consume", async () => {
@@ -780,7 +800,7 @@ describe("Intent Bridge Pi extension", () => {
     }
   });
 
-  it("keeps a skipped send-original duplicate ahead of a ready duplicate", async () => {
+  it("keeps a skipped send-original duplicate collision non-injectable", async () => {
     let selections = 0;
     const test = setup({
       config: config({ mode: "preview" }),
@@ -795,7 +815,7 @@ describe("Intent Bridge Pi extension", () => {
     ).toBeUndefined();
     expect(
       test.handlers.before_agent_start({ prompt: "same" }, test.ctx),
-    ).toMatchObject({ message: { display: false } });
+    ).toBeUndefined();
   });
 
   it("cancels a handled preview without creating duplicate skip debt", async () => {
