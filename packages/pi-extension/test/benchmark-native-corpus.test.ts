@@ -29,7 +29,7 @@ const cases = [
 
 describe("benchmark-native-corpus argument parsing", () => {
   it("uses the current native prompt version", () => {
-    expect(PI_NATIVE_PROMPT_VERSION).toBe("pi-native-v4");
+    expect(PI_NATIVE_PROMPT_VERSION).toBe("pi-native-v5");
   });
 
   it("requires --provider and --model and defaults concurrency to 2", () => {

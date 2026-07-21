@@ -7168,7 +7168,7 @@ function resolvePiHostAdapter(registry) {
   };
 }
 
-var PI_NATIVE_PROMPT_VERSION = "pi-native-v4";
+var PI_NATIVE_PROMPT_VERSION = "pi-native-v5";
 var SYSTEM_INSTRUCTION2 = `You are an intent interpreter for an AI coding harness.
 
 Understand the user's software-development request. Preserve its meaning and boundaries.
@@ -7185,17 +7185,17 @@ interpreterPromptVersion: ${PI_NATIVE_PROMPT_VERSION}
 intentSchemaVersion: 2
 Canonical IntentDocument schema: ${JSON.stringify(IntentDocumentV2JsonSchema)}
 Canonical IntentEvidenceV1 schema: ${JSON.stringify(IntentEvidenceV1Schema)}
-Call emit_intent exactly once with intentJson and evidenceJson containing the two JSON values. If tools are unavailable, return only one strict JSON envelope with exactly {"intent": ..., "evidence": ...}.`;
+Call emit_intent exactly once with direct intent and evidence JSON objects. If tools are unavailable, return only one strict JSON envelope with exactly {"intent": ..., "evidence": ...}.`;
 var emitIntentTool = {
   name: "emit_intent",
   description: "Emit exactly one IntentDocument v2 and IntentEvidenceV1 pair.",
   parameters: {
     type: "object",
     additionalProperties: false,
-    required: ["intentJson", "evidenceJson"],
+    required: ["intent", "evidence"],
     properties: {
-      intentJson: { type: "string" },
-      evidenceJson: { type: "string" }
+      intent: IntentDocumentV2JsonSchema,
+      evidence: IntentEvidenceV1Schema
     }
   }
 };
@@ -7248,14 +7248,14 @@ function output(response) {
     if (!call || calls.length !== 1 || call.name !== "emit_intent")
       throw invalidJson2();
     const args = call.arguments;
-    if (!args || typeof args !== "object" || Array.isArray(args) || Object.keys(args).length !== 2 || !("intentJson" in args) || !("evidenceJson" in args) || typeof args.intentJson !== "string" || !args.intentJson.trim() || typeof args.evidenceJson !== "string" || !args.evidenceJson.trim())
+    if (!args || typeof args !== "object" || Array.isArray(args) || Object.keys(args).length !== 2 || !("intent" in args) || !("evidence" in args) || !args.intent || typeof args.intent !== "object" || Array.isArray(args.intent) || !args.evidence || typeof args.evidence !== "object" || Array.isArray(args.evidence))
       throw invalidJson2();
     return {
-      intent: parseJson(args.intentJson),
-      evidence: parseJson(args.evidenceJson),
+      intent: args.intent,
+      evidence: args.evidence,
       hashInput: JSON.stringify({
-        intentJson: args.intentJson,
-        evidenceJson: args.evidenceJson
+        intent: args.intent,
+        evidence: args.evidence
       })
     };
   }
