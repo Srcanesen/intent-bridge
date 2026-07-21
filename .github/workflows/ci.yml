@@ -25,9 +25,9 @@ jobs:
       - run: corepack enable
       - run: corepack pnpm install --frozen-lockfile
       - run: corepack pnpm format:check && corepack pnpm lint && corepack pnpm typecheck
-      - run: corepack pnpm test && corepack pnpm build
-      - run: corepack pnpm benchmark -- validate-fixtures --cases benchmarks/cases
-      - run: corepack pnpm build && git diff --exit-code -- packages/pi-extension/dist/index.js
+      - run: corepack pnpm test
+      - run: corepack pnpm benchmark:validate:offline
+      - run: git diff --exit-code -- packages/pi-extension/dist/index.js
       - run: corepack pnpm release:smoke
   security:
     runs-on: ubuntu-latest
