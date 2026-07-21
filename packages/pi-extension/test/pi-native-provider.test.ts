@@ -1,8 +1,7 @@
 import { createHash } from "node:crypto";
 
 import {
-  IntentDocumentV2JsonSchema,
-  IntentEvidenceV1Schema,
+  GroundedInterpretationEnvelopeV1JsonSchema,
   InterpretationPipeline,
   PiCompilerV1,
   type BridgeInput,
@@ -54,8 +53,22 @@ const evidenceFor = (quote: string) => ({
   })),
 });
 const envelopeFor = (quote: string) => ({
-  intent,
-  evidence: evidenceFor(quote),
+  version: 1,
+  groundedIntent: {
+    ...intent,
+    goal: { value: intent.goal, evidence: { source: "user_original", quote } },
+    tasks: intent.tasks.map((task) => ({
+      ...task,
+      objective: {
+        value: task.objective,
+        evidence: { source: "user_original", quote },
+      },
+      scope: [],
+      constraints: [],
+      successCriteria: [],
+    })),
+    globalConstraints: [],
+  },
 });
 
 const request = {
@@ -83,11 +96,8 @@ describe("PiNativeProvider", () => {
         { type: "text", text: "SENTINEL_EXPLANATORY_TEXT" },
         {
           type: "toolCall",
-          name: "emit_intent",
-          arguments: {
-            intent,
-            evidence: evidenceFor("SENTINEL_REQUEST"),
-          },
+          name: "emit_grounded_intent",
+          arguments: envelopeFor("SENTINEL_REQUEST"),
         },
       ],
     });
@@ -100,7 +110,7 @@ describe("PiNativeProvider", () => {
       model,
       expect.objectContaining({
         systemPrompt: expect.stringContaining(
-          "Canonical IntentDocument schema",
+          "GroundedInterpretationEnvelopeV1 schema",
         ),
         messages: [
           expect.objectContaining({
@@ -136,7 +146,7 @@ describe("PiNativeProvider", () => {
     ]) {
       expect(user).not.toContain(metadata);
     }
-    expect(system).toContain("interpreterPromptVersion: pi-native-v5");
+    expect(system).toContain("interpreterPromptVersion: pi-native-v6");
     expect(system).toContain("exact substring");
     expect(system).toContain("Evidence proves attribution only");
     expect(system).toContain("material ask_user ambiguity");
@@ -147,22 +157,15 @@ describe("PiNativeProvider", () => {
     );
     expect(outbound?.tools).toEqual([
       {
-        name: "emit_intent",
-        description:
-          "Emit exactly one IntentDocument v2 and IntentEvidenceV1 pair.",
-        parameters: {
-          type: "object",
-          additionalProperties: false,
-          required: ["intent", "evidence"],
-          properties: {
-            intent: IntentDocumentV2JsonSchema,
-            evidence: IntentEvidenceV1Schema,
-          },
-        },
+        name: "emit_grounded_intent",
+        description: "Emit exactly one GroundedInterpretationEnvelopeV1.",
+        parameters: GroundedInterpretationEnvelopeV1JsonSchema,
       },
     ]);
     expect(JSON.stringify(outbound?.tools)).not.toContain("intentJson");
     expect(JSON.stringify(outbound?.tools)).not.toContain("evidenceJson");
+    expect(JSON.stringify(outbound?.tools)).not.toContain('"path"');
+    expect(JSON.stringify(outbound?.tools)).not.toContain('"emit_intent"');
     expect(result).toMatchObject({
       intent,
       evidence: evidenceFor("SENTINEL_REQUEST"),
@@ -219,19 +222,21 @@ describe("PiNativeProvider", () => {
       name: "legacy string arguments",
       arguments: { intentJson: "{}", evidenceJson: "{}" },
     },
-    { name: "missing arguments", arguments: { intent } },
+    {
+      name: "legacy sidecar arguments",
+      arguments: { intent, evidence: evidenceFor("SENTINEL_REQUEST") },
+    },
+    { name: "missing arguments", arguments: { version: 1 } },
     {
       name: "extra arguments",
-      arguments: {
-        intent,
-        evidence: evidenceFor("SENTINEL_REQUEST"),
-        unknown: true,
-      },
+      arguments: { ...envelopeFor("SENTINEL_REQUEST"), unknown: true },
     },
   ])("rejects $name", async ({ arguments: args }) => {
     const completeSimple = vi.fn().mockResolvedValue({
       stopReason: "toolUse",
-      content: [{ type: "toolCall", name: "emit_intent", arguments: args }],
+      content: [
+        { type: "toolCall", name: "emit_grounded_intent", arguments: args },
+      ],
     });
     await expect(
       createPiProvider({ completeSimple }, model).interpret(request, {}),
@@ -244,7 +249,7 @@ describe("PiNativeProvider", () => {
       content: [
         {
           type: "toolCall",
-          name: "other",
+          name: "emit_intent",
           arguments: envelopeFor("SENTINEL_REQUEST"),
         },
         { type: "text", text: JSON.stringify(envelopeFor("SENTINEL_REQUEST")) },
@@ -255,7 +260,7 @@ describe("PiNativeProvider", () => {
       content: [
         {
           type: "toolCall",
-          name: "emit_intent",
+          name: "emit_grounded_intent",
           arguments: envelopeFor("SENTINEL_REQUEST"),
         },
         { type: "toolCall", name: "other", arguments: {} },
@@ -273,36 +278,39 @@ describe("PiNativeProvider", () => {
   it.each([
     {
       name: "a stale intent object",
-      intent: { schemaVersion: "1", goal: "Stale" },
-      evidence: evidenceFor("SENTINEL_REQUEST"),
+      arguments: {
+        ...envelopeFor("SENTINEL_REQUEST"),
+        groundedIntent: {
+          ...envelopeFor("SENTINEL_REQUEST").groundedIntent,
+          schemaVersion: "1",
+        },
+      },
     },
     {
       name: "an invalid evidence quote",
-      intent,
-      evidence: evidenceFor("not in source"),
+      arguments: envelopeFor("not in source"),
     },
     {
-      name: "an invalid evidence path",
-      intent,
-      evidence: {
-        version: 1,
-        items: [
-          {
-            path: "/unknown",
-            source: "user_original",
-            quote: "SENTINEL_REQUEST",
+      name: "an unknown grounding field",
+      arguments: {
+        ...envelopeFor("SENTINEL_REQUEST"),
+        groundedIntent: {
+          ...envelopeFor("SENTINEL_REQUEST").groundedIntent,
+          goal: {
+            ...envelopeFor("SENTINEL_REQUEST").groundedIntent.goal,
+            path: "/goal",
           },
-        ],
+        },
       },
     },
-  ])("fails closed for $name", async ({ intent: directIntent, evidence }) => {
+  ])("fails closed for $name", async ({ arguments: args }) => {
     const completeSimple = vi.fn().mockResolvedValue({
       stopReason: "toolUse",
       content: [
         {
           type: "toolCall",
-          name: "emit_intent",
-          arguments: { intent: directIntent, evidence },
+          name: "emit_grounded_intent",
+          arguments: args,
         },
       ],
     });
@@ -326,15 +334,9 @@ describe("PiNativeProvider", () => {
 
   it.each([
     JSON.stringify(intent),
-    JSON.stringify({
-      intent,
-      evidence: evidenceFor("not in source"),
-    }),
-    JSON.stringify({
-      intent,
-      evidence: evidenceFor("SENTINEL_REQUEST"),
-      unknown: true,
-    }),
+    JSON.stringify({ intent, evidence: evidenceFor("SENTINEL_REQUEST") }),
+    JSON.stringify(envelopeFor("not in source")),
+    JSON.stringify({ ...envelopeFor("SENTINEL_REQUEST"), unknown: true }),
   ])("rejects bare or invalid text envelopes", async (text) => {
     const completeSimple = vi.fn().mockResolvedValue({
       stopReason: "stop",
@@ -390,11 +392,8 @@ describe("PiNativeProvider", () => {
       content: [
         {
           type: "toolCall",
-          name: "emit_intent",
-          arguments: {
-            intent,
-            evidence: evidenceFor("SENTINEL_REQUEST"),
-          },
+          name: "emit_grounded_intent",
+          arguments: envelopeFor("SENTINEL_REQUEST"),
         },
       ],
     });

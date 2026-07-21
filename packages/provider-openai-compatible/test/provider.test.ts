@@ -7,6 +7,7 @@ import {
 
 import {
   type BridgeError,
+  GroundedInterpretationEnvelopeV1JsonSchema,
   parseIntentDocumentV2,
   type InterpretationRequest,
   type ProviderProfileV1,
@@ -15,8 +16,7 @@ import { afterEach, describe, expect, it } from "vitest";
 
 import {
   MAX_RESPONSE_BYTES,
-  OpenAICompatibleIntentDocumentV2JsonSchema,
-  OpenAICompatibleInterpretationEnvelopeJsonSchema,
+  OpenAICompatibleGroundedInterpretationEnvelopeJsonSchema,
   OpenAICompatibleProvider,
 } from "../src/index.js";
 
@@ -79,7 +79,36 @@ const evidenceFor = (
 
 const envelope = (messageType = "initial", quote = ".") => {
   const value = intent(messageType);
-  return { intent: value, evidence: evidenceFor(value, quote) };
+  const grounded = (text: string) => ({
+    value: text,
+    evidence: { source: "user_original" as const, quote },
+  });
+  return {
+    version: 1,
+    groundedIntent: {
+      ...value,
+      goal: grounded(value.goal),
+      tasks: value.tasks.map((task) => ({
+        ...task,
+        objective: grounded(task.objective),
+        scope: task.scope.map(grounded),
+        constraints: task.constraints.map(grounded),
+        successCriteria: task.successCriteria.map(grounded),
+      })),
+      globalConstraints: value.globalConstraints.map(grounded),
+    },
+  };
+};
+
+const envelopeWithGoalEvidence = (evidence: Record<string, unknown>) => {
+  const value = envelope();
+  return {
+    ...value,
+    groundedIntent: {
+      ...value.groundedIntent,
+      goal: { ...value.groundedIntent.goal, evidence },
+    },
+  };
 };
 
 const profiles: ProviderProfileV1 = {
@@ -170,14 +199,33 @@ async function bridgeError(
 
 describe("OpenAICompatibleProvider HTTP contract", () => {
   it("uses a strict wire schema without changing canonical optional fields", () => {
-    const schema = JSON.parse(
-      JSON.stringify(OpenAICompatibleIntentDocumentV2JsonSchema),
+    const canonicalBefore = JSON.stringify(
+      GroundedInterpretationEnvelopeV1JsonSchema,
     );
-    expect(schema).toEqual(OpenAICompatibleIntentDocumentV2JsonSchema);
+    const schema = JSON.parse(
+      JSON.stringify(OpenAICompatibleGroundedInterpretationEnvelopeJsonSchema),
+    );
+    expect(schema).toEqual(
+      OpenAICompatibleGroundedInterpretationEnvelopeJsonSchema,
+    );
     assertStrictSchema(schema);
-    assertStrictSchema(OpenAICompatibleInterpretationEnvelopeJsonSchema);
-    const properties = (schema as { properties: Record<string, unknown> })
-      .properties;
+    expect(JSON.stringify(schema)).not.toContain('"path"');
+    expect(schema.properties).not.toHaveProperty("evidence");
+    expect(JSON.stringify(GroundedInterpretationEnvelopeV1JsonSchema)).toBe(
+      canonicalBefore,
+    );
+    const canonicalSourceLanguage = (
+      GroundedInterpretationEnvelopeV1JsonSchema as {
+        properties: {
+          groundedIntent: {
+            properties: Record<string, Record<string, unknown>>;
+          };
+        };
+      }
+    ).properties.groundedIntent.properties.sourceLanguage;
+    expect(canonicalSourceLanguage).toHaveProperty("properties");
+    expect(canonicalSourceLanguage).not.toHaveProperty("anyOf");
+    const properties = schema.properties.groundedIntent.properties;
     for (const [property, optionalProperty] of [
       ["sourceLanguage", "name"],
       ["responseLanguage", "name"],
@@ -250,13 +298,13 @@ describe("OpenAICompatibleProvider HTTP contract", () => {
       max_tokens: 123,
       response_format: {
         type: "json_schema",
-        json_schema: { name: "intent_interpretation_v2", strict: true },
+        json_schema: { name: "grounded_interpretation_v1", strict: true },
       },
     });
     expect(
       (received?.body.response_format as { json_schema: { schema: unknown } })
         .json_schema.schema,
-    ).toEqual(OpenAICompatibleInterpretationEnvelopeJsonSchema);
+    ).toEqual(OpenAICompatibleGroundedInterpretationEnvelopeJsonSchema);
     const messages = received?.body.messages as Array<{ content: string }>;
     const system = messages[0]?.content ?? "";
     const user = messages[1]?.content ?? "{}";
@@ -264,9 +312,11 @@ describe("OpenAICompatibleProvider HTTP contract", () => {
     expect(system).toContain(
       "responseLanguage.source to user_explicit only when the user explicitly changes the assistant's final response or explanation language",
     );
-    expect(system).toContain("interpreterPromptVersion: openai-compatible-v4");
+    expect(system).toContain("interpreterPromptVersion: openai-compatible-v5");
     expect(system).toContain("exact substring");
     expect(system).toContain("Evidence proves attribution only");
+    expect(system).toContain("Never emit JSON pointer paths");
+    expect(system).toContain("separate evidence sidecar");
     expect(system).toContain("material ask_user ambiguity");
     expect(JSON.parse(user)).toEqual({
       messageType: request.messageType,
@@ -288,7 +338,8 @@ describe("OpenAICompatibleProvider HTTP contract", () => {
       "Do not write implementation code",
     );
     expect(result).toMatchObject({
-      ...envelope(),
+      intent: intent(),
+      evidence: evidenceFor(),
       usage: { inputTokens: 3, outputTokens: 4, totalTokens: 7 },
       requestId: "req-123",
     });
@@ -321,7 +372,7 @@ describe("OpenAICompatibleProvider HTTP contract", () => {
     const system = (body?.messages as Array<{ content: string }>)[0]?.content;
     expect(system).toContain("JSON");
     expect(system).toContain(
-      `Required JSON Schema:\n${JSON.stringify(OpenAICompatibleInterpretationEnvelopeJsonSchema)}`,
+      `Required JSON Schema:\n${JSON.stringify(OpenAICompatibleGroundedInterpretationEnvelopeJsonSchema)}`,
     );
   });
 
@@ -349,45 +400,39 @@ describe("OpenAICompatibleProvider HTTP contract", () => {
       JSON.stringify(envelope("steer")),
       "INTENT_SCHEMA_INVALID",
     ],
-    ["bare IntentDocument", JSON.stringify(intent()), "PROVIDER_INVALID_JSON"],
+    ["bare IntentDocument", JSON.stringify(intent()), "INTENT_SCHEMA_INVALID"],
     [
-      "missing evidence",
-      JSON.stringify({ intent: intent() }),
-      "PROVIDER_INVALID_JSON",
-    ],
-    [
-      "wrong evidence quote",
-      JSON.stringify({
-        intent: intent(),
-        evidence: evidenceFor(intent(), "NOT_IN_SOURCE"),
-      }),
+      "legacy sidecar envelope",
+      JSON.stringify({ intent: intent(), evidence: evidenceFor() }),
       "INTENT_SCHEMA_INVALID",
     ],
     [
-      "wrong evidence path",
-      JSON.stringify({
-        intent: intent(),
-        evidence: {
-          ...evidenceFor(),
-          items: evidenceFor().items.map((item, index) =>
-            index === 0 ? { ...item, path: "/wrong" } : item,
-          ),
-        },
-      }),
+      "wrong evidence quote",
+      JSON.stringify(envelope(undefined, "NOT_IN_SOURCE")),
+      "INTENT_SCHEMA_INVALID",
+    ],
+    [
+      "forbidden evidence path",
+      JSON.stringify(
+        envelopeWithGoalEvidence({
+          source: "user_original",
+          quote: ".",
+          path: "/goal",
+        }),
+      ),
       "INTENT_SCHEMA_INVALID",
     ],
     [
       "wrong evidence source",
-      JSON.stringify({
-        intent: intent(),
-        evidence: evidenceFor(intent(), ".", "project_summary"),
-      }),
+      JSON.stringify(
+        envelopeWithGoalEvidence({ source: "project_summary", quote: "." }),
+      ),
       "INTENT_SCHEMA_INVALID",
     ],
     [
       "unknown envelope key",
       JSON.stringify({ ...envelope(), unknown: true }),
-      "PROVIDER_INVALID_JSON",
+      "INTENT_SCHEMA_INVALID",
     ],
   ])("handles %s in one call", async (_, content, expected) => {
     let calls = 0;

@@ -2,6 +2,7 @@ export * from "./config.js";
 export * from "./context.js";
 export * from "./contracts.js";
 export * from "./errors.js";
+export * from "./grounded-interpretation.js";
 export * from "./intent.js";
 export * from "./intent-evidence.js";
 export * from "./pi-compiler.js";
