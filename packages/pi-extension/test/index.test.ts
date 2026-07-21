@@ -607,7 +607,7 @@ describe("Intent Bridge Pi extension", () => {
     ).toBeUndefined();
   });
 
-  it("matches queued tasks without consuming mismatches and preserves queue order", async () => {
+  it("matches pending tasks without consuming mismatches and preserves queue order", async () => {
     const test = setup();
     await test.handlers.input(input({ text: "request A" }), test.ctx);
     await test.handlers.input(input({ text: "request B" }), test.ctx);
@@ -619,6 +619,61 @@ describe("Intent Bridge Pi extension", () => {
     ).toMatchObject({ message: { display: false } });
     expect(
       test.handlers.before_agent_start({ prompt: "request B" }, test.ctx),
+    ).toMatchObject({ message: { display: false } });
+  });
+
+  it("preserves duplicate arrival order when B completes before A", async () => {
+    let releaseFirst: ((value: BridgeConfigV1) => void) | undefined;
+    const firstConfig = new Promise<BridgeConfigV1>((resolve) => {
+      releaseFirst = resolve;
+    });
+    let configCalls = 0;
+    let providerCalls = 0;
+    const providerFor = (label: string): IntentProvider => ({
+      id: label,
+      interpret: vi.fn().mockImplementation(async (request) => {
+        const occurrence = intent(request.messageType);
+        occurrence.goal = `${label} occurrence`;
+        return { intent: occurrence, rawResponseHash: label, latencyMs: 1 };
+      }),
+      testConnection: vi.fn(),
+    });
+    const test = setup({
+      loadConfig: () =>
+        ++configCalls === 1 ? firstConfig : Promise.resolve(config()),
+      createProvider: () => providerFor(++providerCalls === 1 ? "B" : "A"),
+    });
+    const first = test.handlers.input(input({ text: "same" }), test.ctx);
+    await test.handlers.input(input({ text: "same" }), test.ctx);
+    releaseFirst?.(config());
+    await first;
+
+    expect(
+      test.handlers.before_agent_start({ prompt: "same" }, test.ctx),
+    ).toMatchObject({
+      message: { content: expect.stringContaining("A occurrence") },
+    });
+    expect(
+      test.handlers.before_agent_start({ prompt: "same" }, test.ctx),
+    ).toMatchObject({
+      message: { content: expect.stringContaining("B occurrence") },
+    });
+  });
+
+  it("correlates pending tasks with image count at reserve and consume", async () => {
+    const test = setup();
+    await test.handlers.input(input({ images: [{}] }), test.ctx);
+    expect(
+      test.handlers.before_agent_start(
+        { prompt: "Profil sayfasını düzelt" },
+        test.ctx,
+      ),
+    ).toBeUndefined();
+    expect(
+      test.handlers.before_agent_start(
+        { prompt: "Profil sayfasını düzelt", images: [{}] },
+        test.ctx,
+      ),
     ).toMatchObject({ message: { display: false } });
   });
 
@@ -681,6 +736,41 @@ describe("Intent Bridge Pi extension", () => {
         ),
       ).toBeUndefined();
     }
+  });
+
+  it("keeps a skipped send-original duplicate ahead of a ready duplicate", async () => {
+    let selections = 0;
+    const test = setup({
+      config: config({ mode: "preview" }),
+      select: async () =>
+        ++selections === 1 ? "Send original" : "Send transformed",
+    });
+    await test.handlers.input(input({ text: "same" }), test.ctx);
+    await test.handlers.input(input({ text: "same" }), test.ctx);
+
+    expect(
+      test.handlers.before_agent_start({ prompt: "same" }, test.ctx),
+    ).toBeUndefined();
+    expect(
+      test.handlers.before_agent_start({ prompt: "same" }, test.ctx),
+    ).toMatchObject({ message: { display: false } });
+  });
+
+  it("cancels a handled preview without creating duplicate skip debt", async () => {
+    const current = config({ mode: "preview" });
+    const test = setup({
+      config: current,
+      select: async () => "Cancel",
+    });
+    await expect(
+      test.handlers.input(input({ text: "same" }), test.ctx),
+    ).resolves.toEqual({ action: "handled" });
+    current.mode = "auto";
+    await test.handlers.input(input({ text: "same" }), test.ctx);
+
+    expect(
+      test.handlers.before_agent_start({ prompt: "same" }, test.ctx),
+    ).toMatchObject({ message: { display: false } });
   });
 
   it("constructs one trace writer and reuses it for input, preview, ratings, and pruning", async () => {
@@ -776,6 +866,12 @@ describe("Intent Bridge Pi extension", () => {
     expect(test.noticeLevels.at(-1)).toBe("info");
     expect(test.notices.join(" ")).not.toContain("PROVIDER_TIMEOUT");
     expect(test.notices.join(" ")).not.toContain("SENTINEL_SECRET");
+    expect(
+      test.handlers.before_agent_start(
+        { prompt: "Profil sayfasını düzelt", images: [{}] },
+        test.ctx,
+      ),
+    ).toBeUndefined();
   });
 
   it("fails open for adapter, config, context, provider construction, and missing profile errors", async () => {
@@ -844,6 +940,43 @@ describe("Intent Bridge Pi extension", () => {
     await fail.handlers.input(input(), fail.ctx);
     await fail.command()("status", fail.ctx);
     expect(fail.notices.at(-1)).toContain("last=fail_open");
+  });
+
+  it("clears a ready task immediately when /bridge off runs", async () => {
+    const updates = vi.fn().mockResolvedValue(undefined);
+    const test = setup({ updateConfig: updates });
+    await test.handlers.input(input(), test.ctx);
+    await test.command()("off", test.ctx);
+    expect(
+      test.handlers.before_agent_start(
+        { prompt: "Profil sayfasını düzelt" },
+        test.ctx,
+      ),
+    ).toBeUndefined();
+    expect(test.pi.appendEntry).toHaveBeenCalledWith(
+      "intent-bridge.queue",
+      expect.objectContaining({ reason: "session_reset", status: "ready" }),
+    );
+  });
+
+  it.each([
+    "session_start",
+    "session_before_switch",
+    "session_shutdown",
+  ])("clears ready tasks on %s", async (eventName) => {
+    const test = setup();
+    await test.handlers.input(input(), test.ctx);
+    await test.handlers[eventName]({}, test.ctx);
+    expect(
+      test.handlers.before_agent_start(
+        { prompt: "Profil sayfasını düzelt" },
+        test.ctx,
+      ),
+    ).toBeUndefined();
+    expect(test.pi.appendEntry).toHaveBeenCalledWith(
+      "intent-bridge.queue",
+      expect.objectContaining({ reason: "session_reset", status: "ready" }),
+    );
   });
 
   it("persists deterministic on/off/auto commands and redacts status", async () => {

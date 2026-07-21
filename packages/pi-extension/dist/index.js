@@ -6609,6 +6609,127 @@ Output mode: ${mode}. Return JSON only.${schemaInstruction}`;
 
 import { CONFIG_DIR_NAME } from "@earendil-works/pi-coding-agent";
 
+import { createHash as createHash3 } from "node:crypto";
+var DEFAULT_PENDING_TASK_TTL_MS = 5 * 60 * 1e3;
+var DEFAULT_PENDING_TASK_CAPACITY = 20;
+function fingerprint(prompt, imageCount) {
+  return createHash3("sha256").update(JSON.stringify([prompt, imageCount])).digest("hex");
+}
+var PendingTaskQueue = class {
+  entries = [];
+  sequence = 0;
+  quarantined = false;
+  now;
+  ttlMs;
+  capacity;
+  diagnostic;
+  constructor(options = {}) {
+    this.now = options.now ?? Date.now;
+    this.ttlMs = options.ttlMs ?? DEFAULT_PENDING_TASK_TTL_MS;
+    this.capacity = options.capacity ?? DEFAULT_PENDING_TASK_CAPACITY;
+    this.diagnostic = options.diagnostic ?? (() => void 0);
+  }
+  reserve(prompt, imageCount, traceId) {
+    const sequence = ++this.sequence;
+    const entry = {
+      sequence,
+      traceId,
+      fingerprint: fingerprint(prompt, imageCount),
+      expiresAt: this.now() + this.ttlMs,
+      status: "reserved"
+    };
+    if (this.quarantined) {
+      this.emit("capacity_eviction", entry);
+      return sequence;
+    }
+    if (this.entries.length >= this.capacity) {
+      this.emit("capacity_eviction", this.entries[0] ?? entry);
+      this.entries.length = 0;
+      this.quarantined = true;
+      return sequence;
+    }
+    this.entries.push(entry);
+    return sequence;
+  }
+  markReady(sequence, compiledContent) {
+    if (this.quarantined)
+      return false;
+    const entry = this.entries.find((candidate) => candidate.sequence === sequence);
+    if (!entry || entry.status !== "reserved")
+      return false;
+    entry.compiledContent = compiledContent;
+    entry.status = "ready";
+    return true;
+  }
+  skip(sequence) {
+    const entry = this.entries.find((candidate) => candidate.sequence === sequence);
+    if (!entry)
+      return false;
+    delete entry.compiledContent;
+    entry.status = "skipped";
+    return true;
+  }
+  cancel(sequence) {
+    const index = this.entries.findIndex((entry) => entry.sequence === sequence);
+    if (index < 0)
+      return false;
+    this.entries.splice(index, 1);
+    return true;
+  }
+  consumeForAgentStart(prompt, imageCount, now) {
+    const expected = fingerprint(prompt, imageCount);
+    if (this.quarantined) {
+      this.emitMiss(expected);
+      return null;
+    }
+    const index = this.entries.findIndex((entry2) => entry2.fingerprint === expected);
+    if (index < 0) {
+      this.emitMiss(expected);
+      return null;
+    }
+    const [entry] = this.entries.splice(index, 1);
+    if (!entry)
+      return null;
+    if (entry.expiresAt <= now) {
+      this.emit("expired", entry);
+      return null;
+    }
+    if (entry.status === "skipped")
+      return null;
+    if (entry.status !== "ready" || entry.compiledContent === void 0) {
+      this.emitMiss(expected, entry);
+      return null;
+    }
+    return entry.compiledContent;
+  }
+  clear() {
+    for (const entry of this.entries)
+      this.emit("session_reset", entry);
+    this.entries.length = 0;
+    this.quarantined = false;
+  }
+  emit(reason, entry) {
+    this.diagnostic({
+      reason,
+      sequence: entry.sequence,
+      traceId: entry.traceId,
+      fingerprint: entry.fingerprint,
+      status: entry.status
+    });
+  }
+  emitMiss(fingerprint2, entry) {
+    this.diagnostic({
+      reason: "correlation_miss",
+      fingerprint: fingerprint2,
+      ...entry ? {
+        sequence: entry.sequence,
+        traceId: entry.traceId,
+        status: entry.status
+      } : {}
+    });
+  }
+};
+
 var PREVIEW_CHOICES = [
   "Send transformed",
   "Send original",
@@ -6830,7 +6951,7 @@ function resolvePiModel(registry, provider, id) {
   return model;
 }
 
-import { createHash as createHash3 } from "node:crypto";
+import { createHash as createHash4 } from "node:crypto";
 var PI_NATIVE_PROMPT_VERSION = "pi-native-v1";
 function completeSimpleFor(registry) {
   if (typeof registry.completeSimple === "function")
@@ -6991,7 +7112,7 @@ var PiNativeProvider = class {
         intent,
         ...usage2 && Object.keys(usage2).length ? { usage: usage2 } : {},
         ...responseId ? { requestId: responseId } : {},
-        rawResponseHash: createHash3("sha256").update(extracted).digest("hex"),
+        rawResponseHash: createHash4("sha256").update(extracted).digest("hex"),
         latencyMs: Math.max(0, this.#now() - startedAt)
       };
     } finally {
@@ -7094,12 +7215,15 @@ function createIntentBridgeExtension(pi, dependencies = {}) {
   const createTraceWriter = dependencies.createTraceWriter ?? ((path) => new JsonlTraceWriter(path, now));
   const updateConfig = dependencies.updateConfig ?? updateBridgeConfigLayerAtomic;
   const state = { lastStatus: "none" };
-  const queuedTasks = [];
-  const queueTask = (prompt, content) => {
-    if (queuedTasks.length === 20)
-      queuedTasks.shift();
-    queuedTasks.push({ prompt, content });
-  };
+  const pendingTasks = new PendingTaskQueue({
+    now: () => now().getTime(),
+    diagnostic: (payload) => {
+      try {
+        pi.appendEntry("intent-bridge.queue", payload);
+      } catch {
+      }
+    }
+  });
   const globalDir = dirname3(resolveConfigPaths({ environment }).globalPath);
   const selectionPath = join4(globalDir, "pi-model-selection.json");
   const logsDir = join4(globalDir, "logs");
@@ -7132,13 +7256,21 @@ function createIntentBridgeExtension(pi, dependencies = {}) {
     const syntax = eligibility(event);
     if (!syntax.eligible && syntax.reason !== "disabled" && syntax.reason !== "mode")
       return { action: "continue" };
+    const traceId = uuid();
+    const reservation = pendingTasks.reserve(event.text, event.images?.length ?? 0, traceId);
+    let reserved = true;
+    const approve = (content) => {
+      if (!pendingTasks.markReady(reservation, content))
+        return false;
+      reserved = false;
+      return true;
+    };
     let config;
     try {
       config = await getConfig(ctx);
       if (!eligibility(event, config).eligible)
         return { action: "continue" };
       const source = event.source === "rpc" ? "rpc" : "interactive";
-      const traceId = uuid();
       const timestamp = now().toISOString();
       const inputMeta = {
         version: 1,
@@ -7238,8 +7370,12 @@ function createIntentBridgeExtension(pi, dependencies = {}) {
       if (decision.kind === "inject") {
         if (buffered.trace)
           await append(buffered.trace, config.logging);
+        if (!approve(result.compiledTask)) {
+          state.lastStatus = "fail_open";
+          notify(ctx, "Intent Bridge skipped this message; the original was sent unchanged.");
+          return { action: "continue" };
+        }
         state.lastStatus = "transformed";
-        queueTask(event.text, result.compiledTask);
         return { action: "continue" };
       }
       let choice;
@@ -7275,34 +7411,40 @@ function createIntentBridgeExtension(pi, dependencies = {}) {
       }
       state.lastStatus = action === "transform" ? "transformed" : "bypass";
       if (action === "transform") {
-        queueTask(event.text, result.compiledTask);
+        if (!approve(result.compiledTask)) {
+          state.lastStatus = "fail_open";
+          notify(ctx, "Intent Bridge skipped this message; the original was sent unchanged.");
+        }
         return { action: "continue" };
+      }
+      if (action === "handled") {
+        pendingTasks.cancel(reservation);
+        reserved = false;
       }
       return { action };
     } catch {
       state.lastStatus = "fail_open";
       notify(ctx, "Intent Bridge skipped this message; the original was sent unchanged.");
       return { action: "continue" };
+    } finally {
+      if (reserved)
+        pendingTasks.skip(reservation);
     }
   });
   pi.on("before_agent_start", (event) => {
-    const index = queuedTasks.findIndex((task3) => task3.prompt === event.prompt);
-    if (index < 0)
+    const content = pendingTasks.consumeForAgentStart(event.prompt, event.images?.length ?? 0, now().getTime());
+    if (content === null)
       return;
-    const task2 = queuedTasks[index];
-    if (!task2)
-      return;
-    queuedTasks.splice(index, 1);
     return {
       message: {
         customType: "intent-bridge.task",
-        content: task2.content,
+        content,
         display: false
       }
     };
   });
   pi.on("session_start", async (_event, ctx) => {
-    queuedTasks.length = 0;
+    pendingTasks.clear();
     try {
       const config = await getConfig(ctx);
       await traceWriter.prune(config.logging.retentionDays).catch(() => void 0);
@@ -7310,10 +7452,10 @@ function createIntentBridgeExtension(pi, dependencies = {}) {
     }
   });
   pi.on("session_before_switch", () => {
-    queuedTasks.length = 0;
+    pendingTasks.clear();
   });
   pi.on("session_shutdown", () => {
-    queuedTasks.length = 0;
+    pendingTasks.clear();
     state.latest = void 0;
     delete state.latestMetadata;
     delete state.rating;
@@ -7345,6 +7487,8 @@ function createIntentBridgeExtension(pi, dependencies = {}) {
         notify(ctx, usage);
         return;
       }
+      if (command === "off" && !value)
+        pendingTasks.clear();
       try {
         const config = await getConfig(ctx);
         const paths = resolveConfigPaths({

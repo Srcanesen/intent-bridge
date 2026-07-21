@@ -4,6 +4,7 @@
 
 ### Added
 
+- Fail-safe pending transformation correlation for the Pi extension, using bounded SHA-256 prompt/image-count fingerprints, FIFO occurrence outcomes, expiry, capacity quarantine, and lifecycle cleanup.
 - Deterministic core quality assessment with bounded review reasons, backward-compatible configuration defaults, and privacy-safe trace metadata.
 - Quality review delivery wiring: `config.quality` flows into the pipeline, and the Pi extension routes auto-mode review candidates through the existing preview selector (or preserves the original when no UI is available). The `quality_review_required_no_ui` reason is recorded in the trace and `intent-bridge.preview` session entry.
 - Preview and `/bridge last` now surface bounded, redacted assessment fields: outcome, decision reasons, active enforcement, risk level and reasons, confidence, clarification recommendation, and material ask_user ambiguities.

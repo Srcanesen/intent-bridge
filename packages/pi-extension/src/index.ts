@@ -30,6 +30,7 @@ import {
   type InputEvent,
 } from "@earendil-works/pi-coding-agent";
 
+import { PendingTaskQueue } from "./pending-task-queue.js";
 import {
   PREVIEW_CHOICES,
   formatLastTransformation,
@@ -185,12 +186,14 @@ export function createIntentBridgeExtension(
   const updateConfig =
     dependencies.updateConfig ?? updateBridgeConfigLayerAtomic;
   const state: BridgeState = { lastStatus: "none" };
-  const queuedTasks: Array<{ prompt: string; content: string }> = [];
-  const queueTask = (prompt: string, content: string) => {
-    // ponytail: retain 20 pending prompts; add session-scoped IDs if concurrent turns need more.
-    if (queuedTasks.length === 20) queuedTasks.shift();
-    queuedTasks.push({ prompt, content });
-  };
+  const pendingTasks = new PendingTaskQueue({
+    now: () => now().getTime(),
+    diagnostic: (payload) => {
+      try {
+        pi.appendEntry("intent-bridge.queue", payload);
+      } catch {}
+    },
+  });
   const globalDir = dirname(resolveConfigPaths({ environment }).globalPath);
   const selectionPath = join(globalDir, "pi-model-selection.json");
   const logsDir = join(globalDir, "logs");
@@ -237,13 +240,24 @@ export function createIntentBridgeExtension(
       syntax.reason !== "mode"
     )
       return { action: "continue" };
+    const traceId = uuid();
+    const reservation = pendingTasks.reserve(
+      event.text,
+      event.images?.length ?? 0,
+      traceId,
+    );
+    let reserved = true;
+    const approve = (content: string) => {
+      if (!pendingTasks.markReady(reservation, content)) return false;
+      reserved = false;
+      return true;
+    };
     let config: Awaited<ReturnType<typeof getConfig>>;
     try {
       config = await getConfig(ctx);
       if (!eligibility(event, config).eligible) return { action: "continue" };
       const source: "interactive" | "rpc" =
         event.source === "rpc" ? "rpc" : "interactive";
-      const traceId = uuid();
       const timestamp = now().toISOString();
       const inputMeta = {
         version: 1 as const,
@@ -363,8 +377,15 @@ export function createIntentBridgeExtension(
       }
       if (decision.kind === "inject") {
         if (buffered.trace) await append(buffered.trace, config.logging);
+        if (!approve(result.compiledTask)) {
+          state.lastStatus = "fail_open";
+          notify(
+            ctx,
+            "Intent Bridge skipped this message; the original was sent unchanged.",
+          );
+          return { action: "continue" };
+        }
         state.lastStatus = "transformed";
-        queueTask(event.text, result.compiledTask);
         return { action: "continue" };
       }
       // decision.kind === "preview" — open the existing selector.
@@ -404,8 +425,18 @@ export function createIntentBridgeExtension(
       } catch {}
       state.lastStatus = action === "transform" ? "transformed" : "bypass";
       if (action === "transform") {
-        queueTask(event.text, result.compiledTask);
+        if (!approve(result.compiledTask)) {
+          state.lastStatus = "fail_open";
+          notify(
+            ctx,
+            "Intent Bridge skipped this message; the original was sent unchanged.",
+          );
+        }
         return { action: "continue" };
+      }
+      if (action === "handled") {
+        pendingTasks.cancel(reservation);
+        reserved = false;
       }
       return { action };
     } catch {
@@ -415,26 +446,29 @@ export function createIntentBridgeExtension(
         "Intent Bridge skipped this message; the original was sent unchanged.",
       );
       return { action: "continue" };
+    } finally {
+      if (reserved) pendingTasks.skip(reservation);
     }
   });
 
   pi.on("before_agent_start", (event) => {
-    const index = queuedTasks.findIndex((task) => task.prompt === event.prompt);
-    if (index < 0) return;
-    const task = queuedTasks[index];
-    if (!task) return;
-    queuedTasks.splice(index, 1);
+    const content = pendingTasks.consumeForAgentStart(
+      event.prompt,
+      event.images?.length ?? 0,
+      now().getTime(),
+    );
+    if (content === null) return;
     return {
       message: {
         customType: "intent-bridge.task",
-        content: task.content,
+        content,
         display: false,
       },
     };
   });
 
   pi.on("session_start", async (_event, ctx) => {
-    queuedTasks.length = 0;
+    pendingTasks.clear();
     try {
       const config = await getConfig(ctx);
       await traceWriter
@@ -443,10 +477,10 @@ export function createIntentBridgeExtension(
     } catch {}
   });
   pi.on("session_before_switch", () => {
-    queuedTasks.length = 0;
+    pendingTasks.clear();
   });
   pi.on("session_shutdown", () => {
-    queuedTasks.length = 0;
+    pendingTasks.clear();
     state.latest = undefined;
     delete state.latestMetadata;
     delete state.rating;
@@ -484,6 +518,7 @@ export function createIntentBridgeExtension(
         notify(ctx, usage);
         return;
       }
+      if (command === "off" && !value) pendingTasks.clear();
       try {
         const config = await getConfig(ctx);
         const paths = resolveConfigPaths({
