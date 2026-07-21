@@ -230,22 +230,33 @@ describe("OpenAICompatibleProvider HTTP contract", () => {
       (received?.body.response_format as { json_schema: { schema: unknown } })
         .json_schema.schema,
     ).toEqual(OpenAICompatibleIntentDocumentV2JsonSchema);
-    expect(
-      (received?.body.messages as Array<{ content: string }>)[0]?.content,
-    ).toContain("You are an intent interpreter");
-    expect(
-      (received?.body.messages as Array<{ content: string }>)[0]?.content,
-    ).toContain(
+    const messages = received?.body.messages as Array<{ content: string }>;
+    const system = messages[0]?.content ?? "";
+    const user = messages[1]?.content ?? "{}";
+    expect(system).toContain("You are an intent interpreter");
+    expect(system).toContain(
       "responseLanguage.source to user_explicit only when the user explicitly changes the assistant's final response or explanation language",
     );
-    expect(
-      JSON.parse(
-        (received?.body.messages as Array<{ content: string }>)[1]?.content ??
-          "{}",
-      ),
-    ).toMatchObject({
-      request: { imageCount: 2, originalText: request.originalText },
+    expect(system).toContain("interpreterPromptVersion: openai-compatible-v3");
+    expect(JSON.parse(user)).toEqual({
+      messageType: request.messageType,
+      originalText: request.originalText,
+      attachmentSummary: request.attachmentSummary,
+      projectContext: request.projectContext,
     });
+    for (const metadata of [
+      "outputRequirements",
+      "implementationCodeForbidden",
+      "interpreterPromptVersion",
+      "intentSchemaVersion",
+    ]) {
+      expect(user).not.toContain(metadata);
+    }
+    expect(system).not.toContain("outputRequirements");
+    expect(system).not.toContain("implementationCodeForbidden");
+    expect(`${system}\n${user}`).not.toContain(
+      "Do not write implementation code",
+    );
     expect(result).toMatchObject({
       intent: intent(),
       usage: { inputTokens: 3, outputTokens: 4, totalTokens: 7 },
