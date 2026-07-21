@@ -4,6 +4,7 @@
 
 ### Added
 
+- Opt-in PR7 / IB-06 implementation-outcome A/B benchmark with a separate strict report contract, 12 deterministic disposable repository fixtures, exact Pi/Bridge model selection, aggregate-only output, and mandatory external policy-sandbox attestation for live runs.
 - IntentDocument V2 response-language provenance: built-in providers emit bounded `user_explicit` or `source_language_default` metadata. V2 preserves source language unless the user explicitly changes the final response/explanation language; V1 documents retain the archived regex fallback.
 - `PiCompilerOptions` with `includeOriginalRequest` (default `true`). `PiCompilerV1` constructor accepts partial options. When `false`, the entire `## Original user request` heading and fenced body is omitted from compiled output; normal user input / Pi turn remains byte-for-byte unchanged.
 - Bridge config `compiler.includeOriginalRequest` field with strict validation (unknown keys / non-boolean rejected). Missing `compiler` or empty `compiler: {}` resolve to `true`. Explicit `false` survives layer merge/patch.

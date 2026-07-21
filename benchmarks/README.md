@@ -1,5 +1,7 @@
 # Benchmark fixtures
 
+The existing 50-case interpretation corpus and reports remain unchanged. A separate 12-case implementation benchmark lives in [`implementation-outcome`](implementation-outcome/README.md); it measures downstream repository outcomes and uses its own strict contracts rather than `BenchmarkReportV2`.
+
 Phase 8 provides 50 human-reviewed seed cases: 20 Turkish, 20 English, and 10 Spanish. Inputs and titles are unique. The corpus covers initial, normal, steer, and follow-up messages plus bug fixes, UI, refactoring, tests, architecture, multi-task work, attachments, explicit constraints, risky ambiguity, paths/commands, mixed language, injection-like quoted data, and synthetic secret-like values.
 
 Every committed seed has at least one reviewed English goal concept and a response-language code. Explicit and safety-sensitive cases also carry literal constraints and/or forbidden additions. Dataset validation enforces the count, distribution, unique normalized inputs/titles, taxonomy, annotation density, tag-specific structure, and absence of obvious real credential patterns.

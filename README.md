@@ -200,11 +200,14 @@ A separate model-assisted audit found material request-level changes in 2 of 50 
 
 Sanitized evidence is stored under [`benchmarks/reports`](benchmarks/reports). It excludes raw requests, candidate outputs, prompts, credentials, secrets, and provider error bodies. See [benchmarks/README.md](benchmarks/README.md) for methodology and limitations.
 
+The separate [implementation-outcome benchmark](benchmarks/implementation-outcome/README.md) compares an unchanged prompt with the same prompt plus one hidden compiled Intent Bridge context message in disposable synthetic repositories. Offline corpus validation is safe by default; live execution is expensive, opt-in, and rejected unless an external policy sandbox supplies compatible attestation metadata. Pi hooks are defense in depth, not containment.
+
 ## Development
 
 ```bash
 corepack pnpm install --frozen-lockfile
 corepack pnpm benchmark -- validate-fixtures --cases benchmarks/cases
+corepack pnpm benchmark:implementation-outcome -- validate --cases benchmarks/implementation-outcome/cases.json
 corepack pnpm format:check
 corepack pnpm lint
 corepack pnpm typecheck

@@ -29,6 +29,7 @@
     "benchmark:pi-thinking": "corepack pnpm build && node packages/pi-extension/scripts/benchmark-thinking.mjs",
     "benchmark:pi-local": "corepack pnpm build && node packages/pi-extension/scripts/benchmark-local-latency.mjs",
     "benchmark:pi-corpus": "corepack pnpm build && node packages/pi-extension/scripts/benchmark-native-corpus.mjs",
+    "benchmark:implementation-outcome": "node packages/pi-extension/scripts/benchmark-implementation-outcome.mjs",
     "build:extension": "tsc --build --force tsconfig.json && node scripts/bundle-extension.mjs",
     "build": "corepack pnpm build:extension",
     "release:pack": "corepack pnpm build && node scripts/release-smoke.mjs --pack",
