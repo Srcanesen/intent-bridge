@@ -1,27 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { existsSync } from "node:fs";
 import { dirname, join } from "node:path";
-
-import {
-  BridgeError,
-  collectProjectContext,
-  InterpretationPipeline,
-  JsonlTraceWriter,
-  loadBridgeConfigLayer,
-  loadPiModelSelection,
-  loadLayeredConfig,
-  PiCompilerV1,
-  resolveConfigPaths,
-  updateBridgeConfigLayerAtomic,
-  writePiModelSelectionAtomic,
-  type BridgeTraceV1,
-  type IntentProvider,
-  type ProviderProfileV1,
-  fullLoggingWarning,
-  redactSecrets,
-  type TraceSink,
-} from "@intent-bridge/core";
-import { OpenAICompatibleProvider } from "@intent-bridge/provider-openai-compatible";
 import {
   CONFIG_DIR_NAME,
   type ExtensionAPI,
@@ -29,25 +8,45 @@ import {
   type ExtensionContext,
   type InputEvent,
 } from "@earendil-works/pi-coding-agent";
+import {
+  BridgeError,
+  type BridgeTraceV1,
+  collectProjectContext,
+  fullLoggingWarning,
+  type IntentProvider,
+  InterpretationPipeline,
+  JsonlTraceWriter,
+  loadBridgeConfigLayer,
+  loadLayeredConfig,
+  loadPiModelSelection,
+  PiCompilerV1,
+  type ProviderProfileV1,
+  redactSecrets,
+  resolveConfigPaths,
+  type TraceSink,
+  updateBridgeConfigLayerAtomic,
+  writePiModelSelectionAtomic,
+} from "@intent-bridge/core";
+import { OpenAICompatibleProvider } from "@intent-bridge/provider-openai-compatible";
 
 import { PendingTaskQueue } from "./pending-task-queue.js";
 import {
-  PREVIEW_CHOICES,
-  formatLastTransformation,
-  formatTransformation,
-} from "./preview.js";
-import { eligibility, messageType } from "./routing.js";
-import {
   compatiblePiModels,
-  piModelChoices,
-  resolvePiModel,
   type PiModel,
   type PiModelRegistry,
+  piModelChoices,
+  resolvePiModel,
 } from "./pi-model-provider.js";
 import {
   createPiProvider,
   type PiNativeProviderOptions,
 } from "./pi-native-provider.js";
+import {
+  formatLastTransformation,
+  formatTransformation,
+  PREVIEW_CHOICES,
+} from "./preview.js";
+import { eligibility, messageType } from "./routing.js";
 
 export interface BridgeDependencies {
   environment?: NodeJS.ProcessEnv;
@@ -323,7 +322,7 @@ export function createIntentBridgeExtension(
               { capabilityDiagnostic },
             )
           : createProvider(requireProfile(profile)),
-        new PiCompilerV1(),
+        new PiCompilerV1(config.compiler),
         buffered,
         now,
       );
@@ -410,9 +409,10 @@ export function createIntentBridgeExtension(
       // decision.kind === "preview" — open the existing selector.
       let choice: string | undefined;
       try {
-        choice = await ctx.ui.select(formatTransformation(latest), [
-          ...PREVIEW_CHOICES,
-        ]);
+        choice = await ctx.ui.select(
+          formatTransformation(latest, config.compiler),
+          [...PREVIEW_CHOICES],
+        );
       } catch {
         choice = undefined;
         if (buffered.trace) {
@@ -654,7 +654,7 @@ export function createIntentBridgeExtension(
             ctx,
             formatLastTransformation(
               latest,
-              `Status: ${state.lastStatus}; provider=${metadata.providerProfileId}; model=${metadata.model}; mode=${metadata.mode}; latency=${metadata.latencyMs === undefined ? "unknown" : `${metadata.latencyMs}ms`}; rating=${state.rating ?? "none"}; timestamp=${latest.timestamp}.`,
+              `Status: ${state.lastStatus}; provider=${metadata.providerProfileId}; model=${metadata.model}; mode=${metadata.mode}; latency=${metadata.latencyMs === undefined ? "unknown" : `${metadata.latencyMs}ms`}; rating=${state.rating ?? "none"}; includeOriginalRequest=${config.compiler.includeOriginalRequest}; timestamp=${latest.timestamp}.`,
             ),
           );
           return;

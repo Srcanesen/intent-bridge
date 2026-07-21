@@ -3,6 +3,14 @@ import type { IntentDocumentV1 } from "./intent.js";
 import { redactSecrets } from "./privacy.js";
 import type { TransformationAssessment } from "./quality-policy.js";
 
+export interface PiCompilerOptions {
+  includeOriginalRequest: boolean;
+}
+
+const DEFAULT_COMPILER_OPTIONS: PiCompilerOptions = {
+  includeOriginalRequest: true,
+};
+
 const ADVISORY_HEADING = "Interpreter advisory — not user requirements";
 const ADVISORY_BUDGET = 1_000;
 
@@ -120,6 +128,12 @@ function advisoryContent(
 }
 
 export class PiCompilerV1 implements HarnessCompiler<IntentDocumentV1> {
+  private readonly options: PiCompilerOptions;
+
+  constructor(options?: Partial<PiCompilerOptions>) {
+    this.options = { ...DEFAULT_COMPILER_OPTIONS, ...options };
+  }
+
   compile({
     intent,
     originalText,
@@ -192,7 +206,14 @@ export class PiCompilerV1 implements HarnessCompiler<IntentDocumentV1> {
         "Execution guidance",
         list((compact ? compactGuidance : fullGuidance)(responseLanguage)),
       ),
-      section("Original user request", `${fence}\n${originalText}\n${fence}`),
+      ...(this.options.includeOriginalRequest
+        ? [
+            section(
+              "Original user request",
+              `${fence}\n${originalText}\n${fence}`,
+            ),
+          ]
+        : []),
     ].filter((content): content is string => content !== undefined);
 
     return {

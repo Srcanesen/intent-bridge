@@ -11,11 +11,16 @@ import { basename, dirname, join } from "node:path";
 
 import type { ProviderProfileV1, RetryPolicyV1 } from "./contracts.js";
 import { BridgeError } from "./errors.js";
+import type { PiCompilerOptions } from "./pi-compiler.js";
 import {
   DEFAULT_QUALITY_CONFIG,
   type QualityConfigV1,
   type QualityEnforcementMode,
 } from "./quality-policy.js";
+
+const DEFAULT_COMPILER_CONFIG: PiCompilerOptions = {
+  includeOriginalRequest: true,
+};
 
 export interface PiModelSelectionV1 {
   version: 1;
@@ -43,6 +48,7 @@ export interface BridgeConfigV1 {
   logging: LoggingConfigV1;
   quality: QualityConfigV1;
   retry: RetryPolicyV1;
+  compiler: PiCompilerOptions;
 }
 export type BridgeConfigLayer = {
   version?: 1;
@@ -54,6 +60,7 @@ export type BridgeConfigLayer = {
   logging?: Partial<LoggingConfigV1>;
   quality?: Partial<QualityConfigV1>;
   retry?: Partial<RetryPolicyV1>;
+  compiler?: Partial<PiCompilerOptions>;
 };
 export type BridgeConfigPatch = Pick<
   BridgeConfigLayer,
@@ -70,6 +77,7 @@ export const DEFAULT_BRIDGE_CONFIG: BridgeConfigV1 = {
   logging: { mode: "metadata", retentionDays: 30 },
   quality: { ...DEFAULT_QUALITY_CONFIG },
   retry: { maxRetries: 1, baseDelayMs: 250, totalBudgetMs: 45000 },
+  compiler: { ...DEFAULT_COMPILER_CONFIG },
 };
 
 function invalid(message = "The bridge configuration is invalid."): never {
@@ -243,9 +251,25 @@ function profile(value: unknown): ProviderProfileV1 {
   }
   return result;
 }
+function compilerConfig(value: unknown): PiCompilerOptions {
+  const cc = object(value);
+  // Reject unknown keys; includeOriginalRequest is optional (defaults to true)
+  const allowed = new Set(["includeOriginalRequest"]);
+  for (const key of Object.keys(cc)) {
+    if (!allowed.has(key)) invalid();
+  }
+  return {
+    includeOriginalRequest:
+      cc.includeOriginalRequest === undefined
+        ? true
+        : bool(cc.includeOriginalRequest),
+  };
+}
+
 export function parseBridgeConfig(value: unknown): BridgeConfigV1 {
   const c = object(value);
-  exact(c, [
+  // Allow missing compiler for backward compat (defaults to includeOriginalRequest: true)
+  const allowedKeys = [
     "version",
     "enabled",
     "mode",
@@ -255,7 +279,9 @@ export function parseBridgeConfig(value: unknown): BridgeConfigV1 {
     "logging",
     "quality",
     "retry",
-  ]);
+  ];
+  if ("compiler" in c) allowedKeys.push("compiler");
+  exact(c, allowedKeys);
   if (c.version !== 1) invalid();
   if (!["auto", "preview", "off"].includes(string(c.mode))) invalid();
   const context = object(c.context);
@@ -263,6 +289,10 @@ export function parseBridgeConfig(value: unknown): BridgeConfigV1 {
   const logging = object(c.logging);
   exact(logging, ["mode", "retentionDays"]);
   if (!["metadata", "full", "off"].includes(string(logging.mode))) invalid();
+  const parsedCompiler =
+    c.compiler === undefined
+      ? { ...DEFAULT_COMPILER_CONFIG }
+      : compilerConfig(c.compiler);
   const quality = object(c.quality);
   exact(quality, [
     "enforcement",
@@ -298,6 +328,7 @@ export function parseBridgeConfig(value: unknown): BridgeConfigV1 {
     },
     quality: parsedQuality,
     retry: c.retry === undefined ? DEFAULT_BRIDGE_CONFIG.retry : retry(c.retry),
+    compiler: parsedCompiler,
   };
   if (result.activeProfile && !result.profiles[result.activeProfile]) invalid();
   return result;

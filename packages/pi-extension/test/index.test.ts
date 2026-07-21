@@ -47,6 +47,7 @@ const config = (patch: Partial<BridgeConfigV1> = {}): BridgeConfigV1 => ({
     noUiAction: "send_original",
   },
   retry: { maxRetries: 1, baseDelayMs: 250, totalBudgetMs: 45000 },
+  compiler: { includeOriginalRequest: true },
   ...patch,
 });
 
@@ -610,6 +611,27 @@ describe("Intent Bridge Pi extension", () => {
         test.ctx,
       ),
     ).toBeUndefined();
+  });
+
+  it("omits the original-request section without changing the normal user turn", async () => {
+    const originalText = "UNIQUE_ORIGINAL_REQUEST";
+    const test = setup({
+      config: config({ compiler: { includeOriginalRequest: false } }),
+    });
+    await expect(
+      test.handlers.input(input({ text: originalText }), test.ctx),
+    ).resolves.toEqual({ action: "continue" });
+    expect(test.provider.interpret).toHaveBeenCalledWith(
+      expect.objectContaining({ originalText }),
+      expect.anything(),
+    );
+    const injected = await test.handlers.before_agent_start(
+      { prompt: originalText },
+      test.ctx,
+    );
+    expect(injected).toMatchObject({ message: { display: false } });
+    expect(injected.message.content).not.toContain("## Original user request");
+    expect(injected.message.content).not.toContain(originalText);
   });
 
   it("matches pending tasks without consuming mismatches and preserves queue order", async () => {

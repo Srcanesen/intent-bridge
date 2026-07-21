@@ -9,6 +9,7 @@ import {
 } from "@intent-bridge/core";
 
 import {
+  formatCompilerOption,
   formatLastTransformation,
   formatTransformation,
 } from "../src/preview.js";
@@ -217,5 +218,49 @@ describe("preview formatting", () => {
     expect(text).toContain("[REDACTED]");
     expect(text).toContain("material_ambiguity_requires_user");
     expect(text).toContain("confidence_below_threshold");
+  });
+
+  describe("compiler option display", () => {
+    it("formatCompilerOption shows includeOriginalRequest true/false", () => {
+      expect(formatCompilerOption({ includeOriginalRequest: true })).toBe(
+        "includeOriginalRequest=true",
+      );
+      expect(formatCompilerOption({ includeOriginalRequest: false })).toBe(
+        "includeOriginalRequest=false",
+      );
+    });
+
+    it("formatTransformation with compiler prepends option line", () => {
+      const text = formatTransformation(transformation(), {
+        includeOriginalRequest: true,
+      });
+      expect(text).toContain("includeOriginalRequest=true");
+      expect(text).toContain("INTENT BRIDGE PREVIEW");
+    });
+
+    it("formatTransformation without compiler does not include option line", () => {
+      const text = formatTransformation(transformation());
+      expect(text).not.toContain("includeOriginalRequest");
+      expect(text).toContain("INTENT BRIDGE PREVIEW");
+    });
+
+    it("stays under the cap with compiler option", () => {
+      const text = formatTransformation(transformation(), {
+        includeOriginalRequest: false,
+      });
+      expect(text.length).toBeLessThanOrEqual(5000);
+      expect(text).toContain("includeOriginalRequest=false");
+    });
+
+    it("formatLastTransformation metadata can include includeOriginalRequest", () => {
+      const text = formatLastTransformation(
+        transformation(),
+        "Status: transformed; includeOriginalRequest=true; provider=local",
+      );
+      expect(text).toContain("includeOriginalRequest=true");
+      expect(text).toContain("Original request");
+      expect(text).toContain("## Quality assessment");
+      expect(text.length).toBeLessThanOrEqual(5000);
+    });
   });
 });

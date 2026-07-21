@@ -40,6 +40,7 @@ describe("benchmark-native-corpus argument parsing", () => {
       concurrency: 2,
       provider: "codex",
       model: "gpt-5.4-mini",
+      "compiler-ab": false,
     });
   });
 
@@ -530,5 +531,60 @@ describe("benchmark-native-corpus aggregate rendering", () => {
       "invariantPassRate",
     ])
       expect(rendered).not.toContain(sentinel);
+  });
+
+  describe("--compiler-ab flag", () => {
+    it("accepts --compiler-ab as boolean flag without value", () => {
+      const parsed = parseArgs([
+        "--provider",
+        "codex",
+        "--model",
+        "gpt-5.4-mini",
+        "--compiler-ab",
+      ]);
+      expect(parsed["compiler-ab"]).toBe(true);
+      expect(parsed.provider).toBe("codex");
+      expect(parsed.model).toBe("gpt-5.4-mini");
+    });
+
+    it("defaults --compiler-ab to false", () => {
+      const parsed = parseArgs([
+        "--provider",
+        "codex",
+        "--model",
+        "gpt-5.4-mini",
+      ]);
+      expect(parsed["compiler-ab"]).toBe(false);
+    });
+
+    it("rejects --compiler-ab with a value", () => {
+      expect(() =>
+        parseArgs([
+          "--provider",
+          "codex",
+          "--model",
+          "gpt-5.4-mini",
+          "--compiler-ab",
+          "true",
+        ]),
+      ).toThrow("CONFIG_INVALID");
+    });
+
+    it("HELP text mentions --compiler-ab", () => {
+      expect(HELP).toMatch(/--compiler-ab/);
+      expect(HELP).toMatch(
+        /one interpretation call.*two evaluator calls|interpretation call per case/,
+      );
+      expect(HELP).toMatch(
+        /Characters.bytes are NOT token counts|not token counts/,
+      );
+      expect(HELP).toMatch(
+        /Does not measure downstream Pi coding outcome|does not measure downstream Pi coding outcome/,
+      );
+    });
+
+    it("HELP text states default behavior unchanged without flag", () => {
+      expect(HELP).toMatch(/Default behavior.*no --compiler-ab/);
+    });
   });
 });

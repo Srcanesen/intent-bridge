@@ -6,11 +6,15 @@ import { fileURLToPath } from "node:url";
 import { ModelRuntime } from "@earendil-works/pi-coding-agent";
 import {
   benchmarkReportSha256,
+  createCompilerAbReportV1,
   createCorpusMetadata,
   createReportV2,
   loadBenchmarkCases,
   parseBenchmarkReportV2,
+  parseCompilerAbReportV1,
+  renderCompilerAbSummary,
   runBenchmark,
+  runCompilerAbBenchmark,
   sanitize,
   writeReport,
 } from "../../benchmark/dist/index.js";
@@ -27,14 +31,16 @@ const defaultCasesDir = join(repoRoot, "benchmarks", "cases");
 const defaultContextDir = join(repoRoot, "benchmarks", "contexts");
 
 export function parseArgs(argv) {
-  const out = { concurrency: 2 };
+  const out = { concurrency: 2, "compiler-ab": false };
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i];
     if (!arg || arg === "--") continue;
     if (arg === "--help" || arg === "-h") return { help: true };
     if (!arg.startsWith("--")) throw new Error("CONFIG_INVALID");
     const key = arg.slice(2);
-    if (
+    if (key === "compiler-ab") {
+      out["compiler-ab"] = true;
+    } else if (
       [
         "provider",
         "model",
@@ -98,9 +104,13 @@ export function selectCases(cases, idsRaw) {
   return filtered;
 }
 
-export const HELP = `Usage: benchmark-native-corpus --provider <name> --model <id> [--evaluator-provider <name> --evaluator-model <id> [--evaluator-reasoning <off|minimal|low|medium|high|xhigh|max>] [--review-bundle <file>]] [--concurrency 1..4] [--ids id1,id2,...] [--out <dir>] [--cases <dir>] [--contexts <dir>]
+export const HELP = `Usage: benchmark-native-corpus --provider <name> --model <id> [--evaluator-provider <name> --evaluator-model <id> [--evaluator-reasoning <off|minimal|low|medium|high|xhigh|max>] [--review-bundle <file>]] [--concurrency 1..4] [--ids id1,id2,...] [--out <dir>] [--cases <dir>] [--contexts <dir>] [--compiler-ab]
 
 Requires INTENT_BRIDGE_LIVE_TESTS=1. Uses one Pi ModelRuntime and writes a sanitized Benchmark Report V2 directory. Context fixtures default to benchmarks/contexts; a missing context directory is harmless for cases without a contextFixture. The optional evaluator arguments are required together; --review-bundle has no default and requires them. The exact candidate provider/model pair is rejected, while the same provider with a different model is allowed. Each transformed case is transmitted once to the explicitly selected second evaluator provider with no retries, reasoning selected by --evaluator-reasoning (default off, bounded to Pi ModelThinkingLevel values), no cache retention, and a 30s timeout. The model output is not human review.
+
+With --compiler-ab, runs the Compiler A/B benchmark: one interpretation call per case, then compiles twice locally (includeOriginalRequest=true|false) from the same intent. Up to two evaluator calls per transformed case (one per mode) when --evaluator-* is configured. Reports character (JS string length) and UTF-8 byte deltas between modes, mode-aware invariant results, and optional evaluator summaries. Characters/bytes are NOT token counts. Provider token usage is shared and interpreter-only. Does not measure downstream Pi coding outcome.
+
+Default behavior (no --compiler-ab) remains exactly as documented above.
 
 Stdout contains only safe candidate/evaluator identity, V2 structural, deterministic safety, evaluator, explicitly labeled literal diagnostic and language rates, latency/token/cost aggregates, and thresholds. No legacy invariantPassRate, case results, IDs, titles, corpus request/intent/compiled-task text, provider error bodies, or review-bundle content/path are written to stdout. Without an evaluator, Report V2 is still emitted and evaluator thresholds remain unavailable.`;
 
@@ -358,20 +368,104 @@ async function main() {
       : defaultContextDir;
     const allCases = await loadBenchmarkCases(casesDir);
     const finalCases = selectCases(allCases, args.ids);
-    const report = await runCorpus({
-      provider: args.provider,
-      model: args.model,
-      concurrency: args.concurrency,
-      evaluatorProvider: args["evaluator-provider"],
-      evaluatorModel: args["evaluator-model"],
-      evaluatorReasoning: args["evaluator-reasoning"],
-      cases: finalCases,
-      casesDir,
-      contextDir,
-      ...(args.out ? { outDir: args.out } : {}),
-      ...(args["review-bundle"] ? { reviewBundle: args["review-bundle"] } : {}),
-    });
-    process.stdout.write(`${renderAggregate(report)}\n`);
+
+    if (args["compiler-ab"]) {
+      // A/B benchmark path: one provider call, two local compiles per case
+      process.stderr.write(
+        "WARNING: Compiler A/B benchmark — one interpretation call + up to two evaluator calls " +
+          "per transformed case. Characters/bytes are NOT token counts. " +
+          "Downstream Pi coding outcome is not measured.\n",
+      );
+      const runtime = await ModelRuntime.create();
+      const available = await runtime.getAvailable();
+      const selected = available.find(
+        (item) => item.provider === args.provider && item.id === args.model,
+      );
+      if (!selected) throw new Error("CONFIG_INVALID");
+      const evaluatorSelected = args["evaluator-provider"]
+        ? available.find(
+            (item) =>
+              item.provider === args["evaluator-provider"] &&
+              item.id === args["evaluator-model"],
+          )
+        : undefined;
+      const provider = createPiProvider(runtime, selected);
+      const evaluator = evaluatorSelected
+        ? createPiBenchmarkEvaluator(runtime, evaluatorSelected, {
+            reasoning: args["evaluator-reasoning"],
+          })
+        : undefined;
+      const pricing =
+        selected.cost &&
+        Number.isFinite(selected.cost.input) &&
+        Number.isFinite(selected.cost.output)
+          ? {
+              inputPerMillion: selected.cost.input,
+              outputPerMillion: selected.cost.output,
+            }
+          : undefined;
+      const profileId = `pi:${args.provider}:${args.model}`;
+      const startedAt = new Date().toISOString();
+      const results = await runCompilerAbBenchmark({
+        profileId,
+        profile: { model: args.model, ...(pricing ? { pricing } : {}) },
+        cases: finalCases,
+        provider,
+        ...(evaluator ? { evaluator } : {}),
+        contextDir,
+        concurrency: args.concurrency,
+      });
+      const corpus = createCorpusMetadata(finalCases);
+      const abReport = createCompilerAbReportV1({
+        profile: { id: profileId, model: args.model },
+        corpus: { total: corpus.total, contentSha256: corpus.contentSha256 },
+        ...(evaluatorSelected
+          ? {
+              evaluatorMetadata: {
+                provider: evaluatorSelected.provider,
+                model: evaluatorSelected.id,
+                promptVersion: PI_BENCHMARK_EVALUATOR_PROMPT_VERSION,
+                reasoning: args["evaluator-reasoning"],
+              },
+            }
+          : {}),
+        startedAt,
+        completedAt: new Date().toISOString(),
+        cases: results,
+      });
+      const persistedAbReport = parseCompilerAbReportV1(abReport);
+      const outDir = args.out || "benchmarks/out";
+      const outPath = resolve(
+        outDir.startsWith("/") ? outDir : join(repoRoot, outDir),
+        `compiler-ab-${profileId.replace(/[^a-z0-9_-]/gi, "-")}-report.json`,
+      );
+      await mkdir(dirname(outPath), { recursive: true });
+      const fs = await open(outPath, "w", 0o600);
+      try {
+        await fs.writeFile(`${JSON.stringify(persistedAbReport, null, 2)}\n`);
+        await fs.chmod(0o600);
+      } finally {
+        await fs.close();
+      }
+      process.stdout.write(`${renderCompilerAbSummary(persistedAbReport)}\n`);
+    } else {
+      const report = await runCorpus({
+        provider: args.provider,
+        model: args.model,
+        concurrency: args.concurrency,
+        evaluatorProvider: args["evaluator-provider"],
+        evaluatorModel: args["evaluator-model"],
+        evaluatorReasoning: args["evaluator-reasoning"],
+        cases: finalCases,
+        casesDir,
+        contextDir,
+        ...(args.out ? { outDir: args.out } : {}),
+        ...(args["review-bundle"]
+          ? { reviewBundle: args["review-bundle"] }
+          : {}),
+      });
+      process.stdout.write(`${renderAggregate(report)}\n`);
+    }
   } catch (error) {
     process.stderr.write(
       `${error instanceof Error ? error.message : "BENCHMARK_FAILED"}\n`,

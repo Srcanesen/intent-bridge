@@ -24,6 +24,45 @@ Trace exports are tagged `trace-export` and `needs-review` with empty annotation
 - Model-evaluator output is not owner/human review. The separate strict `OwnerReviewV1` artifact contains only source-report SHA-256, reviewer metadata, manual pass/fail, and bounded per-case IDs/verdicts—never raw source requests or candidate content. Applying it requires exact one-to-one transformed-case coverage. The final V2 report retains only bounded owner metadata and aggregates; the review artifact stays separate.
 - V2 comparison excludes literal diagnostics and any composite: structural descending, deterministic safety descending, evaluator alteration ascending, evaluator clarity descending, fail-open ascending, p50 ascending, then known cost ascending; missing values rank last. Until owner review exists, it emits deterministic side-by-side deltas and an explicit tie rather than a winner. Cross-version comparisons are rejected.
 
+## Compiler A/B benchmark (`--compiler-ab`)
+
+An opt-in fixed-corpus benchmark that evaluates the effect of `includeOriginalRequest=true|false` on compiled output size and invariants without altering existing V1/V2 baselines or default behavior.
+
+### Usage
+
+```bash
+INTENT_BRIDGE_LIVE_TESTS=1 corepack pnpm benchmark:pi-corpus --compiler-ab --provider <name> --model <id> [--evaluator-provider <name> --evaluator-model <id>] [--ids id1,id2,...] [--out <dir>]
+```
+
+### Call model
+
+- **One interpretation call** per case (shared provider latency/usage/cost recorded once).
+- **Two local compiles** per case: one with `includeOriginalRequest=true`, one with `false`. Both compile from the same provider-returned intent. Provider is not called twice.
+- **Up to two evaluator calls** per transformed case (one per mode) when `--evaluator-*` is configured. Without evaluator, quality is marked unavailable (not zero/pass).
+
+### Metrics
+
+- Character count (`text.length`, JS string length) per mode
+- UTF-8 byte count (`Buffer.byteLength`) per mode — correctly handles non-ASCII
+- Character/byte deltas (true − false), aggregated as mean and median
+- Mode-aware deterministic invariants:
+  - `true`: `original_request_fenced` (original text present in fenced section)
+  - `false`: `original_request_omitted` (the `## Original user request` heading is absent; goal/task text may legitimately repeat source wording)
+  - Standard checks remain comparable across both modes
+- Provider latency/usage/cost are shared interpreter-only metadata. Compile and evaluator latency are per-mode and never mixed; evaluator attempts, successes, and bounded failures are counted separately per mode.
+- Provider token usage is labeled as shared interpreter-only data, not per-mode.
+
+### Limitations
+
+- Characters/bytes are NOT token counts and must not be labeled as such.
+- Downstream Pi coding outcome is not measured.
+- Default `includeOriginalRequest=true` **cannot change based on this benchmark alone** without semantic preservation evidence from the full evaluation pipeline.
+- The A/B report (`CompilerAbReportV1`) is strictly sanitized: no raw prompts, intents, compiled content, provider error bodies, or secrets.
+
+### Output
+
+The sanitized A/B report is written as mode `0600` JSON after strict validation and the bounded aggregate summary is printed to stdout. It retains ordered `transformed`, `fail_open`, or `skipped` results; paired size/invariant metrics cover transformed pairs only. Neither output contains raw content or case details.
+
 ## Offline use
 
 Benchmark entrypoints form a separate execution policy: they do not load production retry configuration and explicitly pass `maxRetries: 0`. Use a temporary output directory (and temporary `INTENT_BRIDGE_HOME` when a command needs Bridge state); production keeps its independently configurable bounded retry policy. This logical isolation uses the repository lockfile and does not require Docker.

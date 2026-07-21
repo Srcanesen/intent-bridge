@@ -113,6 +113,22 @@ Default behaviour observes every transformation (`enforcement: "observe"`), with
 
 Set `quality.enforcement` to `"review"` to gate the same candidates through the existing preview selector. In auto mode a review candidate with an interactive UI opens that selector; without UI the original message is sent unchanged, the `quality_review_required_no_ui` reason is recorded in the trace and the session entry, and no technical error notification is shown. The same `config.quality` always flows into the pipeline so the assessment is consistent between trace, latest state, and preview.
 
+## Compiler configuration
+
+The compiled task can exclude the original request text from the output. This is configured under `compiler` in the JSON config (global or trusted project layer) — no CLI control.
+
+```json
+{
+  "compiler": {
+    "includeOriginalRequest": false
+  }
+}
+```
+
+Default is `true` (original request included, backward compatible). When `false`, the `## Original user request` heading and fenced body are omitted from the compiled task. Normal user input / Pi turn behavior is unchanged. The active value is visible in the preview and `/bridge last` output (`includeOriginalRequest=true|false`).
+
+Missing `compiler` or empty `compiler: {}` both resolve to `true`. Unknown keys and non-boolean values are strictly rejected. Explicit `false` survives layer merge/patch.
+
 ## Failure and retry behavior
 
 Production calls use the selected provider/model with thinking disabled and native SDK retries disabled. The Bridge pipeline may retry once, using the same provider and model, only for transient timeout, reachability, rate-limit, or server failures. Authentication, configuration, JSON, schema, safety, compiler, response-size, and unknown failures are not retried.

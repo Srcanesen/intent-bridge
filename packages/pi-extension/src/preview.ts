@@ -1,8 +1,9 @@
 import {
-  redactSecrets,
   type FullInMemoryTransformation,
+  type PiCompilerOptions,
   type QualityConfigV1,
   type QualityDecisionReason,
+  redactSecrets,
 } from "@intent-bridge/core";
 
 export const PREVIEW_CHOICES = [
@@ -157,12 +158,18 @@ function transformationDetails(
   ].join("\n");
 }
 
+export function formatCompilerOption(compiler: PiCompilerOptions): string {
+  return `includeOriginalRequest=${compiler.includeOriginalRequest}`;
+}
+
 export function formatTransformation(
   transformation: FullInMemoryTransformation,
+  compiler?: PiCompilerOptions,
 ): string {
   const details = redactUserContent(transformationDetails(transformation));
   const assessment = redactAssessmentContent(assessmentSection(transformation));
-  return bounded(`${details}\n\n${assessment}`);
+  const header = compiler ? `${formatCompilerOption(compiler)}\n\n` : "";
+  return bounded(`${header}${details}\n\n${assessment}`);
 }
 
 export function formatLastTransformation(

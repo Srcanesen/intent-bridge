@@ -247,4 +247,95 @@ describe("PiCompilerV1", () => {
     expect(text).not.toContain("SENTINEL_SECRET");
     expect(text).not.toContain("```\nfence\n```");
   });
+
+  describe("PiCompilerOptions", () => {
+    it("defaults to includeOriginalRequest=true", () => {
+      const compiler = new PiCompilerV1();
+      const fixture = compilerFixtures[0]!;
+      const text = compiler.compile({
+        intent: fixture.intent,
+        originalText: fixture.originalText,
+        attachmentSummary: { imageCount: 0 },
+      }).text;
+      expect(text).toContain("## Original user request");
+      expect(text).toContain(fixture.originalText);
+    });
+
+    it("false omits the original request heading and fenced body entirely", () => {
+      const compiler = new PiCompilerV1({ includeOriginalRequest: false });
+      const fixture = compilerFixtures[0]!;
+      const text = compiler.compile({
+        intent: fixture.intent,
+        originalText: fixture.originalText,
+        attachmentSummary: { imageCount: 0 },
+      }).text;
+      expect(text).not.toContain("## Original user request");
+      expect(text).not.toContain(fixture.originalText);
+    });
+
+    it("true preserves dynamic backtick fence behavior", () => {
+      const compiler = new PiCompilerV1({ includeOriginalRequest: true });
+      const fixture = compilerFixtures.find(
+        (c) => c.name === "adversarial-delimiter",
+      )!;
+      const text = compiler.compile({
+        intent: fixture.intent,
+        originalText: fixture.originalText,
+        attachmentSummary: { imageCount: 0 },
+      }).text;
+      const fence = "`".repeat(5);
+      expect(text).toContain(
+        `## Original user request\n${fence}\n${fixture.originalText}\n${fence}`,
+      );
+    });
+
+    it("normal user input / Pi turn remains byte-for-byte unchanged in false mode", () => {
+      const compiler = new PiCompilerV1({ includeOriginalRequest: false });
+      // Use a fixture whose originalText is unique (not in the intent goal/tasks)
+      const fixture = compilerFixtures.find(
+        (c) => c.name === "commands-and-paths",
+      )!;
+      const text = compiler.compile({
+        intent: fixture.intent,
+        originalText: fixture.originalText,
+        attachmentSummary: { imageCount: 0 },
+      }).text;
+      // Fail-open unchanged: the non-original sections should still be present
+      expect(text).toContain("[INTENT BRIDGE TASK — v1]");
+      expect(text).toContain("Message type: initial");
+      // The original text should NOT appear since includeOriginalRequest=false
+      expect(text).not.toContain(fixture.originalText);
+    });
+
+    it("compact intent works in both modes", () => {
+      for (const includeOriginalRequest of [true, false]) {
+        const compiler = new PiCompilerV1({ includeOriginalRequest });
+        for (const name of ["steer-compact", "follow-up-compact"]) {
+          const fixture = compilerFixtures.find((c) => c.name === name)!;
+          const text = compiler.compile({
+            intent: fixture.intent,
+            originalText: fixture.originalText,
+            attachmentSummary: { imageCount: 0 },
+          }).text;
+          expect(text).toContain("[INTENT BRIDGE TASK — v1]");
+          if (includeOriginalRequest) {
+            expect(text).toContain(fixture.originalText);
+          } else {
+            expect(text).not.toContain(fixture.originalText);
+          }
+        }
+      }
+    });
+
+    it("constructor accepts partial options and merges with defaults", () => {
+      const defaultCompiler = new PiCompilerV1({});
+      expect(() =>
+        defaultCompiler.compile({
+          intent: compilerFixtures[0]!.intent,
+          originalText: compilerFixtures[0]!.originalText,
+          attachmentSummary: { imageCount: 0 },
+        }),
+      ).not.toThrow();
+    });
+  });
 });

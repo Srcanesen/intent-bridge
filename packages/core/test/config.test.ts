@@ -454,4 +454,58 @@ describe("configuration", () => {
       expect(parsed.quality.minConfidence).toBe(value);
     }
   });
+
+  describe("compiler config", () => {
+    it("defaults includeOriginalRequest to true when missing", () => {
+      const { compiler, ...rest } = DEFAULT_BRIDGE_CONFIG;
+      const parsed = parseBridgeConfig(rest);
+      expect(parsed.compiler.includeOriginalRequest).toBe(true);
+    });
+
+    it("defaults includeOriginalRequest to true when compiler is empty object", () => {
+      const parsed = parseBridgeConfig({
+        ...DEFAULT_BRIDGE_CONFIG,
+        compiler: {},
+      });
+      expect(parsed.compiler.includeOriginalRequest).toBe(true);
+    });
+
+    it("resolves explicit false and preserves through merge", () => {
+      const parsed = parseBridgeConfig({
+        ...DEFAULT_BRIDGE_CONFIG,
+        compiler: { includeOriginalRequest: false },
+      });
+      expect(parsed.compiler.includeOriginalRequest).toBe(false);
+
+      const merged = mergeBridgeConfig(
+        { compiler: { includeOriginalRequest: false } },
+        { enabled: true },
+      );
+      expect(merged.compiler.includeOriginalRequest).toBe(false);
+    });
+
+    it("rejects unknown compiler keys", () => {
+      expect(
+        bridgeError(() =>
+          parseBridgeConfig({
+            ...DEFAULT_BRIDGE_CONFIG,
+            compiler: { unknownKey: true },
+          }),
+        ).code,
+      ).toBe("CONFIG_INVALID");
+    });
+
+    it("rejects non-boolean includeOriginalRequest values", () => {
+      for (const value of ["true", 1, null, "yes"]) {
+        expect(
+          bridgeError(() =>
+            parseBridgeConfig({
+              ...DEFAULT_BRIDGE_CONFIG,
+              compiler: { includeOriginalRequest: value },
+            }),
+          ).code,
+        ).toBe("CONFIG_INVALID");
+      }
+    });
+  });
 });

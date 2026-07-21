@@ -4,6 +4,11 @@
 
 ### Added
 
+- `PiCompilerOptions` with `includeOriginalRequest` (default `true`). `PiCompilerV1` constructor accepts partial options. When `false`, the entire `## Original user request` heading and fenced body is omitted from compiled output; normal user input / Pi turn remains byte-for-byte unchanged.
+- Bridge config `compiler.includeOriginalRequest` field with strict validation (unknown keys / non-boolean rejected). Missing `compiler` or empty `compiler: {}` resolve to `true`. Explicit `false` survives layer merge/patch.
+- Extension wiring: `PiCompilerV1` constructed with effective `config.compiler`. Preview and `/bridge last` display `includeOriginalRequest=true|false` using existing bounded/redacted formatting (no raw request duplication or cap relaxation).
+- Isolated fixed-corpus Compiler A/B benchmark (`CompilerAbReportV1` with strict parser, `runCompilerAbBenchmark`, `evaluateCompilerAbInvariants`). One provider interpretation call per case followed by two local compiles (true/false); optional evaluator called exactly twice per transformed case (one per mode). Reports character (JS string length) and UTF-8 byte deltas, mode-aware invariants, and separate provider/evaluator/compile latency fields.
+- `--compiler-ab` opt-in flag on `packages/pi-extension/scripts/benchmark-native-corpus.mjs`. Without the flag, behavior/output/report remains exactly current. With the flag, requires live-test gate, runs A/B path, writes sanitized A/B report, and prints bounded aggregate summary. Help/cost notice discloses one interpretation call + up to two evaluator calls per transformed case; characters/bytes are not token counts; downstream Pi coding outcome is not measured.
 - Pi host completion capability adapter with a one-time public-delegate-first/runtime-fallback resolution, bounded capability-source diagnostics, exact `0.80.10` support metadata, pinned compatibility CI, and scheduled non-blocking latest observation.
 - Fail-safe pending transformation correlation for the Pi extension, using bounded SHA-256 prompt/image-count fingerprints, FIFO occurrence outcomes, expiry, capacity quarantine, and lifecycle cleanup.
 - Deterministic core quality assessment with bounded review reasons, backward-compatible configuration defaults, and privacy-safe trace metadata.

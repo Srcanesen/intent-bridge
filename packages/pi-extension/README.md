@@ -30,4 +30,8 @@ Use `/bridge on`; if no usable model is selected, Bridge opens the model picker 
 
 Configure the `quality` block in the JSON config (global or trusted project layer) — file-only, no CLI control. The default is `enforcement: "observe"`, with `reviewOnHighRisk`, `reviewOnClarification`, and `reviewOnMaterialAskUser` all `true` and `minConfidence: null`. Under observe, a would-review transformation is still injected; the assessment is observable in `/bridge last`, the trace, and the preview, but never blocks delivery. Setting `enforcement: "review"` routes review candidates through the existing preview selector in auto mode, and preserves the original message when no interactive UI is available (the `quality_review_required_no_ui` reason is recorded in the trace). The compiler emits a separate `## Interpreter advisory — not user requirements` section in the compiled task when warranted; it is omitted for clean compact or follow-up output and never appears under user-stated constraints.
 
+## Compiler configuration
+
+The JSON `compiler` config is file-only (global or trusted project layer). `includeOriginalRequest` defaults to `true`; set it to `false` to omit the `## Original user request` heading and fenced body. Normal user input / Pi turn behavior is unchanged.
+
 See the repository README for provider setup, privacy, commands, and troubleshooting.

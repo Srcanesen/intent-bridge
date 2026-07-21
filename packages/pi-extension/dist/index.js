@@ -7,6 +7,7 @@ var __export = (target, all) => {
 import { randomUUID } from "node:crypto";
 import { existsSync } from "node:fs";
 import { dirname as dirname3, join as join4 } from "node:path";
+import { CONFIG_DIR_NAME } from "@earendil-works/pi-coding-agent";
 
 import { mkdir, open, readFile, rename, unlink, writeFile } from "node:fs/promises";
 import { homedir } from "node:os";
@@ -63,6 +64,9 @@ function assessQuality(intent, config) {
   };
 }
 
+var DEFAULT_COMPILER_CONFIG = {
+  includeOriginalRequest: true
+};
 var DEFAULT_BRIDGE_CONFIG = {
   version: 1,
   enabled: false,
@@ -72,7 +76,8 @@ var DEFAULT_BRIDGE_CONFIG = {
   context: { enabled: true, maxCharacters: 12e3, maxFileCharacters: 6e3 },
   logging: { mode: "metadata", retentionDays: 30 },
   quality: { ...DEFAULT_QUALITY_CONFIG },
-  retry: { maxRetries: 1, baseDelayMs: 250, totalBudgetMs: 45e3 }
+  retry: { maxRetries: 1, baseDelayMs: 250, totalBudgetMs: 45e3 },
+  compiler: { ...DEFAULT_COMPILER_CONFIG }
 };
 function invalid(message = "The bridge configuration is invalid.") {
   throw new BridgeError({
@@ -227,9 +232,20 @@ function profile(value) {
   }
   return result;
 }
+function compilerConfig(value) {
+  const cc = object(value);
+  const allowed = /* @__PURE__ */ new Set(["includeOriginalRequest"]);
+  for (const key of Object.keys(cc)) {
+    if (!allowed.has(key))
+      invalid();
+  }
+  return {
+    includeOriginalRequest: cc.includeOriginalRequest === void 0 ? true : bool(cc.includeOriginalRequest)
+  };
+}
 function parseBridgeConfig(value) {
   const c = object(value);
-  exact(c, [
+  const allowedKeys = [
     "version",
     "enabled",
     "mode",
@@ -239,7 +255,10 @@ function parseBridgeConfig(value) {
     "logging",
     "quality",
     "retry"
-  ]);
+  ];
+  if ("compiler" in c)
+    allowedKeys.push("compiler");
+  exact(c, allowedKeys);
   if (c.version !== 1)
     invalid();
   if (!["auto", "preview", "off"].includes(string(c.mode)))
@@ -250,6 +269,7 @@ function parseBridgeConfig(value) {
   exact(logging, ["mode", "retentionDays"]);
   if (!["metadata", "full", "off"].includes(string(logging.mode)))
     invalid();
+  const parsedCompiler = c.compiler === void 0 ? { ...DEFAULT_COMPILER_CONFIG } : compilerConfig(c.compiler);
   const quality = object(c.quality);
   exact(quality, [
     "enforcement",
@@ -283,7 +303,8 @@ function parseBridgeConfig(value) {
       retentionDays: positive(logging.retentionDays)
     },
     quality: parsedQuality,
-    retry: c.retry === void 0 ? DEFAULT_BRIDGE_CONFIG.retry : retry(c.retry)
+    retry: c.retry === void 0 ? DEFAULT_BRIDGE_CONFIG.retry : retry(c.retry),
+    compiler: parsedCompiler
   };
   if (result.activeProfile && !result.profiles[result.activeProfile])
     invalid();
@@ -5777,6 +5798,9 @@ function parseIntentDocumentV1(input, options = {}) {
   };
 }
 
+var DEFAULT_COMPILER_OPTIONS = {
+  includeOriginalRequest: true
+};
 var ADVISORY_HEADING = "Interpreter advisory \u2014 not user requirements";
 var ADVISORY_BUDGET = 1e3;
 var fullGuidance = (responseLanguage2) => [
@@ -5851,6 +5875,10 @@ function advisoryContent(intent, assessment) {
 [truncated]`;
 }
 var PiCompilerV1 = class {
+  options;
+  constructor(options) {
+    this.options = { ...DEFAULT_COMPILER_OPTIONS, ...options };
+  }
   compile({ intent, originalText, attachmentSummary, assessment }) {
     const responseLanguage2 = intent.responseLanguage.name ? `${intent.responseLanguage.name} (${intent.responseLanguage.code})` : intent.responseLanguage.code;
     const compact = intent.messageType === "steer" || intent.messageType === "follow_up";
@@ -5871,9 +5899,11 @@ ${list(intent.globalConstraints)}` : void 0,
       attachmentSummary.imageCount === 0 ? void 0 : section("Attached material", attachmentSummary.imageCount === 1 ? "The user attached 1 image. Inspect it directly; the bridge did not analyze it." : `The user attached ${attachmentSummary.imageCount} images. Inspect them directly; the bridge did not analyze them.`),
       section(ADVISORY_HEADING, assessment ? advisoryContent(intent, assessment) : void 0),
       section("Execution guidance", list((compact ? compactGuidance : fullGuidance)(responseLanguage2))),
-      section("Original user request", `${fence}
+      ...this.options.includeOriginalRequest ? [
+        section("Original user request", `${fence}
 ${originalText}
 ${fence}`)
+      ] : []
     ].filter((content) => content !== void 0);
     return {
       compilerVersion: "pi-v2",
@@ -6607,8 +6637,6 @@ Output mode: ${mode}. Return JSON only.${schemaInstruction}`;
   }
 };
 
-import { CONFIG_DIR_NAME } from "@earendil-works/pi-coding-agent";
-
 import { createHash as createHash3 } from "node:crypto";
 var DEFAULT_PENDING_TASK_TTL_MS = 5 * 60 * 1e3;
 var DEFAULT_PENDING_TASK_CAPACITY = 20;
@@ -6729,199 +6757,6 @@ var PendingTaskQueue = class {
     });
   }
 };
-
-var PREVIEW_CHOICES = [
-  "Send transformed",
-  "Send original",
-  "Cancel"
-];
-var CAP = 5e3;
-var LIST_CAP = 10;
-var REASON_CAP = 120;
-function bounded(text) {
-  return text.length <= CAP ? text : `${text.slice(0, CAP - 14)}
-[truncated]`;
-}
-function redactUserContent(text) {
-  return redactSecrets(text).text;
-}
-var QUALITY_DECISION_REASONS = [
-  "high_risk",
-  "clarification_recommended",
-  "material_ambiguity_requires_user",
-  "confidence_below_threshold"
-];
-function redactAssessmentContent(text) {
-  const protectedReasons = QUALITY_DECISION_REASONS.map((reason, index) => ({
-    reason,
-    placeholder: `[QUALITY_REASON_${index}]`
-  }));
-  let result = text;
-  for (const { reason, placeholder } of protectedReasons)
-    result = result.replaceAll(reason, placeholder);
-  result = redactSecrets(result).text;
-  for (const { reason, placeholder } of protectedReasons)
-    result = result.replaceAll(placeholder, reason);
-  return result;
-}
-function list2(items) {
-  return items.length ? items.map((item) => `- ${item}`).join("\n") : "- None";
-}
-function safeReason(reason) {
-  const cleaned = redactUserContent(reason).replace(/[\r\n]+/g, " ");
-  return cleaned.length <= REASON_CAP ? cleaned : `${cleaned.slice(0, REASON_CAP - 14)}[truncated]`;
-}
-function boundedReasons(reasons) {
-  return list2(reasons.slice(0, LIST_CAP).map(safeReason));
-}
-function qualityDecisionReasonText(reasons) {
-  if (reasons.length === 0)
-    return "- None";
-  return list2(reasons.map((reason) => reason.replace(/[\r\n]+/g, " ")));
-}
-function materialAskUser(transformation) {
-  return transformation.intent.ambiguities.filter((ambiguity2) => ambiguity2.material && ambiguity2.preferredResolution === "ask_user");
-}
-function qualityEnforcementLine(config) {
-  return `Enforcement: ${config.enforcement}`;
-}
-function assessmentSection(transformation) {
-  const { intent, assessment, qualityConfig: qualityConfig2 } = transformation;
-  const askUser = materialAskUser(transformation);
-  const riskLine = intent.risk.level === "low" && intent.risk.reasons.length === 0 ? "- None" : list2([
-    `level=${intent.risk.level}`,
-    ...intent.risk.reasons.slice(0, LIST_CAP).map(safeReason)
-  ]);
-  const clarificationLine = intent.clarification.recommended ? `recommended \u2014 ${safeReason(intent.clarification.reason ?? "no reason provided")}` : "- None";
-  return [
-    "## Quality assessment",
-    `Outcome: ${assessment.outcome}`,
-    `Policy: ${assessment.policyVersion}`,
-    `Observed confidence: ${assessment.observedConfidence}`,
-    `Decision reasons: ${qualityDecisionReasonText(assessment.reasons)}`,
-    `Active ${qualityEnforcementLine(qualityConfig2)}`,
-    "\n## Risk",
-    riskLine,
-    "\n## Clarification",
-    clarificationLine,
-    "\n## Material ask_user ambiguities",
-    list2(askUser.slice(0, LIST_CAP).map((ambiguity2) => safeReason(ambiguity2.description)))
-  ].join("\n");
-}
-function transformationDetails(transformation) {
-  const intent = transformation.intent;
-  const tasks = intent.tasks.map((task2, index) => `${index + 1}. ${task2.objective}${task2.scope.length ? `
-   Scope: ${task2.scope.join("; ")}` : ""}${task2.constraints.length ? `
-   Constraints: ${task2.constraints.join("; ")}` : ""}`);
-  return [
-    "INTENT BRIDGE PREVIEW",
-    "\n## Source language",
-    intent.sourceLanguage.name ? `${intent.sourceLanguage.name} (${intent.sourceLanguage.code})` : intent.sourceLanguage.code,
-    "\n## Interpreted goal",
-    intent.goal,
-    "\n## Tasks",
-    list2(tasks),
-    "\n## Global constraints",
-    list2(intent.globalConstraints),
-    "\n## Task constraints",
-    list2(intent.tasks.flatMap((task2) => task2.constraints)),
-    "\n## Assumptions",
-    list2(intent.assumptions.map((assumption2) => assumption2.text)),
-    "\n## Ambiguities",
-    list2(intent.ambiguities.map((ambiguity2) => ambiguity2.description)),
-    "\n## Quality",
-    `Confidence: ${intent.confidence}`,
-    `Risk level: ${intent.risk.level}`,
-    `Risk reasons: ${intent.risk.reasons.length === 0 ? "- None" : boundedReasons(intent.risk.reasons)}`,
-    `Clarification recommended: ${intent.clarification.recommended ? `yes \u2014 ${safeReason(intent.clarification.reason ?? "no reason provided")}` : "no"}`,
-    `Material ask_user ambiguities: ${materialAskUser(transformation).length === 0 ? "- None" : list2(materialAskUser(transformation).slice(0, LIST_CAP).map((ambiguity2) => safeReason(ambiguity2.description)))}`,
-    "\n## English compiled task",
-    transformation.compiledTask.text
-  ].join("\n");
-}
-function formatTransformation(transformation) {
-  const details = redactUserContent(transformationDetails(transformation));
-  const assessment = redactAssessmentContent(assessmentSection(transformation));
-  return bounded(`${details}
-
-${assessment}`);
-}
-function formatLastTransformation(transformation, metadata) {
-  const details = redactUserContent(`${metadata}
-
-Original request:
-${transformation.originalText}
-
-${transformationDetails(transformation)}`);
-  const assessment = redactAssessmentContent(assessmentSection(transformation));
-  return bounded(`${details}
-
-${assessment}`);
-}
-
-var smallTalk = /* @__PURE__ */ new Set([
-  "merhaba",
-  "selam",
-  "selamlar",
-  "g\xFCnayd\u0131n",
-  "iyi ak\u015Famlar",
-  "nas\u0131ls\u0131n",
-  "te\u015Fekk\xFCrler",
-  "sa\u011F ol",
-  "tamam",
-  "g\xF6r\xFC\u015F\xFCr\xFCz",
-  "hi",
-  "hello",
-  "hey",
-  "good morning",
-  "how are you",
-  "thanks",
-  "thank you",
-  "ok",
-  "okay",
-  "bye",
-  "hola",
-  "buenos d\xEDas",
-  "c\xF3mo est\xE1s",
-  "gracias",
-  "vale",
-  "adi\xF3s"
-]);
-function isSmallTalk(text) {
-  return smallTalk.has(text.trim().toLocaleLowerCase().replace(/[.!?,…]+$/u, "").trim());
-}
-function eligibility(event, config) {
-  if (event.images?.length && !event.text.trim())
-    return { eligible: false, reason: "image_only" };
-  if (!event.text.trim())
-    return { eligible: false, reason: "empty" };
-  if (!event.images?.length && isSmallTalk(event.text))
-    return { eligible: false, reason: "small_talk" };
-  if (event.text.startsWith("/"))
-    return { eligible: false, reason: "command" };
-  if (event.text.startsWith("!"))
-    return { eligible: false, reason: "shell" };
-  if (event.source === "extension")
-    return { eligible: false, reason: "extension" };
-  if (event.source !== "interactive" && event.source !== "rpc")
-    return { eligible: false, reason: "unsupported" };
-  if (!config?.enabled)
-    return { eligible: false, reason: "disabled" };
-  if (config.mode === "off")
-    return { eligible: false, reason: "mode" };
-  return { eligible: true };
-}
-function messageType(event, hasPriorUserMessage2) {
-  if (event.streamingBehavior === "steer")
-    return "steer";
-  if (event.streamingBehavior === "followUp")
-    return "follow_up";
-  try {
-    return hasPriorUserMessage2() ? "normal" : "initial";
-  } catch {
-    return "normal";
-  }
-}
 
 function isCompatiblePiModel(model) {
   return model.input?.includes("text") === true && Number.isFinite(model.contextWindow) && (model.contextWindow ?? 0) > 0 && Number.isFinite(model.maxTokens) && (model.maxTokens ?? 0) > 0 && !(model.reasoning === true && model.thinkingLevelMap?.off === null);
@@ -7168,6 +7003,205 @@ function createPiProvider(registry, model, options = {}) {
   return new PiNativeProvider(registry, model, typeof options === "string" ? { reasoning: options } : options);
 }
 
+var PREVIEW_CHOICES = [
+  "Send transformed",
+  "Send original",
+  "Cancel"
+];
+var CAP = 5e3;
+var LIST_CAP = 10;
+var REASON_CAP = 120;
+function bounded(text) {
+  return text.length <= CAP ? text : `${text.slice(0, CAP - 14)}
+[truncated]`;
+}
+function redactUserContent(text) {
+  return redactSecrets(text).text;
+}
+var QUALITY_DECISION_REASONS = [
+  "high_risk",
+  "clarification_recommended",
+  "material_ambiguity_requires_user",
+  "confidence_below_threshold"
+];
+function redactAssessmentContent(text) {
+  const protectedReasons = QUALITY_DECISION_REASONS.map((reason, index) => ({
+    reason,
+    placeholder: `[QUALITY_REASON_${index}]`
+  }));
+  let result = text;
+  for (const { reason, placeholder } of protectedReasons)
+    result = result.replaceAll(reason, placeholder);
+  result = redactSecrets(result).text;
+  for (const { reason, placeholder } of protectedReasons)
+    result = result.replaceAll(placeholder, reason);
+  return result;
+}
+function list2(items) {
+  return items.length ? items.map((item) => `- ${item}`).join("\n") : "- None";
+}
+function safeReason(reason) {
+  const cleaned = redactUserContent(reason).replace(/[\r\n]+/g, " ");
+  return cleaned.length <= REASON_CAP ? cleaned : `${cleaned.slice(0, REASON_CAP - 14)}[truncated]`;
+}
+function boundedReasons(reasons) {
+  return list2(reasons.slice(0, LIST_CAP).map(safeReason));
+}
+function qualityDecisionReasonText(reasons) {
+  if (reasons.length === 0)
+    return "- None";
+  return list2(reasons.map((reason) => reason.replace(/[\r\n]+/g, " ")));
+}
+function materialAskUser(transformation) {
+  return transformation.intent.ambiguities.filter((ambiguity2) => ambiguity2.material && ambiguity2.preferredResolution === "ask_user");
+}
+function qualityEnforcementLine(config) {
+  return `Enforcement: ${config.enforcement}`;
+}
+function assessmentSection(transformation) {
+  const { intent, assessment, qualityConfig: qualityConfig2 } = transformation;
+  const askUser = materialAskUser(transformation);
+  const riskLine = intent.risk.level === "low" && intent.risk.reasons.length === 0 ? "- None" : list2([
+    `level=${intent.risk.level}`,
+    ...intent.risk.reasons.slice(0, LIST_CAP).map(safeReason)
+  ]);
+  const clarificationLine = intent.clarification.recommended ? `recommended \u2014 ${safeReason(intent.clarification.reason ?? "no reason provided")}` : "- None";
+  return [
+    "## Quality assessment",
+    `Outcome: ${assessment.outcome}`,
+    `Policy: ${assessment.policyVersion}`,
+    `Observed confidence: ${assessment.observedConfidence}`,
+    `Decision reasons: ${qualityDecisionReasonText(assessment.reasons)}`,
+    `Active ${qualityEnforcementLine(qualityConfig2)}`,
+    "\n## Risk",
+    riskLine,
+    "\n## Clarification",
+    clarificationLine,
+    "\n## Material ask_user ambiguities",
+    list2(askUser.slice(0, LIST_CAP).map((ambiguity2) => safeReason(ambiguity2.description)))
+  ].join("\n");
+}
+function transformationDetails(transformation) {
+  const intent = transformation.intent;
+  const tasks = intent.tasks.map((task2, index) => `${index + 1}. ${task2.objective}${task2.scope.length ? `
+   Scope: ${task2.scope.join("; ")}` : ""}${task2.constraints.length ? `
+   Constraints: ${task2.constraints.join("; ")}` : ""}`);
+  return [
+    "INTENT BRIDGE PREVIEW",
+    "\n## Source language",
+    intent.sourceLanguage.name ? `${intent.sourceLanguage.name} (${intent.sourceLanguage.code})` : intent.sourceLanguage.code,
+    "\n## Interpreted goal",
+    intent.goal,
+    "\n## Tasks",
+    list2(tasks),
+    "\n## Global constraints",
+    list2(intent.globalConstraints),
+    "\n## Task constraints",
+    list2(intent.tasks.flatMap((task2) => task2.constraints)),
+    "\n## Assumptions",
+    list2(intent.assumptions.map((assumption2) => assumption2.text)),
+    "\n## Ambiguities",
+    list2(intent.ambiguities.map((ambiguity2) => ambiguity2.description)),
+    "\n## Quality",
+    `Confidence: ${intent.confidence}`,
+    `Risk level: ${intent.risk.level}`,
+    `Risk reasons: ${intent.risk.reasons.length === 0 ? "- None" : boundedReasons(intent.risk.reasons)}`,
+    `Clarification recommended: ${intent.clarification.recommended ? `yes \u2014 ${safeReason(intent.clarification.reason ?? "no reason provided")}` : "no"}`,
+    `Material ask_user ambiguities: ${materialAskUser(transformation).length === 0 ? "- None" : list2(materialAskUser(transformation).slice(0, LIST_CAP).map((ambiguity2) => safeReason(ambiguity2.description)))}`,
+    "\n## English compiled task",
+    transformation.compiledTask.text
+  ].join("\n");
+}
+function formatCompilerOption(compiler) {
+  return `includeOriginalRequest=${compiler.includeOriginalRequest}`;
+}
+function formatTransformation(transformation, compiler) {
+  const details = redactUserContent(transformationDetails(transformation));
+  const assessment = redactAssessmentContent(assessmentSection(transformation));
+  const header = compiler ? `${formatCompilerOption(compiler)}
+
+` : "";
+  return bounded(`${header}${details}
+
+${assessment}`);
+}
+function formatLastTransformation(transformation, metadata) {
+  const details = redactUserContent(`${metadata}
+
+Original request:
+${transformation.originalText}
+
+${transformationDetails(transformation)}`);
+  const assessment = redactAssessmentContent(assessmentSection(transformation));
+  return bounded(`${details}
+
+${assessment}`);
+}
+
+var smallTalk = /* @__PURE__ */ new Set([
+  "merhaba",
+  "selam",
+  "selamlar",
+  "g\xFCnayd\u0131n",
+  "iyi ak\u015Famlar",
+  "nas\u0131ls\u0131n",
+  "te\u015Fekk\xFCrler",
+  "sa\u011F ol",
+  "tamam",
+  "g\xF6r\xFC\u015F\xFCr\xFCz",
+  "hi",
+  "hello",
+  "hey",
+  "good morning",
+  "how are you",
+  "thanks",
+  "thank you",
+  "ok",
+  "okay",
+  "bye",
+  "hola",
+  "buenos d\xEDas",
+  "c\xF3mo est\xE1s",
+  "gracias",
+  "vale",
+  "adi\xF3s"
+]);
+function isSmallTalk(text) {
+  return smallTalk.has(text.trim().toLocaleLowerCase().replace(/[.!?,…]+$/u, "").trim());
+}
+function eligibility(event, config) {
+  if (event.images?.length && !event.text.trim())
+    return { eligible: false, reason: "image_only" };
+  if (!event.text.trim())
+    return { eligible: false, reason: "empty" };
+  if (!event.images?.length && isSmallTalk(event.text))
+    return { eligible: false, reason: "small_talk" };
+  if (event.text.startsWith("/"))
+    return { eligible: false, reason: "command" };
+  if (event.text.startsWith("!"))
+    return { eligible: false, reason: "shell" };
+  if (event.source === "extension")
+    return { eligible: false, reason: "extension" };
+  if (event.source !== "interactive" && event.source !== "rpc")
+    return { eligible: false, reason: "unsupported" };
+  if (!config?.enabled)
+    return { eligible: false, reason: "disabled" };
+  if (config.mode === "off")
+    return { eligible: false, reason: "mode" };
+  return { eligible: true };
+}
+function messageType(event, hasPriorUserMessage2) {
+  if (event.streamingBehavior === "steer")
+    return "steer";
+  if (event.streamingBehavior === "followUp")
+    return "follow_up";
+  try {
+    return hasPriorUserMessage2() ? "normal" : "initial";
+  } catch {
+    return "normal";
+  }
+}
+
 var usage = "Usage: /bridge on|off|model [provider/model-id|model-id]|auto|preview [off]|status|test|last|rate good|bad|logs|privacy";
 var bridgeArgumentItems = [
   "on",
@@ -7335,7 +7369,7 @@ function createIntentBridgeExtension(pi, dependencies = {}) {
         configDirName: CONFIG_DIR_NAME
       });
       const buffered = new BufferedTraceSink();
-      const pipeline = new InterpretationPipeline(model ? createPiNativeProvider(ctx.modelRegistry, model, { capabilityDiagnostic }) : createProvider(requireProfile(profile2)), new PiCompilerV1(), buffered, now);
+      const pipeline = new InterpretationPipeline(model ? createPiNativeProvider(ctx.modelRegistry, model, { capabilityDiagnostic }) : createProvider(requireProfile(profile2)), new PiCompilerV1(config.compiler), buffered, now);
       const result = await pipeline.run({
         traceId,
         receivedAt: timestamp,
@@ -7412,9 +7446,7 @@ function createIntentBridgeExtension(pi, dependencies = {}) {
       }
       let choice;
       try {
-        choice = await ctx.ui.select(formatTransformation(latest), [
-          ...PREVIEW_CHOICES
-        ]);
+        choice = await ctx.ui.select(formatTransformation(latest, config.compiler), [...PREVIEW_CHOICES]);
       } catch {
         choice = void 0;
         if (buffered.trace) {
@@ -7592,7 +7624,7 @@ function createIntentBridgeExtension(pi, dependencies = {}) {
             notify(ctx, "Intent Bridge: no transformation in this session.");
             return;
           }
-          notify(ctx, formatLastTransformation(latest, `Status: ${state.lastStatus}; provider=${metadata.providerProfileId}; model=${metadata.model}; mode=${metadata.mode}; latency=${metadata.latencyMs === void 0 ? "unknown" : `${metadata.latencyMs}ms`}; rating=${state.rating ?? "none"}; timestamp=${latest.timestamp}.`));
+          notify(ctx, formatLastTransformation(latest, `Status: ${state.lastStatus}; provider=${metadata.providerProfileId}; model=${metadata.model}; mode=${metadata.mode}; latency=${metadata.latencyMs === void 0 ? "unknown" : `${metadata.latencyMs}ms`}; rating=${state.rating ?? "none"}; includeOriginalRequest=${config.compiler.includeOriginalRequest}; timestamp=${latest.timestamp}.`));
           return;
         }
         if (command === "rate") {
