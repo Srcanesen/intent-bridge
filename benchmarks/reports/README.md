@@ -14,10 +14,15 @@ human owner review; the limitations are recorded below.
 | `2026-07-20-mimo-v2.5-sol-medium-v2.json` | `pi:opencode-go:mimo-v2.5` | `mimo-v2.5` | rejected comparison profile (Report V2) |
 | `2026-07-20-deepseek-vs-mimo-sol-medium-v2.json` | — | — | sanitized side-by-side comparison |
 | `2026-07-21-prompt-transformation-v1-smoke.json` | `pi:opencode-go-gateway:deepseek-v4-flash` | `deepseek-v4-flash` | pre-registered TR/EN smoke stop evidence |
+| `2026-07-21-source-grounded-evidence-v1-smoke.json` | `pi:opencode-go-gateway:deepseek-v4-flash` | `deepseek-v4-flash` | kaynak kanıtı smoke stop kanıtı |
 
-All four files are sanitized evidence artifacts. Their SHA-256 was
+All five files are sanitized evidence artifacts. Their SHA-256 was
 verified when they were prepared, and their committed file mode is
 `0644`.
+
+## Kaynağa dayalı kanıt v1 smoke kararı
+
+Dondurulmuş sekiz vakalık smoke çalışmasının tamamı dış sandbox içinde yürütüldü. Sekiz aday çağrısının tamamı `INTENT_SCHEMA_INVALID` ile byte-koruyan fail-open oldu; değerlendirici çağrısı yapılmadı ve 80 vakalık doğrulayıcı aşama başlatılmadı. Bir ek, izole aday teşhis çağrısı ortak şema uyumsuzluğunu doğruladı. Ham paketler Türkçe inceleme sonrasında silindi; yalnız strict parser ve secret scan'den geçen sanitize toplu sonuç saklandı. Dosyanın hazırlanırken doğrulanan SHA-256 değeri `b801aaac295d53199737b9573d8278693e929fce0962f708634bea8b9ed39150`dir.
 
 ## Prompt-transformation v1 smoke decision
 
