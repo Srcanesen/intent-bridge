@@ -110,6 +110,10 @@ Tüm inceleme, onay soruları ve kararlar **Türkçe**dir.
 - Yalnızca toplu (aggregate) sonuçlar commit edilir
 - **Yasak ham içerik anahtarları:** prompt, input, originalText, intent, compiledTask, caseIds, caseTitles, credentials, providerErrorBodies
 
+## İlk Yürütme Durumu
+
+İlk onaylı smoke girişimi geçerli benchmark kanıtı üretemedi. Sekiz aday çağrısı tamamlandı; üç dönüşüm fail-open olduğu için yalnızca beş değerlendirici çağrısı yapıldı. Ardından Report V2 sözleşmesinin `pi-benchmark-evaluator-v4` değerini kabul etmemesi nedeniyle kaynak rapor ve inceleme paketi yazılamadı. Toplam 13 çıkarım çağrısı kullanıldı, 80 vakalık onaylayıcı çalışma başlatılmadı ve başarı/başarısızlık sonucu ilan edilmedi. Bu kayıt operasyonel sapma bilgisidir; aggregate sonuç değildir.
+
 ## Sınırlamalar
 
 1. Bu protokol, yalnızca `766ed0e` commit'inde mevcut olan düzeltmeyi test eder. Gelecekteki değişiklikler yeniden doğrulama gerektirir.
