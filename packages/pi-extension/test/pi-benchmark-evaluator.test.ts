@@ -54,7 +54,7 @@ describe("Pi benchmark evaluator", () => {
     expect(result).toEqual(evaluation);
     expect(JSON.stringify(result)).not.toContain("SENTINEL_EXPLANATORY_TEXT");
     expect(PI_BENCHMARK_EVALUATOR_PROMPT_VERSION).toBe(
-      "pi-benchmark-evaluator-v3",
+      "pi-benchmark-evaluator-v4",
     );
     expect(completeSimple).toHaveBeenCalledTimes(1);
     expect(completeSimple).toHaveBeenCalledWith(
@@ -89,7 +89,7 @@ describe("Pi benchmark evaluator", () => {
       "evaluatorPromptVersion is instruction metadata only and MUST NOT be copied into output.",
     );
     expect(systemPrompt).toContain(
-      "Current evaluatorPromptVersion instruction metadata: pi-benchmark-evaluator-v3",
+      "Current evaluatorPromptVersion instruction metadata: pi-benchmark-evaluator-v4",
     );
     expect(systemPrompt).toContain("Deterministic intentAltered rubric:");
     expect(systemPrompt).toContain(
@@ -106,6 +106,18 @@ describe("Pi benchmark evaluator", () => {
     );
     expect(systemPrompt).toContain(
       "Repetition of the same requirement across goals or constraints is harmless and is not a duplication alteration",
+    );
+    expect(systemPrompt).toContain(
+      "The following patterns MUST be classified as material alteration when not explicitly present in the source request or project context:",
+    );
+    expect(systemPrompt).toContain(
+      "interpreter or output-envelope instructions copied as executable user constraints",
+    );
+    expect(systemPrompt).toContain(
+      "broadening a single field, component, or request to apply to all fields, all user content, or the entire system",
+    );
+    expect(systemPrompt).toContain(
+      "mandating a specific implementation mechanism when the source left the approach open",
     );
     const promptInput = completeSimple.mock.calls[0]?.[1].messages[0].content;
     expect(promptInput).toContain("SENTINEL_REQUEST");

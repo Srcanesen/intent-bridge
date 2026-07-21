@@ -21,6 +21,11 @@ import {
   parsePtV1Manifest,
   parsePtV1GoldAnnotation,
 } from "./pt-v1-validator.js";
+import {
+  parseProviderLeakageManifestV1,
+  parseProviderLeakageAggregateResultV1,
+  sha256FileBytes,
+} from "./provider-leakage-diagnostic-v1.js";
 import { summarizePtV1 } from "./pt-v1-summarizer.js";
 
 const help = `benchmark validate-fixtures [--cases dir]
@@ -31,6 +36,8 @@ benchmark export-traces trace.jsonl --out dir [--trace-id id]
 benchmark pt-v1 validate [--cases dir] [--smoke dir] [--manifest path] [--annotations path] [--smoke-annotations path]
 benchmark pt-v1 audit [--cases dir] [--smoke dir] [--manifest path] [--annotations path] [--smoke-annotations path]
 benchmark pt-v1 summarize <report.json> <manifest.json> <annotations.json> [--out file]
+benchmark plv validate-manifest [--manifest path]       Validate the frozen PLV manifest and print its exact-byte SHA-256
+benchmark plv validate-aggregate <result.json>          Validate a sanitized PLV aggregate against the frozen protocol
 `;
 const value = (args: string[], key: string, fallback?: string) => {
   const index = args.indexOf(key);
@@ -221,6 +228,34 @@ export async function main(input = process.argv.slice(2)) {
         concurrency,
         results,
       }),
+    );
+    return;
+  }
+  if (command === "plv" && args[1] === "validate-manifest") {
+    const manifestPath = value(
+      args,
+      "--manifest",
+      "benchmarks/provider-leakage-diagnostic-v1/manifest.json",
+    );
+    if (!manifestPath) throw new Error("BENCHMARK_ARGUMENTS_INVALID");
+    const manifestBytes = await readFile(manifestPath);
+    const manifest = parseProviderLeakageManifestV1(
+      JSON.parse(manifestBytes.toString("utf8")) as unknown,
+    );
+    console.log(
+      `PLV manifest valid: ${manifest.benchmarkId} (${manifest.subjectCommit.slice(0, 7)}; file SHA-256 ${sha256FileBytes(manifestBytes)})`,
+    );
+    return;
+  }
+  if (command === "plv" && args[1] === "validate-aggregate") {
+    const resultPath = args[2];
+    if (!resultPath || resultPath.startsWith("--"))
+      throw new Error("BENCHMARK_ARGUMENTS_INVALID");
+    const result = parseProviderLeakageAggregateResultV1(
+      await readJson(resultPath),
+    );
+    console.log(
+      `PLV aggregate valid: ${result.benchmarkId} (${result.subjectCommit.slice(0, 7)})`,
     );
     return;
   }

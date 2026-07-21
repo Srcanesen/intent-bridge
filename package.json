@@ -30,7 +30,7 @@
     "benchmark:pi-local": "corepack pnpm build && node packages/pi-extension/scripts/benchmark-local-latency.mjs",
     "benchmark:pi-corpus": "corepack pnpm build && node packages/pi-extension/scripts/benchmark-native-corpus.mjs",
     "benchmark:implementation-outcome": "node packages/pi-extension/scripts/benchmark-implementation-outcome.mjs",
-    "benchmark:validate:offline": "corepack pnpm build && node packages/benchmark/dist/cli.js validate-fixtures --cases benchmarks/cases && node packages/pi-extension/scripts/benchmark-implementation-outcome.mjs validate --cases benchmarks/implementation-outcome/cases.json && node packages/benchmark/dist/cli.js pt-v1 validate",
+    "benchmark:validate:offline": "corepack pnpm build && node packages/benchmark/dist/cli.js validate-fixtures --cases benchmarks/cases && node packages/pi-extension/scripts/benchmark-implementation-outcome.mjs validate --cases benchmarks/implementation-outcome/cases.json && node packages/benchmark/dist/cli.js pt-v1 validate && node packages/benchmark/dist/cli.js plv validate-manifest --manifest benchmarks/provider-leakage-diagnostic-v1/manifest.json",
     "build:extension": "tsc --build --force tsconfig.json && node scripts/bundle-extension.mjs",
     "build": "corepack pnpm build:extension",
     "release:pack": "corepack pnpm build && node scripts/release-smoke.mjs --pack",
