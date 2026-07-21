@@ -3,7 +3,7 @@ import { ModelRuntime } from "@earendil-works/pi-coding-agent";
 import { createPiProvider } from "../dist/pi-native-provider.js";
 
 const fixture = {
-  schemaVersion: "1",
+  schemaVersion: "2",
   originalText:
     "Bir TypeScript fonksiyonundaki null kontrolünü düzelt; yalnızca gerekli değişikliği yap.",
   messageType: "initial",

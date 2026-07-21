@@ -3,7 +3,7 @@ import {
   PiCompilerV1,
   type BridgeTraceV1,
   type CompiledTask,
-  type IntentDocumentV1,
+  type IntentDocument,
   type IntentProvider,
   type RetryPolicyV1,
 } from "@intent-bridge/core";
@@ -455,7 +455,7 @@ export function parseCompilerAbReportV1(value: unknown): CompilerAbReportV1 {
 
 export function evaluateCompilerAbInvariants(
   caseItem: BenchmarkCaseV1,
-  intent: IntentDocumentV1 | undefined,
+  intent: IntentDocument | undefined,
   compiled: CompiledTask | undefined,
   includeOriginalRequest: boolean,
 ): InvariantResult {
@@ -495,7 +495,7 @@ async function evaluate(
   evaluator: BenchmarkEvaluator,
   caseItem: BenchmarkCaseV1,
   project: Awaited<ReturnType<typeof loadContextFixture>>,
-  intent: IntentDocumentV1,
+  intent: IntentDocument,
   compiled: CompiledTask,
   nowMs: () => number,
 ): Promise<
@@ -617,7 +617,7 @@ export async function runCompilerAbBenchmark(
             ...(options.profile.pricing
               ? { pricing: options.profile.pricing }
               : {}),
-            promptVersion: "openai-compatible-v1",
+            promptVersion: "openai-compatible-v2",
             retryPolicy: BENCHMARK_NO_RETRY_POLICY,
             ...(options.signal ? { signal: options.signal } : {}),
           },

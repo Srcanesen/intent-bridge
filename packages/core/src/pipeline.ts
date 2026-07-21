@@ -13,8 +13,8 @@ import type {
   RetryPolicyV1,
 } from "./contracts.js";
 import { BridgeError, type BridgeErrorCode } from "./errors.js";
-import type { IntentDocumentV1 } from "./intent.js";
-import { parseIntentDocumentV1 } from "./intent.js";
+import type { IntentDocument } from "./intent.js";
+import { parseIntentDocument } from "./intent.js";
 import { calculateQualitySignals } from "./quality.js";
 import {
   DEFAULT_QUALITY_CONFIG,
@@ -26,7 +26,7 @@ export type PipelineResult =
   | {
       status: "transformed";
       compiledTask: string;
-      intent: IntentDocumentV1;
+      intent: IntentDocument;
       assessment: TransformationAssessment;
       traceId: string;
     }
@@ -61,7 +61,7 @@ export interface PipelineRunOptions {
 
 export interface FullInMemoryTransformation {
   originalText: string;
-  intent: IntentDocumentV1;
+  intent: IntentDocument;
   compiledTask: CompiledTask;
   quality: QualitySignalsV1;
   assessment: TransformationAssessment;
@@ -102,7 +102,7 @@ export function estimateCostUsd(
 
 function requestFrom(input: BridgeInput): InterpretationRequest {
   return {
-    schemaVersion: "1",
+    schemaVersion: "2",
     originalText: input.originalText,
     messageType: input.messageType,
     attachmentSummary: input.attachmentSummary,
@@ -162,7 +162,7 @@ async function waitForRetry(
   });
 }
 
-function explicitlyRequestsResponseLanguage(intent: IntentDocumentV1): boolean {
+function explicitlyRequestsResponseLanguage(intent: IntentDocument): boolean {
   return [
     ...intent.globalConstraints,
     ...intent.tasks.flatMap((task) => task.constraints),
@@ -173,7 +173,20 @@ function explicitlyRequestsResponseLanguage(intent: IntentDocumentV1): boolean {
   );
 }
 
-function preserveResponseLanguage(intent: IntentDocumentV1): IntentDocumentV1 {
+function preserveResponseLanguage(intent: IntentDocument): IntentDocument {
+  if (intent.schemaVersion === "2") {
+    if (intent.responseLanguage.source === "user_explicit") return intent;
+    return {
+      ...intent,
+      responseLanguage: {
+        code: intent.sourceLanguage.code,
+        ...(intent.sourceLanguage.name === undefined
+          ? {}
+          : { name: intent.sourceLanguage.name }),
+        source: "source_language_default",
+      },
+    };
+  }
   if (
     intent.sourceLanguage.code === intent.responseLanguage.code ||
     explicitlyRequestsResponseLanguage(intent)
@@ -195,7 +208,7 @@ export class InterpretationPipeline {
 
   constructor(
     private readonly provider: IntentProvider,
-    private readonly compiler: HarnessCompiler<IntentDocumentV1>,
+    private readonly compiler: HarnessCompiler<IntentDocument>,
     private readonly traceSink?: TraceSink,
     private readonly now: () => Date = () => new Date(),
   ) {}
@@ -212,7 +225,7 @@ export class InterpretationPipeline {
     try {
       const providerResult = await this.interpret(requestFrom(input), options);
       const intent = preserveResponseLanguage(
-        parseIntentDocumentV1(providerResult.intent, {
+        parseIntentDocument(providerResult.intent, {
           expectedMessageType: input.messageType,
         }).intent,
       );
@@ -381,7 +394,7 @@ export class InterpretationPipeline {
       providerProfile: options.providerProfileId,
       model: options.model,
       mode: options.mode,
-      schemaVersion: "1",
+      schemaVersion: "2",
       ...(options.promptVersion === undefined
         ? {}
         : { promptVersion: options.promptVersion }),
@@ -393,7 +406,7 @@ export class InterpretationPipeline {
     options: PipelineRunOptions,
     timestamp: string,
     providerResult: ProviderInterpretationResult,
-    intent: IntentDocumentV1,
+    intent: IntentDocument,
     compiledTask: CompiledTask,
     quality: QualitySignalsV1,
     assessment: TransformationAssessment,
@@ -402,6 +415,7 @@ export class InterpretationPipeline {
     const estimatedCostUsd = estimateCostUsd(usage, options.pricing);
     return {
       ...this.baseTrace(input, options, timestamp),
+      schemaVersion: intent.schemaVersion,
       status: "success",
       sourceLanguage: intent.sourceLanguage.code,
       latencyMs: providerResult.latencyMs,

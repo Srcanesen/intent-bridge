@@ -4,12 +4,12 @@ import { performance } from "node:perf_hooks";
 import { fileURLToPath } from "node:url";
 
 import {
-  IntentDocumentV1JsonSchema,
+  IntentDocumentV2JsonSchema,
   PiCompilerV1,
   collectProjectContext,
   loadLayeredConfig,
   loadPiModelSelection,
-  parseIntentDocumentV1,
+  parseIntentDocumentV2,
   resolveConfigPaths,
 } from "@intent-bridge/core";
 import { loadBenchmarkCases } from "../../benchmark/dist/index.js";
@@ -89,9 +89,9 @@ const configOptions = {
 };
 
 const validIntent = {
-  schemaVersion: "1",
+  schemaVersion: "2",
   sourceLanguage: { code: "tr", confidence: 1 },
-  responseLanguage: { code: "tr" },
+  responseLanguage: { code: "tr", source: "source_language_default" },
   messageType: "initial",
   goal: "Test",
   tasks: [
@@ -170,7 +170,7 @@ export async function collectBaseline({
     },
   ).interpret(
     {
-      schemaVersion: "1",
+      schemaVersion: "2",
       originalText: "synthetic request",
       messageType: "initial",
       attachmentSummary: { imageCount: 0 },
@@ -190,7 +190,13 @@ export async function collectBaseline({
   const documents = cases.map((item) => ({
     ...validIntent,
     sourceLanguage: { code: item.language, confidence: 1 },
-    responseLanguage: { code: item.expected.responseLanguage },
+    responseLanguage: {
+      code: item.expected.responseLanguage,
+      source:
+        item.expected.responseLanguage === item.language
+          ? "source_language_default"
+          : "user_explicit",
+    },
     messageType: item.messageType,
     goal: item.expected.requiredGoalConcepts[0] ?? item.title,
     tasks: [
@@ -207,7 +213,7 @@ export async function collectBaseline({
   const compiler = new PiCompilerV1();
   const parseTiming = await durations(corpusPasses, () => {
     for (const [index, document] of documents.entries()) {
-      parseIntentDocumentV1(document, {
+      parseIntentDocumentV2(document, {
         expectedMessageType: cases[index].messageType,
       });
     }
@@ -229,7 +235,7 @@ export async function collectBaseline({
     runs: { config: configRuns, corpusPasses, corpusCases: cases.length },
     promptBytes: {
       nativeSystem: byteLength(nativeCall.context.systemPrompt),
-      canonicalSchema: byteLength(IntentDocumentV1JsonSchema),
+      canonicalSchema: byteLength(IntentDocumentV2JsonSchema),
       nativeToolSchema: byteLength(nativeCall.context.tools),
     },
     context: {

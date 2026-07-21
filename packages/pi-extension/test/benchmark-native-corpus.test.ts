@@ -8,6 +8,7 @@ import {
 } from "../../benchmark/dist/index.js";
 import { describe, expect, it, vi } from "vitest";
 
+import { PI_NATIVE_PROMPT_VERSION } from "../dist/pi-native-provider.js";
 import {
   HELP,
   buildReviewBundle,
@@ -27,6 +28,10 @@ const cases = [
 ];
 
 describe("benchmark-native-corpus argument parsing", () => {
+  it("uses the current native prompt version", () => {
+    expect(PI_NATIVE_PROMPT_VERSION).toBe("pi-native-v2");
+  });
+
   it("requires --provider and --model and defaults concurrency to 2", () => {
     expect(() => parseArgs([])).toThrow("CONFIG_INVALID");
     expect(() => parseArgs(["--provider", "codex"])).toThrow("CONFIG_INVALID");

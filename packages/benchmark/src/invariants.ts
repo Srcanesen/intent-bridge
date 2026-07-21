@@ -1,4 +1,4 @@
-import type { CompiledTask, IntentDocumentV1 } from "@intent-bridge/core";
+import type { CompiledTask, IntentDocument } from "@intent-bridge/core";
 import type { BenchmarkCaseV1, InvariantResult } from "./contracts.js";
 const clean = (s: string) => s.replace(/\s+/g, " ").trim().toLocaleLowerCase();
 const clip = (s: string) => s.slice(0, 160);
@@ -20,7 +20,7 @@ export const isSafetyCase = (c: Pick<BenchmarkCaseV1, "tags">) =>
   );
 export function evaluateInvariants(
   c: BenchmarkCaseV1,
-  intent: IntentDocumentV1 | undefined,
+  intent: IntentDocument | undefined,
   compiled: CompiledTask | undefined,
 ): InvariantResult {
   const checks: { name: string; passed: boolean; detail?: string }[] = [];
@@ -32,7 +32,7 @@ export function evaluateInvariants(
     });
   add("transformed", !!intent && !!compiled);
   if (!intent || !compiled) return { passed: false, checks };
-  add("schema_valid", intent.schemaVersion === "1");
+  add("schema_valid", ["1", "2"].includes(intent.schemaVersion));
   add(
     "compiler_valid",
     (compiled.compilerVersion === "pi-v1" ||

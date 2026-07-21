@@ -109,7 +109,7 @@ export async function runBenchmark(options: {
             ...(options.profile.pricing
               ? { pricing: options.profile.pricing }
               : {}),
-            promptVersion: "openai-compatible-v1",
+            promptVersion: "openai-compatible-v2",
             retryPolicy: BENCHMARK_NO_RETRY_POLICY,
             ...(options.signal ? { signal: options.signal } : {}),
           },

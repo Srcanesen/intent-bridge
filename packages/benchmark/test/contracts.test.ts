@@ -185,6 +185,34 @@ describe("benchmark contracts", () => {
       );
   });
 
+  it("accepts only current and legacy schema/compiler metadata", () => {
+    const legacy = createReport(reportInput([makeResult("legacy")]));
+    expect(parseBenchmarkReportV1(legacy)).toMatchObject({
+      schemaVersion: "1",
+      compilerVersion: "pi-v1",
+    });
+    const current = createReportV2({
+      ...reportInput([makeResult("current")]),
+      schemaVersion: "2",
+      promptVersion: "openai-compatible-v2",
+      compilerVersion: "pi-v2",
+    });
+    expect(parseBenchmarkReportV2(current)).toEqual(current);
+    expect(
+      parseBenchmarkReportV1({ ...legacy, compilerVersion: "pi-v2" }),
+    ).toMatchObject({ compilerVersion: "pi-v2" });
+    for (const invalid of [
+      { ...current, schemaVersion: "3" },
+      { ...current, compilerVersion: "pi-v3" },
+      { ...legacy, compilerVersion: "pi-v3" },
+    ])
+      expect(() =>
+        invalid.version === 1
+          ? parseBenchmarkReportV1(invalid)
+          : parseBenchmarkReportV2(invalid),
+      ).toThrow("BENCHMARK_INVALID");
+  });
+
   it("round-trips V2 evaluator metadata with bounded reasoning and keeps old reports parseable", () => {
     const baseEvaluator = {
       provider: "openai",

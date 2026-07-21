@@ -344,7 +344,7 @@ export function createIntentBridgeExtension(
           providerProfileId: providerId,
           model: model?.id ?? requireProfile(profile).model,
           ...(profile?.pricing ? { pricing: profile.pricing } : {}),
-          promptVersion: model ? "pi-native-v1" : "openai-compatible-v1",
+          promptVersion: model ? "pi-native-v2" : "openai-compatible-v2",
           retryPolicy: config.retry,
           contextManifest: context.manifest,
           projectId: ctx.cwd,

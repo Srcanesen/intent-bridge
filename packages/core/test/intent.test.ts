@@ -4,7 +4,9 @@ import {
   BridgeError,
   INTENT_LIMITS,
   IntentDocumentV1JsonSchema,
+  IntentDocumentV2JsonSchema,
   parseIntentDocumentV1,
+  parseIntentDocumentV2,
   validateIntentDocumentV1,
 } from "../src/index.js";
 import { invalidIntentFixtures } from "./fixtures/invalid-intent.js";
@@ -22,6 +24,33 @@ const invalidSchema = (input: unknown) => {
 describe("IntentDocumentV1", () => {
   it("accepts a valid minimal intent", () => {
     expect(parseIntentDocumentV1(validIntent()).intent).toEqual(validIntent());
+  });
+
+  it("parses V2 provenance and normalizes its language code", () => {
+    const input = {
+      ...validIntent(),
+      schemaVersion: "2" as const,
+      sourceLanguage: { code: "EN", confidence: 1 },
+      responseLanguage: { code: "ES-MX", source: "user_explicit" as const },
+    };
+    expect(parseIntentDocumentV2(input).intent).toMatchObject({
+      schemaVersion: "2",
+      sourceLanguage: { code: "en" },
+      responseLanguage: { code: "es-mx", source: "user_explicit" },
+    });
+    expect(IntentDocumentV2JsonSchema).toBeDefined();
+    expect(() =>
+      parseIntentDocumentV2({ ...input, responseLanguage: { code: "es" } }),
+    ).toThrow(BridgeError);
+    expect(() =>
+      parseIntentDocumentV2({
+        ...input,
+        responseLanguage: {
+          code: "x".repeat(INTENT_LIMITS.languageCodeLength + 1),
+          source: "user_explicit",
+        },
+      }),
+    ).toThrow(BridgeError);
   });
 
   it("exposes a plain strict JSON Schema", () => {

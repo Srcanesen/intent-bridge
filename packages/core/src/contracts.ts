@@ -22,7 +22,7 @@ export interface BridgeInput {
 }
 
 export interface InterpretationRequest {
-  schemaVersion: "1";
+  schemaVersion: "1" | "2";
   originalText: string;
   messageType: BridgeMessageType;
   attachmentSummary: {
@@ -79,7 +79,7 @@ export interface ProviderProfileV1 {
 }
 
 export interface ProviderInterpretationResult {
-  intent: import("./intent.js").IntentDocumentV1;
+  intent: import("./intent.js").IntentDocument;
   usage?: {
     inputTokens?: number;
     outputTokens?: number;
@@ -116,7 +116,7 @@ export interface HarnessCompiler<TIntent> {
 
 export interface FullTraceContentV1 {
   originalText?: string;
-  intent?: import("./intent.js").IntentDocumentV1;
+  intent?: import("./intent.js").IntentDocument;
   compiledTask?: CompiledTask;
   contextManifest?: unknown;
 }
@@ -142,7 +142,7 @@ export interface BridgeTraceV1 {
     total?: number;
   };
   estimatedCostUsd?: number;
-  schemaVersion?: string;
+  schemaVersion?: "1" | "2";
   compilerVersion?: string;
   promptVersion?: string;
   quality?: QualitySignalsV1;

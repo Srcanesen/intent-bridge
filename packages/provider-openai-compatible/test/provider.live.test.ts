@@ -46,7 +46,7 @@ describe.skipIf(!ready)("OpenAI-compatible live smoke", () => {
       };
       const result = await new OpenAICompatibleProvider(profile).interpret(
         {
-          schemaVersion: "1",
+          schemaVersion: "2",
           originalText: "Fix the profile page without changing payments.",
           messageType: "initial",
           attachmentSummary: { imageCount: 0 },
@@ -60,7 +60,7 @@ describe.skipIf(!ready)("OpenAI-compatible live smoke", () => {
         },
         {},
       );
-      expect(result.intent.schemaVersion).toBe("1");
+      expect(result.intent.schemaVersion).toBe("2");
     },
     timeoutMs + 5_000,
   );

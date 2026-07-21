@@ -22,9 +22,9 @@ const model: PiModel = {
   maxTokens: 9000,
 };
 const intent = {
-  schemaVersion: "1",
+  schemaVersion: "2",
   sourceLanguage: { code: "tr", confidence: 1 },
-  responseLanguage: { code: "tr" },
+  responseLanguage: { code: "tr", source: "source_language_default" },
   messageType: "initial",
   goal: "Test",
   tasks: [
@@ -44,7 +44,7 @@ const intent = {
   clarification: { recommended: false },
 };
 const request = {
-  schemaVersion: "1" as const,
+  schemaVersion: "2" as const,
   originalText: "SENTINEL_REQUEST",
   messageType: "initial" as const,
   attachmentSummary: { imageCount: 0 },

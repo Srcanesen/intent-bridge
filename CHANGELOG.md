@@ -4,6 +4,7 @@
 
 ### Added
 
+- IntentDocument V2 response-language provenance: built-in providers emit bounded `user_explicit` or `source_language_default` metadata. V2 preserves source language unless the user explicitly changes the final response/explanation language; V1 documents retain the archived regex fallback.
 - `PiCompilerOptions` with `includeOriginalRequest` (default `true`). `PiCompilerV1` constructor accepts partial options. When `false`, the entire `## Original user request` heading and fenced body is omitted from compiled output; normal user input / Pi turn remains byte-for-byte unchanged.
 - Bridge config `compiler.includeOriginalRequest` field with strict validation (unknown keys / non-boolean rejected). Missing `compiler` or empty `compiler: {}` resolve to `true`. Explicit `false` survives layer merge/patch.
 - Extension wiring: `PiCompilerV1` constructed with effective `config.compiler`. Preview and `/bridge last` display `includeOriginalRequest=true|false` using existing bounded/redacted formatting (no raw request duplication or cap relaxation).

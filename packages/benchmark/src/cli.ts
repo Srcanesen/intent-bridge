@@ -10,7 +10,7 @@ import { loadBenchmarkCases, validateReviewedDataset } from "./fixtures.js";
 import {
   applyOwnerReview,
   compareReports,
-  createReport,
+  createReportV2,
   sanitize,
   writeReport,
 } from "./report.js";
@@ -133,12 +133,11 @@ export async function main(input = process.argv.slice(2)) {
     });
     await writeReport(
       value(args, "--out", "benchmarks/out") ?? "benchmarks/out",
-      createReport({
+      createReportV2({
         profile: { id, model: profile.model },
-        schemaVersion: "1",
-        promptVersion: "openai-compatible-v1",
-        compilerVersion: "pi-v1",
-        runnerVersion: "benchmark-v1",
+        schemaVersion: "2",
+        promptVersion: "openai-compatible-v2",
+        compilerVersion: "pi-v2",
         startedAt,
         completedAt: new Date().toISOString(),
         concurrency,

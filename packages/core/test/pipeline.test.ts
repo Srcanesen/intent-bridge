@@ -86,7 +86,7 @@ describe("InterpretationPipeline", () => {
     expect(testCompiler.compile).toHaveBeenCalledTimes(1);
     expect(testProvider.interpret).toHaveBeenCalledWith(
       {
-        schemaVersion: "1",
+        schemaVersion: "2",
         originalText: "Fix the profile layout.",
         messageType: "initial",
         attachmentSummary: { imageCount: 1 },
@@ -251,6 +251,80 @@ describe("InterpretationPipeline", () => {
         options,
       ),
     ).resolves.toMatchObject({ compiledTask: language });
+  });
+
+  it.each([
+    [
+      "Turkish default despite English README",
+      "tr",
+      "en",
+      "source_language_default",
+      "tr",
+    ],
+    [
+      "mixed-language request defaults to source",
+      "tr",
+      "en",
+      "source_language_default",
+      "tr",
+    ],
+    [
+      "artifact and response language differ",
+      "tr",
+      "en",
+      "source_language_default",
+      "tr",
+    ],
+    ["explicit English final response", "tr", "en", "user_explicit", "en"],
+    ["explicit Spanish final response", "en", "es", "user_explicit", "es"],
+  ] as const)("uses V2 provenance for %s", async (_, source, response, provenance, expected) => {
+    const providerIntent = {
+      ...validIntent(),
+      schemaVersion: "2" as const,
+      sourceLanguage: { code: source, confidence: 0.95 },
+      responseLanguage: { code: response, source: provenance },
+      globalConstraints: ["Write README in English"],
+    };
+    const testCompiler: HarnessCompiler<
+      import("../src/index.js").IntentDocument
+    > = {
+      compile: vi.fn().mockImplementation(({ intent }) => ({
+        compilerVersion: "pi-v1",
+        text: intent.responseLanguage.code,
+        responseLanguageCode: intent.responseLanguage.code,
+      })),
+    };
+    await expect(
+      new InterpretationPipeline(provider(providerIntent), testCompiler).run(
+        input(),
+        options,
+      ),
+    ).resolves.toMatchObject({ compiledTask: expected });
+  });
+
+  it("keeps an explicit follow-up response-language override", async () => {
+    const providerIntent = {
+      ...validIntent(),
+      schemaVersion: "2" as const,
+      messageType: "follow_up" as const,
+      sourceLanguage: { code: "tr", confidence: 0.95 },
+      responseLanguage: { code: "en", source: "user_explicit" as const },
+    };
+    const testCompiler: HarnessCompiler<
+      import("../src/index.js").IntentDocument
+    > = {
+      compile: vi.fn().mockImplementation(({ intent }) => ({
+        compilerVersion: "pi-v1",
+        text: intent.responseLanguage.code,
+        responseLanguageCode: intent.responseLanguage.code,
+      })),
+    };
+    await expect(
+      new InterpretationPipeline(provider(providerIntent), testCompiler).run(
+        { ...input(), messageType: "follow_up" },
+        options,
+      ),
+    ).resolves.toMatchObject({ compiledTask: "en" });
   });
 
   it("passes an empty context through unchanged", async () => {

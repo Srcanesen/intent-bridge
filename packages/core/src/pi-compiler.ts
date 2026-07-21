@@ -1,5 +1,5 @@
 import type { CompiledTask, HarnessCompiler } from "./contracts.js";
-import type { IntentDocumentV1 } from "./intent.js";
+import type { IntentDocument } from "./intent.js";
 import { redactSecrets } from "./privacy.js";
 import type { TransformationAssessment } from "./quality-policy.js";
 
@@ -35,7 +35,7 @@ function list(items: readonly string[]): string {
 }
 
 function taskList(
-  tasks: IntentDocumentV1["tasks"],
+  tasks: IntentDocument["tasks"],
   field: "scope" | "constraints" | "successCriteria",
 ): string | undefined {
   const groups = tasks
@@ -69,15 +69,15 @@ function safeLine(text: string): string {
 }
 
 function materialAskUserAmbiguities(
-  intent: IntentDocumentV1,
-): IntentDocumentV1["ambiguities"] {
+  intent: IntentDocument,
+): IntentDocument["ambiguities"] {
   return intent.ambiguities.filter(
     (ambiguity) =>
       ambiguity.material && ambiguity.preferredResolution === "ask_user",
   );
 }
 
-function riskReasons(intent: IntentDocumentV1): readonly string[] {
+function riskReasons(intent: IntentDocument): readonly string[] {
   return intent.risk.reasons.slice(0, 10);
 }
 
@@ -89,7 +89,7 @@ function confidenceOnlyReview(assessment: TransformationAssessment): boolean {
 }
 
 function advisoryContent(
-  intent: IntentDocumentV1,
+  intent: IntentDocument,
   assessment: TransformationAssessment,
 ): string | undefined {
   const reasons = riskReasons(intent);
@@ -127,7 +127,7 @@ function advisoryContent(
   return `${body.slice(0, ADVISORY_BUDGET - 14)}\n[truncated]`;
 }
 
-export class PiCompilerV1 implements HarnessCompiler<IntentDocumentV1> {
+export class PiCompilerV1 implements HarnessCompiler<IntentDocument> {
   private readonly options: PiCompilerOptions;
 
   constructor(options?: Partial<PiCompilerOptions>) {
@@ -139,9 +139,7 @@ export class PiCompilerV1 implements HarnessCompiler<IntentDocumentV1> {
     originalText,
     attachmentSummary,
     assessment,
-  }: Parameters<
-    HarnessCompiler<IntentDocumentV1>["compile"]
-  >[0]): CompiledTask {
+  }: Parameters<HarnessCompiler<IntentDocument>["compile"]>[0]): CompiledTask {
     const responseLanguage = intent.responseLanguage.name
       ? `${intent.responseLanguage.name} (${intent.responseLanguage.code})`
       : intent.responseLanguage.code;

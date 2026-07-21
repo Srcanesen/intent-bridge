@@ -1,8 +1,8 @@
 import type { QualitySignalsV1 } from "./contracts.js";
-import type { IntentDocumentV1 } from "./intent.js";
+import type { IntentDocument } from "./intent.js";
 
 export function calculateQualitySignals(
-  intent: IntentDocumentV1,
+  intent: IntentDocument,
   options: { compilerValid: boolean },
 ): QualitySignalsV1 {
   return {

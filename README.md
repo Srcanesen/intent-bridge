@@ -44,7 +44,7 @@ Source prompt: "Giriş ekranına şifremi unuttum bağlantısı ekle."
 Required user-facing response language: Turkish (tr)
 ```
 
-Intent Bridge does not translate this request into an English user experience. Pi receives structured hidden context and should answer the user in Turkish unless the user explicitly requests another language.
+Intent Bridge does not translate this request into an English user experience. V2 intent documents record whether the response language was explicitly requested; artifact, README, code, and UI-copy languages do not override the final response language. Pi answers in Turkish unless the user explicitly requests another language.
 
 ## Requirements
 

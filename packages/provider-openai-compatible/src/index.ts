@@ -2,8 +2,8 @@ import { createHash } from "node:crypto";
 
 import {
   BridgeError,
-  IntentDocumentV1JsonSchema,
-  parseIntentDocumentV1,
+  IntentDocumentV2JsonSchema,
+  parseIntentDocumentV2,
   resolveApiKey,
   type IntentProvider,
   type InterpretationRequest,
@@ -13,7 +13,7 @@ import {
   type ProviderProfileV1,
 } from "@intent-bridge/core";
 
-export const OPENAI_COMPATIBLE_PROMPT_VERSION = "openai-compatible-v1";
+export const OPENAI_COMPATIBLE_PROMPT_VERSION = "openai-compatible-v2";
 export const MAX_RESPONSE_BYTES = 1024 * 1024;
 
 type JsonSchema = Record<string, unknown>;
@@ -34,9 +34,9 @@ function strictOptionalObject(
   return { anyOf: [withOptional, withoutOptional] };
 }
 
-function strictIntentDocumentV1Schema(): JsonSchema {
+function strictIntentDocumentV2Schema(): JsonSchema {
   const schema = JSON.parse(
-    JSON.stringify(IntentDocumentV1JsonSchema),
+    JSON.stringify(IntentDocumentV2JsonSchema),
   ) as JsonSchema;
   const properties = schema.properties as JsonSchema;
   for (const [property, optionalProperty] of [
@@ -52,8 +52,8 @@ function strictIntentDocumentV1Schema(): JsonSchema {
   return schema;
 }
 
-export const OpenAICompatibleIntentDocumentV1JsonSchema =
-  strictIntentDocumentV1Schema();
+export const OpenAICompatibleIntentDocumentV2JsonSchema =
+  strictIntentDocumentV2Schema();
 
 const SYSTEM_INSTRUCTION = `You are an intent interpreter for an AI coding harness.
 
@@ -61,7 +61,7 @@ Understand the user's software-development request.
 Preserve its meaning and boundaries.
 Return only the required structured intent.
 outputRequirements.contentLanguage controls intent-field language only.
-Default responseLanguage to sourceLanguage unless the user explicitly requests a different final user-facing response language.
+Set responseLanguage.source to user_explicit only when the user explicitly changes the assistant's final response or explanation language. A requested artifact, code, file, README, or UI-copy language is source_language_default. If uncertain, use source_language_default and record an ambiguity when useful.
 Do not write implementation code.
 Do not invent requirements.
 Do not silently expand scope.
@@ -306,8 +306,8 @@ export class OpenAICompatibleProvider implements IntentProvider {
       const schemaInstruction =
         mode === "json_schema"
           ? ""
-          : `\nRequired JSON Schema:\n${JSON.stringify(IntentDocumentV1JsonSchema)}`;
-      const system = `${SYSTEM_INSTRUCTION}\n\ninterpreterPromptVersion: ${OPENAI_COMPATIBLE_PROMPT_VERSION}\nintentSchemaVersion: 1\nOutput mode: ${mode}. Return JSON only.${schemaInstruction}`;
+          : `\nRequired JSON Schema:\n${JSON.stringify(IntentDocumentV2JsonSchema)}`;
+      const system = `${SYSTEM_INSTRUCTION}\n\ninterpreterPromptVersion: ${OPENAI_COMPATIBLE_PROMPT_VERSION}\nintentSchemaVersion: 2\nOutput mode: ${mode}. Return JSON only.${schemaInstruction}`;
       const body: Record<string, unknown> = {
         model: this.#profile.model,
         messages: [
@@ -316,7 +316,7 @@ export class OpenAICompatibleProvider implements IntentProvider {
             role: "user",
             content: JSON.stringify({
               interpreterPromptVersion: OPENAI_COMPATIBLE_PROMPT_VERSION,
-              intentSchemaVersion: "1",
+              intentSchemaVersion: "2",
               request: {
                 messageType: request.messageType,
                 originalText: request.originalText,
@@ -335,9 +335,9 @@ export class OpenAICompatibleProvider implements IntentProvider {
         body.response_format = {
           type: "json_schema",
           json_schema: {
-            name: "intent_document_v1",
+            name: "intent_document_v2",
             strict: true,
-            schema: OpenAICompatibleIntentDocumentV1JsonSchema,
+            schema: OpenAICompatibleIntentDocumentV2JsonSchema,
           },
         };
       } else if (mode === "json_object") {
@@ -394,7 +394,7 @@ export class OpenAICompatibleProvider implements IntentProvider {
       } catch {
         throw invalidJson();
       }
-      const { intent } = parseIntentDocumentV1(document, {
+      const { intent } = parseIntentDocumentV2(document, {
         expectedMessageType: request.messageType,
       });
       const usage = (
@@ -437,7 +437,7 @@ export class OpenAICompatibleProvider implements IntentProvider {
   ): Promise<ProviderHealthResult> {
     const result = await this.interpret(
       {
-        schemaVersion: "1",
+        schemaVersion: "2",
         originalText:
           "Return a minimal valid intent document for this request.",
         messageType: "initial",

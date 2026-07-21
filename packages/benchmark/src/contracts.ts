@@ -1,7 +1,7 @@
 import type {
   BridgeMessageType,
   CompiledTask,
-  IntentDocumentV1,
+  IntentDocument,
   ProjectContext,
   QualitySignalsV1,
 } from "@intent-bridge/core";
@@ -40,7 +40,7 @@ export type BenchmarkEvaluatorInputV1 = {
     projectContext: ProjectContext;
   };
   candidate: {
-    intent: IntentDocumentV1;
+    intent: IntentDocument;
     compiledTask: CompiledTask;
   };
 };
@@ -116,9 +116,9 @@ export type BenchmarkThresholdsV1 = Record<
 export type BenchmarkReportV1 = {
   version: 1;
   profile: { id: string; model: string };
-  schemaVersion: "1";
+  schemaVersion: "1" | "2";
   promptVersion: string;
-  compilerVersion: "pi-v1";
+  compilerVersion: "pi-v1" | "pi-v2";
   runnerVersion: "benchmark-v1";
   startedAt: string;
   completedAt: string;
@@ -519,8 +519,8 @@ export function parseBenchmarkReportV1(value: unknown): BenchmarkReportV1 {
   ]);
   if (
     o.version !== 1 ||
-    o.schemaVersion !== "1" ||
-    o.compilerVersion !== "pi-v1" ||
+    !["1", "2"].includes(o.schemaVersion as string) ||
+    !["pi-v1", "pi-v2"].includes(o.compilerVersion as string) ||
     o.runnerVersion !== "benchmark-v1"
   )
     fail();
@@ -529,9 +529,9 @@ export function parseBenchmarkReportV1(value: unknown): BenchmarkReportV1 {
   return {
     version: 1,
     profile: { id: text(profile.id, 100), model: text(profile.model, 200) },
-    schemaVersion: "1",
+    schemaVersion: enumValue(o.schemaVersion, ["1", "2"] as const),
     promptVersion: text(o.promptVersion, 100),
-    compilerVersion: "pi-v1",
+    compilerVersion: enumValue(o.compilerVersion, ["pi-v1", "pi-v2"] as const),
     runnerVersion: "benchmark-v1",
     startedAt: date(o.startedAt),
     completedAt: date(o.completedAt),
@@ -780,8 +780,8 @@ export function parseBenchmarkReportV2(value: unknown): BenchmarkReportV2 {
   );
   if (
     o.version !== 2 ||
-    o.schemaVersion !== "1" ||
-    o.compilerVersion !== "pi-v1" ||
+    !["1", "2"].includes(o.schemaVersion as string) ||
+    !["pi-v1", "pi-v2"].includes(o.compilerVersion as string) ||
     o.runnerVersion !== "benchmark-v2"
   )
     fail();
@@ -840,9 +840,9 @@ export function parseBenchmarkReportV2(value: unknown): BenchmarkReportV2 {
     ...(corpusMetadata ? { corpus: corpusMetadata } : {}),
     ...(evaluatorMetadata ? { evaluator: evaluatorMetadata } : {}),
     ...(ownerReview ? { ownerReview } : {}),
-    schemaVersion: "1",
+    schemaVersion: enumValue(o.schemaVersion, ["1", "2"] as const),
     promptVersion: text(o.promptVersion, 100),
-    compilerVersion: "pi-v1",
+    compilerVersion: enumValue(o.compilerVersion, ["pi-v1", "pi-v2"] as const),
     runnerVersion: "benchmark-v2",
     startedAt: date(o.startedAt),
     completedAt: date(o.completedAt),

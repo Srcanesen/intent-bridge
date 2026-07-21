@@ -1,4 +1,4 @@
-import type { IntentDocumentV1 } from "./intent.js";
+import type { IntentDocument } from "./intent.js";
 
 export type QualityEnforcementMode = "observe" | "review";
 
@@ -53,7 +53,7 @@ export function isQualityDecisionReason(
 }
 
 export function assessQuality(
-  intent: IntentDocumentV1,
+  intent: IntentDocument,
   config: QualityConfigV1,
 ): TransformationAssessment {
   const reasons: QualityDecisionReason[] = [];

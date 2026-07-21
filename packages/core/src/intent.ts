@@ -46,6 +46,18 @@ const responseLanguage = Type.Object(
   { additionalProperties: false },
 );
 
+const responseLanguageV2 = Type.Object(
+  {
+    code: languageCode,
+    name: languageName,
+    source: Type.Union([
+      Type.Literal("user_explicit"),
+      Type.Literal("source_language_default"),
+    ]),
+  },
+  { additionalProperties: false },
+);
+
 const task = Type.Object(
   {
     id: Type.String({ minLength: 1, maxLength: 64, pattern: TASK_ID_PATTERN }),
@@ -123,10 +135,24 @@ export const IntentDocumentV1Schema = Type.Object(
   { additionalProperties: false },
 );
 
+export const IntentDocumentV2Schema = Type.Object(
+  {
+    ...IntentDocumentV1Schema.properties,
+    schemaVersion: Type.Literal("2"),
+    responseLanguage: responseLanguageV2,
+  },
+  { additionalProperties: false },
+);
+
 export const IntentDocumentV1JsonSchema = JSON.parse(
   JSON.stringify(IntentDocumentV1Schema),
 ) as Record<string, unknown>;
+export const IntentDocumentV2JsonSchema = JSON.parse(
+  JSON.stringify(IntentDocumentV2Schema),
+) as Record<string, unknown>;
 export type IntentDocumentV1 = Static<typeof IntentDocumentV1Schema>;
+export type IntentDocumentV2 = Static<typeof IntentDocumentV2Schema>;
+export type IntentDocument = IntentDocumentV1 | IntentDocumentV2;
 
 export interface NormalizationDiagnostics {
   trimmed: string[];
@@ -149,7 +175,13 @@ export interface ParsedIntentDocumentV1 {
   diagnostics: NormalizationDiagnostics;
 }
 
+export interface ParsedIntentDocument {
+  intent: IntentDocument;
+  diagnostics: NormalizationDiagnostics;
+}
+
 const compiledIntentDocumentV1 = TypeCompiler.Compile(IntentDocumentV1Schema);
+const compiledIntentDocumentV2 = TypeCompiler.Compile(IntentDocumentV2Schema);
 const languageCodeExpression = new RegExp(LANGUAGE_CODE_PATTERN);
 const taskIdExpression = new RegExp(TASK_ID_PATTERN);
 
@@ -410,23 +442,46 @@ export function normalizeIntentDocumentV1(input: unknown): NormalizationResult {
   return { value, diagnostics };
 }
 
-export function validateIntentDocumentV1(
+function validateIntent(
   input: unknown,
-  options: ParseIntentDocumentV1Options = {},
-): IntentDocumentV1 {
+  options: ParseIntentDocumentV1Options,
+  check: (value: unknown) => boolean,
+): void {
   if (
-    !compiledIntentDocumentV1.Check(input) ||
+    !check(input) ||
     (options.expectedMessageType !== undefined &&
       (!isRecord(input) || input.messageType !== options.expectedMessageType))
-  ) {
+  )
     throw new BridgeError({
       code: "INTENT_SCHEMA_INVALID",
       safeMessage:
         "The provider response did not match the required intent schema.",
       retryable: false,
     });
-  }
-  return input;
+}
+
+export function validateIntentDocumentV1(
+  input: unknown,
+  options: ParseIntentDocumentV1Options = {},
+): IntentDocumentV1 {
+  validateIntent(
+    input,
+    options,
+    compiledIntentDocumentV1.Check.bind(compiledIntentDocumentV1),
+  );
+  return input as IntentDocumentV1;
+}
+
+export function validateIntentDocumentV2(
+  input: unknown,
+  options: ParseIntentDocumentV1Options = {},
+): IntentDocumentV2 {
+  validateIntent(
+    input,
+    options,
+    compiledIntentDocumentV2.Check.bind(compiledIntentDocumentV2),
+  );
+  return input as IntentDocumentV2;
 }
 
 export function parseIntentDocumentV1(
@@ -438,4 +493,27 @@ export function parseIntentDocumentV1(
     intent: validateIntentDocumentV1(normalized.value, options),
     diagnostics: normalized.diagnostics,
   };
+}
+
+export function parseIntentDocumentV2(
+  input: unknown,
+  options: ParseIntentDocumentV1Options = {},
+): ParsedIntentDocument {
+  const normalized = normalizeIntentDocumentV1(input);
+  return {
+    intent: validateIntentDocumentV2(normalized.value, options),
+    diagnostics: normalized.diagnostics,
+  };
+}
+
+export function parseIntentDocument(
+  input: unknown,
+  options: ParseIntentDocumentV1Options = {},
+): ParsedIntentDocument {
+  const normalized = normalizeIntentDocumentV1(input);
+  const intent =
+    isRecord(normalized.value) && normalized.value.schemaVersion === "2"
+      ? validateIntentDocumentV2(normalized.value, options)
+      : validateIntentDocumentV1(normalized.value, options);
+  return { intent, diagnostics: normalized.diagnostics };
 }

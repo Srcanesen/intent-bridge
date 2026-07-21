@@ -18,7 +18,10 @@ import {
   sanitize,
   writeReport,
 } from "../../benchmark/dist/index.js";
-import { createPiProvider } from "../dist/pi-native-provider.js";
+import {
+  createPiProvider,
+  PI_NATIVE_PROMPT_VERSION,
+} from "../dist/pi-native-provider.js";
 import {
   createPiBenchmarkEvaluator,
   parseEvaluatorReasoning,
@@ -280,9 +283,9 @@ export async function runCorpus({
   });
   const report = createReportV2({
     profile: { id: profileId, model },
-    schemaVersion: "1",
-    promptVersion: "pi-native-v1",
-    compilerVersion: "pi-v1",
+    schemaVersion: "2",
+    promptVersion: PI_NATIVE_PROMPT_VERSION,
+    compilerVersion: "pi-v2",
     startedAt,
     completedAt: new Date().toISOString(),
     concurrency,

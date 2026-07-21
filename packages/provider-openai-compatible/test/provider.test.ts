@@ -7,8 +7,8 @@ import {
 
 import {
   type BridgeError,
-  IntentDocumentV1JsonSchema,
-  parseIntentDocumentV1,
+  IntentDocumentV2JsonSchema,
+  parseIntentDocumentV2,
   type InterpretationRequest,
   type ProviderProfileV1,
 } from "@intent-bridge/core";
@@ -16,12 +16,12 @@ import { afterEach, describe, expect, it } from "vitest";
 
 import {
   MAX_RESPONSE_BYTES,
-  OpenAICompatibleIntentDocumentV1JsonSchema,
+  OpenAICompatibleIntentDocumentV2JsonSchema,
   OpenAICompatibleProvider,
 } from "../src/index.js";
 
 const request: InterpretationRequest = {
-  schemaVersion: "1",
+  schemaVersion: "2",
   originalText: "Fix the profile page.",
   messageType: "initial",
   attachmentSummary: { imageCount: 2 },
@@ -35,9 +35,9 @@ const request: InterpretationRequest = {
 };
 
 const intent = (messageType = "initial") => ({
-  schemaVersion: "1",
+  schemaVersion: "2",
   sourceLanguage: { code: "en", confidence: 1 },
-  responseLanguage: { code: "en" },
+  responseLanguage: { code: "en", source: "source_language_default" },
   messageType,
   goal: "Fix the profile page.",
   tasks: [
@@ -146,9 +146,9 @@ async function bridgeError(
 describe("OpenAICompatibleProvider HTTP contract", () => {
   it("uses a strict wire schema without changing canonical optional fields", () => {
     const schema = JSON.parse(
-      JSON.stringify(OpenAICompatibleIntentDocumentV1JsonSchema),
+      JSON.stringify(OpenAICompatibleIntentDocumentV2JsonSchema),
     );
-    expect(schema).toEqual(OpenAICompatibleIntentDocumentV1JsonSchema);
+    expect(schema).toEqual(OpenAICompatibleIntentDocumentV2JsonSchema);
     assertStrictSchema(schema);
     const properties = (schema as { properties: Record<string, unknown> })
       .properties;
@@ -168,11 +168,15 @@ describe("OpenAICompatibleProvider HTTP contract", () => {
     const withOptionalFields = {
       ...intent(),
       sourceLanguage: { code: "en", name: "English", confidence: 1 },
-      responseLanguage: { code: "en", name: "English" },
+      responseLanguage: {
+        code: "en",
+        name: "English",
+        source: "source_language_default",
+      },
       clarification: { recommended: false, reason: "None needed." },
     };
-    expect(parseIntentDocumentV1(intent()).intent).toEqual(intent());
-    expect(parseIntentDocumentV1(withOptionalFields).intent).toEqual(
+    expect(parseIntentDocumentV2(intent()).intent).toEqual(intent());
+    expect(parseIntentDocumentV2(withOptionalFields).intent).toEqual(
       withOptionalFields,
     );
   });
@@ -219,20 +223,20 @@ describe("OpenAICompatibleProvider HTTP contract", () => {
       max_tokens: 123,
       response_format: {
         type: "json_schema",
-        json_schema: { name: "intent_document_v1", strict: true },
+        json_schema: { name: "intent_document_v2", strict: true },
       },
     });
     expect(
       (received?.body.response_format as { json_schema: { schema: unknown } })
         .json_schema.schema,
-    ).toEqual(OpenAICompatibleIntentDocumentV1JsonSchema);
+    ).toEqual(OpenAICompatibleIntentDocumentV2JsonSchema);
     expect(
       (received?.body.messages as Array<{ content: string }>)[0]?.content,
     ).toContain("You are an intent interpreter");
     expect(
       (received?.body.messages as Array<{ content: string }>)[0]?.content,
     ).toContain(
-      "responseLanguage to sourceLanguage unless the user explicitly requests a different final user-facing response language",
+      "responseLanguage.source to user_explicit only when the user explicitly changes the assistant's final response or explanation language",
     );
     expect(
       JSON.parse(
@@ -276,7 +280,7 @@ describe("OpenAICompatibleProvider HTTP contract", () => {
     const system = (body?.messages as Array<{ content: string }>)[0]?.content;
     expect(system).toContain("JSON");
     expect(system).toContain(
-      `Required JSON Schema:\n${JSON.stringify(IntentDocumentV1JsonSchema)}`,
+      `Required JSON Schema:\n${JSON.stringify(IntentDocumentV2JsonSchema)}`,
     );
   });
 
