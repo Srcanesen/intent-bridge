@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Built-in providers now use the provider-neutral grounded interpretation envelope: evidence is embedded beside every executable string, while core deterministically unwraps canonical intent values and generates evidence paths.
+- Pi-native provider calls allow 60 seconds before fail-open, avoiding a race against observed near-30-second grounded responses.
 
 ## 1.1.0 — 2026-07-21
 
