@@ -50,6 +50,12 @@ import {
   SOURCE_GROUNDED_EVIDENCE_V4_MANIFEST_SHA256,
   validateSourceGroundedEvidenceV4Corpus,
 } from "./source-grounded-evidence-v4.js";
+import {
+  parseSourceGroundedEvidenceAggregateResultV5,
+  parseSourceGroundedEvidenceManifestV5,
+  SOURCE_GROUNDED_EVIDENCE_V5_MANIFEST_SHA256,
+  validateSourceGroundedEvidenceV5Corpus,
+} from "./source-grounded-evidence-v5.js";
 import { summarizePtV1 } from "./pt-v1-summarizer.js";
 
 const help = `benchmark validate-fixtures [--cases dir]
@@ -70,6 +76,8 @@ benchmark sge-v3 validate-manifest [--manifest path]      Validate the frozen SG
 benchmark sge-v3 validate-aggregate <result.json>         Validate a sanitized SGE-v3 aggregate against the frozen protocol
 benchmark sge-v4 validate-manifest [--manifest path]      Validate the frozen SGE-v4 manifest and print its exact-byte SHA-256
 benchmark sge-v4 validate-aggregate <result.json>         Validate a sanitized SGE-v4 aggregate against the frozen protocol
+benchmark sge-v5 validate-manifest [--manifest path]      Validate the frozen SGE-v5 manifest and print its exact-byte SHA-256
+benchmark sge-v5 validate-aggregate <result.json>         Validate a sanitized SGE-v5 aggregate against the frozen protocol
 `;
 const value = (args: string[], key: string, fallback?: string) => {
   const index = args.indexOf(key);
@@ -400,6 +408,41 @@ export async function main(input = process.argv.slice(2)) {
     );
     console.log(
       `SGE-v4 aggregate valid: ${String(result.benchmarkId)} (${String(result.subjectCommit).slice(0, 7)})`,
+    );
+    return;
+  }
+  if (command === "sge-v5" && args[1] === "validate-manifest") {
+    const manifestPath = value(
+      args,
+      "--manifest",
+      "benchmarks/source-grounded-evidence-v5/manifest.json",
+    );
+    if (!manifestPath) throw new Error("BENCHMARK_ARGUMENTS_INVALID");
+    const manifestBytes = await readFile(manifestPath);
+    const manifest = parseSourceGroundedEvidenceManifestV5(
+      JSON.parse(manifestBytes.toString("utf8")) as unknown,
+    );
+    validateSourceGroundedEvidenceV5Corpus(
+      await readJson("benchmarks/source-grounded-evidence-v1/cases.json"),
+      await readJson("benchmarks/source-grounded-evidence-v1/annotations.json"),
+    );
+    const manifestSha = sha256FileBytes(manifestBytes);
+    if (manifestSha !== SOURCE_GROUNDED_EVIDENCE_V5_MANIFEST_SHA256)
+      throw new Error("SGE_V5_MANIFEST_SHA256_MISMATCH");
+    console.log(
+      `SGE-v5 manifest valid: ${manifest.benchmarkId} (${String(manifest.subjectCommit).slice(0, 7)}; file SHA-256 ${manifestSha})`,
+    );
+    return;
+  }
+  if (command === "sge-v5" && args[1] === "validate-aggregate") {
+    const resultPath = args[2];
+    if (!resultPath || resultPath.startsWith("--"))
+      throw new Error("BENCHMARK_ARGUMENTS_INVALID");
+    const result = parseSourceGroundedEvidenceAggregateResultV5(
+      await readJson(resultPath),
+    );
+    console.log(
+      `SGE-v5 aggregate valid: ${String(result.benchmarkId)} (${String(result.subjectCommit).slice(0, 7)})`,
     );
     return;
   }
