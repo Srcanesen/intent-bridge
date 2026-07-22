@@ -1,11 +1,13 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import {
+  access,
   mkdir,
   mkdtemp,
   readFile,
   readdir,
   rm,
+  stat,
   writeFile,
 } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -13,8 +15,61 @@ import { basename, join, resolve } from "node:path";
 
 const root = resolve(".");
 const pi = resolve("packages/pi-extension/node_modules/.bin/pi");
+
+function parseArgs(args) {
+  let packed = false;
+  let tarball;
+  for (let index = 0; index < args.length; index += 1) {
+    const arg = args[index];
+    if (arg === "--pack") {
+      packed = true;
+      continue;
+    }
+    if (arg === "--tarball") {
+      const separator = args[index + 1] === "--";
+      const path = args[index + 1 + Number(separator)];
+      if (!path || path.startsWith("--")) {
+        throw new Error("Configuration error: --tarball requires a path");
+      }
+      if (tarball) {
+        throw new Error(
+          "Configuration error: --tarball may only be provided once",
+        );
+      }
+      tarball = resolve(path);
+      index += 1 + Number(separator);
+      continue;
+    }
+    throw new Error(`Configuration error: unknown argument ${arg}`);
+  }
+  if (packed && tarball) {
+    throw new Error(
+      "Configuration error: --pack cannot be used with --tarball",
+    );
+  }
+  return { packed, tarball };
+}
+
+async function verifyTarball(path) {
+  if (!path.endsWith(".tgz")) {
+    throw new Error(
+      "Configuration error: --tarball must reference a .tgz file",
+    );
+  }
+  try {
+    await access(path);
+    if (!(await stat(path)).isFile()) {
+      throw new Error("not a file");
+    }
+  } catch {
+    throw new Error(
+      "Configuration error: --tarball must reference a readable file",
+    );
+  }
+}
+
+const { packed, tarball: prebuiltTarball } = parseArgs(process.argv.slice(2));
 const temp = await mkdtemp(join(tmpdir(), "intent-bridge-release-"));
-const packed = process.argv.includes("--pack");
 const run = (command, args, { timeout = 120_000, ...options } = {}) => {
   const result = spawnSync(command, args, {
     cwd: root,
@@ -127,19 +182,27 @@ async function smoke(extension, directory, name) {
 }
 try {
   const packageDir = join(root, "packages/pi-extension");
-  run("corepack", [
-    "pnpm",
-    "--dir",
-    packageDir,
-    "pack",
-    "--pack-destination",
-    temp,
-  ]);
-  const tarball = join(
-    temp,
-    (await readdir(temp)).find((file) => file.endsWith(".tgz")) ?? "",
+  const expectedManifest = JSON.parse(
+    await readFile(join(packageDir, "package.json"), "utf8"),
   );
-  assert.ok(tarball.endsWith(".tgz"), "pnpm pack did not create a tarball");
+  let tarball = prebuiltTarball;
+  if (tarball) {
+    await verifyTarball(tarball);
+  } else {
+    run("corepack", [
+      "pnpm",
+      "--dir",
+      packageDir,
+      "pack",
+      "--pack-destination",
+      temp,
+    ]);
+    tarball = join(
+      temp,
+      (await readdir(temp)).find((file) => file.endsWith(".tgz")) ?? "",
+    );
+    assert.ok(tarball.endsWith(".tgz"), "pnpm pack did not create a tarball");
+  }
   const entries = run("tar", ["-tzf", tarball]).trim().split("\n");
   const expected = new Set([
     "package/dist/index.js",
@@ -175,9 +238,9 @@ try {
       license: manifest.license,
     },
     {
-      name: "@srcanesen/intent-bridge",
-      version: "1.1.0",
-      license: "Apache-2.0",
+      name: expectedManifest.name,
+      version: expectedManifest.version,
+      license: expectedManifest.license,
     },
   );
   assert.deepEqual(manifest.pi?.extensions, ["./dist/index.js"]);
@@ -212,7 +275,7 @@ try {
     consumer,
     "tarball",
   );
-  if (!packed) {
+  if (!packed && !prebuiltTarball) {
     const clone = join(temp, "clone");
     run("git", ["clone", "--quiet", root, clone]);
     const rootManifest = JSON.parse(

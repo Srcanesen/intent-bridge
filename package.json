@@ -35,6 +35,7 @@
     "build": "corepack pnpm build:extension",
     "release:pack": "corepack pnpm build && node scripts/release-smoke.mjs --pack",
     "release:smoke": "corepack pnpm build && node scripts/release-smoke.mjs",
+    "release:verify-artifact": "node scripts/release-smoke.mjs --tarball",
     "scan:secrets": "node scripts/scan-secrets.mjs",
     "check": "corepack pnpm format:check && corepack pnpm lint && corepack pnpm typecheck && corepack pnpm test && corepack pnpm benchmark:validate:offline"
   },
