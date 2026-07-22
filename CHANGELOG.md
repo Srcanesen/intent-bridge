@@ -2,8 +2,11 @@
 
 ## Unreleased
 
-- Built-in providers now use the provider-neutral grounded interpretation envelope: evidence is embedded beside every executable string, while core deterministically unwraps canonical intent values and generates evidence paths.
-- Pi-native provider calls allow 60 seconds before fail-open, avoiding a race against observed near-30-second grounded responses.
+## 1.2.0 — 2026-07-22
+
+- Built-in providers use a provider-neutral grounded interpretation envelope: evidence sits beside executable strings, while core derives canonical values and evidence paths.
+- Pi-native provider calls allow 60 seconds before fail-open.
+- Known evidence: unit and contract validation exists, but there is no valid v5 live benchmark conclusion; this release makes no quality-win claim.
 
 ## 1.1.0 — 2026-07-21
 
