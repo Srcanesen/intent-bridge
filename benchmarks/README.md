@@ -141,4 +141,4 @@ A separate frozen protocol [`provider-leakage-diagnostic-v1`](provider-leakage-d
 
 Yeni dondurulmuş [`source-grounded-evidence-v1`](source-grounded-evidence-v1/README.md) protokolü, kaynak temelli kanıt sözleşmesini ve Türkçe gözetim akışını çevrimdışı olarak doğrular. Pi-native v5 doğrudan şema düzeltmesi için ayrı [`source-grounded-evidence-v2`](source-grounded-evidence-v2/README.md) ön kaydı, v1 korpusuna referans verir ve v1 stopped sonucunu tarihsel/bağımsız tutar.
 
-Pi-native v6 OpenAI-compatible-v5 dondurulmuş ön kaydı [`source-grounded-evidence-v3`](source-grounded-evidence-v3/README.md), aynı korpusa referans verir ve v1/v2 stopped sonuçlarını bağımsız tarihsel kanıt olarak tutar.
+Pi-native v6 OpenAI-compatible-v5 dondurulmuş ön kaydı [`source-grounded-evidence-v3`](source-grounded-evidence-v3/README.md), aynı korpusa referans verir ve v1/v2 stopped sonuçlarını bağımsız tarihsel kanıt olarak tutar. V3 canlı denemesi benchmark-geçersizdir; zaman aşımı düzeltmesini temel alan [`source-grounded-evidence-v4`](source-grounded-evidence-v4/README.md) aynı promptlarla aynı korpusa referans verir.
