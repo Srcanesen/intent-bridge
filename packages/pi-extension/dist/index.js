@@ -7224,6 +7224,7 @@ function resolvePiHostAdapter(registry) {
 }
 
 var PI_NATIVE_PROMPT_VERSION = "pi-native-v6";
+var PROVIDER_TIMEOUT_MS = 6e4;
 var SYSTEM_INSTRUCTION2 = `You are an intent interpreter for an AI coding harness.
 
 Understand the user's software-development request. Preserve its meaning and boundaries.
@@ -7328,7 +7329,7 @@ var PiNativeProvider = class {
     const timeout = setTimeout(() => {
       timedOut = true;
       controller.abort();
-    }, 3e4);
+    }, PROVIDER_TIMEOUT_MS);
     const abort = () => controller.abort();
     options.signal?.addEventListener("abort", abort, { once: true });
     if (options.signal?.aborted)
@@ -7357,7 +7358,7 @@ var PiNativeProvider = class {
           maxRetryDelayMs: 0,
           cacheRetention: "none",
           maxTokens: Math.min(Math.max(this.#model.maxTokens ?? 1, 1), 4096),
-          timeoutMs: 3e4,
+          timeoutMs: PROVIDER_TIMEOUT_MS,
           signal: controller.signal
         });
       } catch {

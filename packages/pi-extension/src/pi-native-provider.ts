@@ -21,6 +21,7 @@ import {
 import type { PiModel } from "./pi-model-provider.js";
 
 export const PI_NATIVE_PROMPT_VERSION = "pi-native-v6";
+const PROVIDER_TIMEOUT_MS = 60_000;
 
 type ReasoningLevel =
   | "off"
@@ -189,7 +190,7 @@ export class PiNativeProvider implements IntentProvider {
     const timeout = setTimeout(() => {
       timedOut = true;
       controller.abort();
-    }, 30000);
+    }, PROVIDER_TIMEOUT_MS);
     const abort = () => controller.abort();
     options.signal?.addEventListener("abort", abort, { once: true });
     if (options.signal?.aborted) abort();
@@ -220,7 +221,7 @@ export class PiNativeProvider implements IntentProvider {
             maxRetryDelayMs: 0,
             cacheRetention: "none",
             maxTokens: Math.min(Math.max(this.#model.maxTokens ?? 1, 1), 4096),
-            timeoutMs: 30000,
+            timeoutMs: PROVIDER_TIMEOUT_MS,
             signal: controller.signal,
           },
         );

@@ -124,7 +124,7 @@ describe("PiNativeProvider", () => {
         maxRetryDelayMs: 0,
         cacheRetention: "none",
         maxTokens: 4096,
-        timeoutMs: 30000,
+        timeoutMs: 60000,
         signal: expect.any(AbortSignal),
       }),
     );
