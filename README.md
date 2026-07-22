@@ -8,7 +8,7 @@
   A fail-open Pi extension that turns natural-language software requests into structured, implementation-ready context without replacing the user's original message.
 </p>
 
-> **Status:** `v1.1.0` is prepared for public npm release.
+> **Current release line:** `v1.2.0`.
 
 ## What it does
 
@@ -60,7 +60,7 @@ CI verifies the pinned Pi `0.80.10` host regularly. A scheduled latest-Pi check 
 Install through Pi:
 
 ```bash
-pi install npm:@srcanesen/intent-bridge@1.1.0
+pi install npm:@srcanesen/intent-bridge@1.2.0
 ```
 
 Or use a local checkout:
@@ -131,7 +131,7 @@ Missing `compiler` or empty `compiler: {}` both resolve to `true`. Unknown keys 
 
 ## Failure and retry behavior
 
-Production calls use the selected provider/model with thinking disabled and native SDK retries disabled. The Bridge pipeline may retry once, using the same provider and model, only for transient timeout, reachability, rate-limit, or server failures. Authentication, configuration, JSON, schema, safety, compiler, response-size, and unknown failures are not retried.
+Production calls use the selected provider/model with thinking disabled, native SDK retries disabled, and a Pi-native 60-second timeout. The Bridge pipeline may retry once, using the same provider and model, only for transient timeout, reachability, rate-limit, or server failures. Authentication, configuration, JSON, schema, safety, compiler, response-size, and unknown failures are not retried.
 
 If transformation still fails, the original user message is sent to Pi byte-for-byte unchanged. Intent Bridge does not switch to a second provider or model automatically.
 
