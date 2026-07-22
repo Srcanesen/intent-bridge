@@ -13,3 +13,4 @@ export * from "./provider-leakage-diagnostic-v1.js";
 export * from "./source-grounded-evidence-v1.js";
 export * from "./source-grounded-evidence-v2.js";
 export * from "./source-grounded-evidence-v3.js";
+export * from "./source-grounded-evidence-v4.js";
